@@ -6221,50 +6221,50 @@ local ClosureBindings = {
 	end,
 	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
         Name = "InfernoX Hub",
-		Accent = Color3.fromRGB(255, 0, 0),
+Accent = Color3.fromRGB(255, 0, 0),
 
-		AcrylicMain = Color3.fromRGB(20, 20, 20),
-		AcrylicBorder = Color3.fromRGB(13, 13, 13),
-		AcrylicGradient = ColorSequence.new(Color3.fromRGB(20,20,20), Color3.fromRGB(15,15,15)),
-		AcrylicNoise = 0.98,
+AcrylicMain = Color3.fromRGB(20, 20, 20),
+AcrylicBorder = Color3.fromRGB(255, 255, 255), -- ขอบชัดขึ้นสีขาว
+AcrylicGradient = ColorSequence.new(Color3.fromRGB(20,20,20), Color3.fromRGB(15,15,15)),
+AcrylicNoise = 0.98,
 
-		TitleBarLine = Color3.fromRGB(13, 13, 13),
-		Tab = Color3.fromRGB(255, 0, 0),
+TitleBarLine = Color3.fromRGB(255, 255, 255), -- ขอบ TitleBar ขาว
+Tab = Color3.fromRGB(255, 0, 0),
 
-		Element = Color3.fromRGB(62,62,62),
-		ElementBorder = Color3.fromRGB(18,18,18),
-		InElementBorder = Color3.fromRGB(15,15,15),
-		ElementTransparency = 0.87,
+Element = Color3.fromRGB(62,62,62),
+ElementBorder = Color3.fromRGB(255, 255, 255), -- ขอบ Element ขาว
+InElementBorder = Color3.fromRGB(255, 255, 255), -- ขอบด้านใน Element ขาว
+ElementTransparency = 0.87,
 
-		ToggleSlider = Color3.fromRGB(223, 223, 223),
-		ToggleToggled = Color3.fromRGB(40, 40, 40),
+ToggleSlider = Color3.fromRGB(223, 223, 223),
+ToggleToggled = Color3.fromRGB(40, 40, 40),
 
-		SliderRail = Color3.fromRGB(189, 25, 74),
+SliderRail = Color3.fromRGB(189, 25, 74),
 
-		DropdownFrame = Color3.fromRGB(180,180,180),
-		DropdownHolder = Color3.fromRGB(20,20,20),
-		DropdownBorder = Color3.fromRGB(15,15,15),
-		DropdownOption = Color3.fromRGB(57, 57, 57),
+DropdownFrame = Color3.fromRGB(180,180,180),
+DropdownHolder = Color3.fromRGB(20,20,20),
+DropdownBorder = Color3.fromRGB(255, 255, 255), -- ขอบ Dropdown ขาว
+DropdownOption = Color3.fromRGB(57, 57, 57),
 
-		Keybind = Color3.fromRGB(20, 20, 20),
+Keybind = Color3.fromRGB(20, 20, 20),
 
-		Input = Color3.fromRGB(20, 20, 20),
-		InputFocused = Color3.fromRGB(20, 10, 30),
-		InputIndicator = Color3.fromRGB(25,25,25),
+Input = Color3.fromRGB(20, 20, 20),
+InputFocused = Color3.fromRGB(20, 10, 30),
+InputIndicator = Color3.fromRGB(25,25,25),
 
-		Dialog = Color3.fromRGB(24,24,24),
-		DialogHolder = Color3.fromRGB(27,27,27),
-		DialogHolderLine = Color3.fromRGB(20,20,20),
-		DialogButton = Color3.fromRGB(40,40,40),
-		DialogButtonBorder = Color3.fromRGB(27,27,27),
-		DialogBorder = Color3.fromRGB(172, 172, 172),
-		DialogInput = Color3.fromRGB(35,35,35),
-		DialogInputLine = Color3.fromRGB(13,13,13),
+Dialog = Color3.fromRGB(24,24,24),
+DialogHolder = Color3.fromRGB(27,27,27),
+DialogHolderLine = Color3.fromRGB(255, 255, 255), -- ขอบ DialogHolder ขาว
+DialogButton = Color3.fromRGB(40,40,40),
+DialogButtonBorder = Color3.fromRGB(255, 255, 255), -- ขอบปุ่ม Dialog ขาว
+DialogBorder = Color3.fromRGB(255, 255, 255), -- ขอบ Dialog ขาว
+DialogInput = Color3.fromRGB(35,35,35),
+DialogInputLine = Color3.fromRGB(255, 255, 255), -- ขอบ Input ขาว
 
-		Text = Color3.fromRGB(247, 227, 233),
-		SubText = Color3.fromRGB(170, 170, 170),
-		Hover = Color3.fromRGB(35,35,35),
-		HoverChange = 0.04,
+Text = Color3.fromRGB(247, 227, 233),
+SubText = Color3.fromRGB(170, 170, 170),
+Hover = Color3.fromRGB(35,35,35),
+HoverChange = 0.04,
 		}
 	end
 } 
