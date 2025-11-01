@@ -6219,40 +6219,57 @@ local ClosureBindings = {
 		HoverChange = 0.04,
 		}
 	end,
-	[54] = function()local maui, script, require, getfenv, setfenv = ImportGlobals(54)return {		
-		Name = "InfernoX Hub",
-		Accent = Color3.fromRGB(255, 0, 0),
+	[54] = function()local maui,script,require,getfenv,setfenv = ImportGlobals(54)return {
+        Name = "InfernoX Hub",
+        Accent = Color3.fromRGB(255, 0, 0),
 
-		-- พื้นหลังดำ–เทา
-		AcrylicMain = Color3.fromRGB(5, 5, 5),
-		AcrylicGradient = ColorSequence.new(Color3.fromRGB(5, 5, 5), Color3.fromRGB(15, 15, 15)),
-		AcrylicNoise = 0.2,
+        AcrylicMain = Color3.fromRGB(20, 20, 20),
+        AcrylicBorder = Color3.fromRGB(15, 15, 15), -- ขอบหลักเป็นเทาอ่อน
+        AcrylicGradient = ColorSequence.new(Color3.fromRGB(20,20,20), Color3.fromRGB(15,15,15)),
+        AcrylicNoise = 0.98,
 
-		Element = Color3.fromRGB(10, 10, 10),
-		ElementTransparency = 1,
-		ElementBorder = Color3.fromRGB(200, 200, 200),  -- ขอบเทาอ่อน
-		InElementBorder = Color3.fromRGB(150, 150, 150),
+        TitleBarLine = Color3.fromRGB(180, 180, 180), -- ขอบนีออนเทาอ่อน
+        Tab = Color3.fromRGB(255, 0, 0),
 
-		ToggleBorder = Color3.fromRGB(200, 200, 200),
-		SliderBorder = Color3.fromRGB(200, 200, 200),
+        Element = Color3.fromRGB(62,62,62),
+        ElementBorder = Color3.fromRGB(180,180,180), -- ขอบช่องเป็นเทาอ่อน
+        InElementBorder = Color3.fromRGB(150,150,150), -- ขอบภายในช่องนีออน
+        ElementTransparency = 0.87,
 
-		DropdownFrame = Color3.fromRGB(15, 15, 15),
-		DropdownHolder = Color3.fromRGB(10, 10, 10),
-		DropdownBorder = Color3.fromRGB(200, 200, 200),
+        ToggleSlider = Color3.fromRGB(223, 223, 223),
+        ToggleToggled = Color3.fromRGB(40, 40, 40),
+        ToggleBorder = Color3.fromRGB(180,180,180), -- ขอบ Toggle
 
-		Input = Color3.fromRGB(10, 10, 10),
-		InputFocused = Color3.fromRGB(20, 20, 20),
-		InputIndicator = Color3.fromRGB(200, 200, 200),
+        SliderRail = Color3.fromRGB(189, 25, 74),
 
-		Dialog = Color3.fromRGB(10, 10, 10),
-		DialogHolder = Color3.fromRGB(15, 15, 15),
-		DialogHolderLine = Color3.fromRGB(180, 180, 180),
-		DialogButtonBorder = Color3.fromRGB(200, 200, 200),
-		DialogBorder = Color3.fromRGB(200, 200, 200),
-		DialogInput = Color3.fromRGB(15, 15, 15),
-		DialogInputLine = Color3.fromRGB(200, 200, 200),
-	}
- end
+        DropdownFrame = Color3.fromRGB(180,180,180),
+        DropdownHolder = Color3.fromRGB(20,20,20),
+        DropdownBorder = Color3.fromRGB(180,180,180), -- ขอบ dropdown
+        DropdownOption = Color3.fromRGB(57, 57, 57),
+
+        Keybind = Color3.fromRGB(20, 20, 20),
+        KeybindBorder = Color3.fromRGB(180,180,180),
+
+        Input = Color3.fromRGB(20, 20, 20),
+        InputFocused = Color3.fromRGB(20, 10, 30),
+        InputIndicator = Color3.fromRGB(25,25,25),
+        InputBorder = Color3.fromRGB(180,180,180), -- ขอบช่อง input
+
+        Dialog = Color3.fromRGB(24,24,24),
+        DialogHolder = Color3.fromRGB(27,27,27),
+        DialogHolderLine = Color3.fromRGB(20,20,20),
+        DialogButton = Color3.fromRGB(40,40,40),
+        DialogButtonBorder = Color3.fromRGB(180,180,180), -- ปรับขอบปุ่ม
+        DialogBorder = Color3.fromRGB(180,180,180),
+        DialogInput = Color3.fromRGB(35,35,35),
+        DialogInputLine = Color3.fromRGB(150,150,150), -- ขอบเส้นนีออนเทาอ่อน
+
+        Text = Color3.fromRGB(247, 227, 233),
+        SubText = Color3.fromRGB(170, 170, 170),
+        Hover = Color3.fromRGB(35,35,35),
+        HoverChange = 0.04,
+    }
+end
 } 
 do
 	-- Localizing certain libraries and built-ins for runtime efficiency
