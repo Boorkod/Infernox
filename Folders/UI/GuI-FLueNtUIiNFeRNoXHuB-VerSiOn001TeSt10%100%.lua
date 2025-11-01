@@ -6261,8 +6261,8 @@ DialogBorder = Color3.fromRGB(255, 255, 255), -- ขอบ Dialog ขาว
 DialogInput = Color3.fromRGB(35,35,35),
 DialogInputLine = Color3.fromRGB(255, 255, 255), -- ขอบ Input ขาว
 
-Text = Color3.fromRGB(247, 227, 233),
-SubText = Color3.fromRGB(170, 170, 170),
+Text = Color3.fromRGB(255, 255, 255),      -- ตัวหนังสือหลักเป็นขาว
+SubText = Color3.fromRGB(255, 255, 255),   -- ตัวหนังสือรองเป็นขาว
 Hover = Color3.fromRGB(35,35,35),
 HoverChange = 0.04,
 		}
