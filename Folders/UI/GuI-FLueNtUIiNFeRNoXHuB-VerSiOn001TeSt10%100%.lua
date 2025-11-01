@@ -6223,28 +6223,36 @@ local ClosureBindings = {
 		Name = "InfernoX Hub",
 		Accent = Color3.fromRGB(255, 0, 0),
 
-		-- พื้นหลังปรับใหม่
-		AcrylicMain = Color3.fromRGB(5, 5, 5),        -- พื้นหลักดำสนิท
-		AcrylicGradient = ColorSequence.new(
-			Color3.fromRGB(5, 5, 5),                  -- แทบไม่เห็นแดง
-			Color3.fromRGB(10, 10, 10)
-		),
-		AcrylicNoise = 0.2,                            -- texture นิด ๆ ฟีล Darker
+		-- พื้นหลังดำ–เทา
+		AcrylicMain = Color3.fromRGB(5, 5, 5),
+		AcrylicGradient = ColorSequence.new(Color3.fromRGB(5, 5, 5), Color3.fromRGB(15, 15, 15)),
+		AcrylicNoise = 0.2,
 
-		Element = Color3.fromRGB(10, 10, 10),         -- element ดำเข้ม
-		ElementTransparency = 0.6,                     -- โปร่งใส element
+		Element = Color3.fromRGB(10, 10, 10),
+		ElementTransparency = 1,
+		ElementBorder = Color3.fromRGB(200, 200, 200),  -- ขอบเทาอ่อน
+		InElementBorder = Color3.fromRGB(150, 150, 150),
+
+		ToggleBorder = Color3.fromRGB(200, 200, 200),
+		SliderBorder = Color3.fromRGB(200, 200, 200),
 
 		DropdownFrame = Color3.fromRGB(15, 15, 15),
 		DropdownHolder = Color3.fromRGB(10, 10, 10),
+		DropdownBorder = Color3.fromRGB(200, 200, 200),
 
 		Input = Color3.fromRGB(10, 10, 10),
-		InputFocused = Color3.fromRGB(25, 0, 0),
+		InputFocused = Color3.fromRGB(20, 20, 20),
+		InputIndicator = Color3.fromRGB(200, 200, 200),
 
 		Dialog = Color3.fromRGB(10, 10, 10),
 		DialogHolder = Color3.fromRGB(15, 15, 15),
-		DialogInput = Color3.fromRGB(15, 0, 0),
+		DialogHolderLine = Color3.fromRGB(180, 180, 180),
+		DialogButtonBorder = Color3.fromRGB(200, 200, 200),
+		DialogBorder = Color3.fromRGB(200, 200, 200),
+		DialogInput = Color3.fromRGB(15, 15, 15),
+		DialogInputLine = Color3.fromRGB(200, 200, 200),
 	}
-end
+ end
 } 
 do
 	-- Localizing certain libraries and built-ins for runtime efficiency
