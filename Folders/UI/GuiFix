@@ -1,137 +1,194 @@
 local Http = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
+
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Boorkod/Infernox/refs/heads/main/Folders/UI/GuI-FLueNtUIiNFeRNoXHuB-VerSiOn001TeSt10%25100%25.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
 local MapName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 local MainFolder = "InfernoX Hub"
 local GameFolder = MainFolder.."/"..MapName
 local UserFile = GameFolder.."/"..LocalPlayer.UserId..".json"
 local AutoloadFile = GameFolder.."/Autoload.txt"
-local function MakeFolderSafe(path, notify)
-if not isfolder(path) then
-makefolder(path)
-if notify then
-Fluent:Notify({Title="InfernoX Hub", Content="สร้างโฟลเดอร์: "..path, Duration=5})
+
+local function MakeFolderSafe(path)
+	if not isfolder(path) then
+		makefolder(path)
+	end
 end
+
+local function MakeFileSafe(path, content)
+	if not isfile(path) then
+		writefile(path, content)
+	end
 end
-end
+
 MakeFolderSafe(MainFolder)
 MakeFolderSafe(GameFolder)
-local function MakeFileSafe(path, defaultContent, notify)
-if not isfile(path) then
-writefile(path, defaultContent)
-if notify then
-Fluent:Notify({Title="InfernoX Hub", Content="สร้างไฟล์: "..path, Duration=5})
-end
-end
-end
-MakeFileSafe(UserFile,"{}",true)
-MakeFileSafe(AutoloadFile,"",true)
+MakeFileSafe(UserFile, "{}")
+MakeFileSafe(AutoloadFile, "")
+
 local ConfigData = {}
 pcall(function()
-ConfigData = Http:JSONDecode(readfile(UserFile))
-end)
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
-local player = Players.LocalPlayer
-if CoreGui:FindFirstChild("MyImageButtonGui") then
-CoreGui.MyImageButtonGui:Destroy()
-end
-
-local G = Instance.new("ScreenGui", CoreGui)
-G.Name = "MyImageButtonGui"
-
-local B = Instance.new("ImageButton", G)
-B.Size = UDim2.new(0,45,0,45)
-B.Position = UDim2.new(0.12,0,0.095,0)
-B.Image = "rbxassetid://133128937209520"
-B.BackgroundTransparency = 1
-Instance.new("UICorner", B).CornerRadius = UDim.new(0,10)
-
-B.MouseButton1Down:Connect(function()
-local TS = game.TweenService
-TS:Create(B,TweenInfo.new(0.08),{Size=UDim2.new(0,45,0,45)}):Play()
-task.wait(0.08)
-TS:Create(B,TweenInfo.new(0.08),{Size=UDim2.new(0,50,0,50)}):Play()
-
-local VIM = game:GetService("VirtualInputManager")  
-VIM:SendKeyEvent(true,Enum.KeyCode.LeftControl,false,game)  
-VIM:SendKeyEvent(false,Enum.KeyCode.LeftControl,false,game)
-
+	ConfigData = Http:JSONDecode(readfile(UserFile))
 end)
 
 -- ========================
--- Create Window & Tabs
+-- Create Window & Tabs (ต้องมาก่อน)
 -- ========================
 local Window = Fluent:CreateWindow({
-Title="InfernoX HUB "..Fluent.Version,
-SubTitle="by TeamInfernoX",
-TabWidth=140,
-Size=UDim2.fromOffset(520,380),
-Acrylic=true,
-Theme="InfernoX Hub",
-MinimizeKey=Enum.KeyCode.LeftControl
+	Title = "Team2"..Fluent.Version,
+	SubTitle = "by Everyone",
+	TabWidth = 140,
+	Size = UDim2.fromOffset(520,380),
+	Acrylic = true,
+	Theme = "Darker",
+	MinimizeKey = nil
 })
 
-local Tabs = {
-Main = Window:AddTab({Title="Main"}),
-Settings = Window:AddTab({Title="Settings"})
+local T = {
+	M = Window:AddTab({Title="Main"}),
+	Settings = Window:AddTab({Title="Settings"})
 }
 
-local Options = Fluent.Options
+-- ========================
+-- IMAGE BUTTON (FIX ALL)
+-- ========================
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Click ImageButton to toggle window
-B.MouseButton1Click:Connect(function()
-local TS = game.TweenService
-TS:Create(B,TweenInfo.new(0.08),{Size=UDim2.new(0,45,0,45)}):Play()
-task.wait(0.08)
-TS:Create(B,TweenInfo.new(0.08),{Size=UDim2.new(0,50,0,50)}):Play()
-if Window then
-Window.Visible = not Window.Visible
+if PlayerGui:FindFirstChild("MyImageButtonGui") then
+	PlayerGui.MyImageButtonGui:Destroy()
 end
+
+local G = Instance.new("ScreenGui")
+G.Name = "MyImageButtonGui"
+G.ResetOnSpawn = false
+G.IgnoreGuiInset = true
+G.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+G.Parent = PlayerGui
+
+local B = Instance.new("ImageButton")
+B.Parent = G
+B.Size = UDim2.new(0,50,0,50)
+B.Position = UDim2.new(0.12,0,0.200,0)
+B.Image = "rbxassetid://133128937209520"
+B.BackgroundTransparency = 1
+B.ZIndex = 999
+Instance.new("UICorner", B).CornerRadius = UDim.new(0,10)
+
+local TS = game:GetService("TweenService")
+
+B.MouseButton1Down:Connect(function()
+	TS:Create(B, TweenInfo.new(0.08), {Size = UDim2.new(0,45,0,45)}):Play()
+	task.wait(0.08)
+	TS:Create(B, TweenInfo.new(0.08), {Size = UDim2.new(0,50,0,50)}):Play()
+end)
+
+-- เปิด / ปิด Fluent (ถูกต้อง 100%)
+B.MouseButton1Click:Connect(function()
+	Window:Minimize()
 end)
 
 -- ========================
 -- Example UI Elements
 -- ========================
-local Toggle = Tabs.Main:AddToggle("MyToggle",{Title="Toggle"})
-local Slider = Tabs.Main:AddSlider("MySlider",{Title="Slider",Min=0,Max=5,Rounding=1,Default=3})
-local Dropdown = Tabs.Main:AddDropdown("MyDropdown",{Title="Dropdown",Values={"one","two","three"},Default="one"})
-local Input = Tabs.Main:AddInput("MyInput",{Title="Input"})
-local Keybind = Tabs.Main:AddKeybind("MyKeybind",{Title="Keybind",Mode="Toggle",Default="LeftControl"})
+local Toggle = T.M:AddToggle("MyToggle", {Title = "Toggle", Default = false })
 
-Toggle:OnChanged(function(v) print("Toggle:", v) end)
-Slider:OnChanged(function(v) print("Slider:", v) end)
-Dropdown:OnChanged(function(v) print("Dropdown:", v) end)
-Input:OnChanged(function(v) print("Input:", v) end)
-Keybind:OnClick(function() print("Keybind clicked:", Keybind:GetState()) end)
-local function Register(Element, id)
-if ConfigData[id] ~= nil then
-Element:SetValue(ConfigData[id])
-end
-Element:OnChanged(function(val)
-ConfigData[id] = val
-writefile(UserFile,Http:JSONEncode(ConfigData))
+    Toggle:OnChanged(function()
+    print("Toggle changed:", Toggle.Value)
 end)
+
+
+    
+    local Slider = T.M:AddSlider("Slider", {
+        Title = "Slider",
+        Description = "This is a slider",
+        Default = 2,
+        Min = 0,
+        Max = 5,
+        Rounding = 1,
+        Callback = function(Value)
+            print("Slider was changed:", Value)
+        end
+    })
+
+    Slider:OnChanged(function(Value)
+        print("Slider changed:", Value)
+    end)
+
+    Slider:SetValue(3)
+
+
+
+    local Dropdown = T.M:AddDropdown("Dropdown", {
+        Title = "Dropdown",
+        Values = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"},
+        Multi = false,
+        Default = 1,
+    })
+
+    Dropdown:SetValue("four")
+
+    Dropdown:OnChanged(function(Value)
+        print("Dropdown changed:", Value)
+    end)
+
+
+    
+    local MultiDropdown = T.M:AddDropdown("MultiDropdown", {
+        Title = "Dropdown",
+        Description = "You can select multiple values.",
+        Values = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"},
+        Multi = true,
+        Default = {"seven", "twelve"},
+    })
+
+    MultiDropdown:SetValue({
+        three = true,
+        five = true,
+        seven = false
+    })
+
+    MultiDropdown:OnChanged(function(Value)
+        local Values = {}
+        for Value, State in next, Value do
+            table.insert(Values, Value)
+        end
+        print("Mutlidropdown changed:", table.concat(Values, ", "))
+    end)
+
+local function R(list)
+	for id, Element in pairs(list) do
+		if Element then
+			if ConfigData[id] ~= nil then
+				Element:SetValue(ConfigData[id])
+			end
+			Element:OnChanged(function(v)
+				ConfigData[id] = v
+				writefile(UserFile, Http:JSONEncode(ConfigData))
+			end)
+		end
+	end
 end
-Register(Toggle,"MyToggle")
-Register(Slider,"MySlider")
-Register(Dropdown,"MyDropdown")
-Register(Input,"MyInput")
-Register(Keybind,"MyKeybind")
+
+R({
+	MyToggle = Toggle,
+	MySlider = Slider,
+	MyDropdown = Dropdown,
+	MyInput = Input,
+	MyKeybind = Keybind,
+})
+
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
 InterfaceManager:SetFolder(GameFolder)
 SaveManager:SetFolder(GameFolder)
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
+InterfaceManager:BuildInterfaceSection(T.Settings)
+SaveManager:BuildConfigSection(T.Settings)
 SaveManager:LoadAutoloadConfig()
+
 Window:SelectTab(1)
 Fluent:Notify({Title="Fluent", Content="The script has been loaded.", Duration=8})
