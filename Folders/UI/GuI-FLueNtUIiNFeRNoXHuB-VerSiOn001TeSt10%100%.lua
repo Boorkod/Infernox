@@ -6218,62 +6218,7 @@ local ClosureBindings = {
 		Hover = Color3.fromRGB(200, 120, 170),
 		HoverChange = 0.04,
 		}
-	end,
-	[54] = function()local maui,script,require,getfenv,setfenv = ImportGlobals(54)return {
-        Name = "RedDark Neon",
-
-        Accent = Color3.fromRGB(255, 70, 80),
-
-        AcrylicMain = Color3.fromRGB(18,18,18),
-        AcrylicBorder = Color3.fromRGB(30, 10, 12),
-        AcrylicGradient = ColorSequence.new(
-            Color3.fromRGB(20,20,20),
-            Color3.fromRGB(14,14,14)
-        ),
-        AcrylicNoise = 0.95,
-
-        TitleBarLine = Color3.fromRGB(255, 70, 80),
-        Tab = Color3.fromRGB(255, 70, 80),
-
-        Element = Color3.fromRGB(48,48,48),
-        ElementBorder = Color3.fromRGB(35, 15, 18),
-        InElementBorder = Color3.fromRGB(25, 10, 12),
-        ElementTransparency = 0.9,
-
-        ToggleSlider = Color3.fromRGB(230,230,230),
-        ToggleToggled = Color3.fromRGB(255, 70, 80),
-
-        SliderRail = Color3.fromRGB(255, 60, 70),
-
-        DropdownFrame = Color3.fromRGB(200,200,200),
-        DropdownHolder = Color3.fromRGB(18,18,18),
-        DropdownBorder = Color3.fromRGB(35, 15, 18),
-        DropdownOption = Color3.fromRGB(55,55,55),
-
-        Keybind = Color3.fromRGB(18,18,18),
-
-        Input = Color3.fromRGB(18,18,18),
-        InputFocused = Color3.fromRGB(40, 15, 20),
-        InputIndicator = Color3.fromRGB(255, 70, 80),
-
-        Dialog = Color3.fromRGB(22,22,22),
-        DialogHolder = Color3.fromRGB(26,26,26),
-        DialogHolderLine = Color3.fromRGB(255, 70, 80),
-        DialogButton = Color3.fromRGB(40,40,40),
-        DialogButtonBorder = Color3.fromRGB(35, 15, 18),
-        DialogBorder = Color3.fromRGB(255, 70, 80),
-        DialogInput = Color3.fromRGB(32,32,32),
-        DialogInputLine = Color3.fromRGB(35, 15, 18),
-
-        Text = Color3.fromRGB(240,240,240),
-        SubText = Color3.fromRGB(170,170,170),
-
-        Hover = Color3.fromRGB(45,25,30),
-        HoverChange = 0.05,
-   
-    
-		}
-	end
+	end    
 } 
 do
 	-- Localizing certain libraries and built-ins for runtime efficiency
