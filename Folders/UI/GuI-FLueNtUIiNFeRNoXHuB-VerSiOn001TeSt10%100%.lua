@@ -394,8 +394,8 @@ local ObjectTree = {
 	}
 }
 
-if game:GetService("CoreGui"):FindFirstChild('Infernox Hub') then
-	game:GetService("CoreGui"):FindFirstChild('Infernox Hub'):Destroy()
+if game:GetService("CoreGui"):FindFirstChild('XZY Hub') then
+	game:GetService("CoreGui"):FindFirstChild('XZY Hub'):Destroy()
 end
 
 -- Holds direct closure data
@@ -420,7 +420,7 @@ local ClosureBindings = {
 		local ProtectGui = protectgui or (syn and syn.protect_gui) or function() end
 		local GUI = New("ScreenGui", {
 			Parent = RunService:IsStudio() and LocalPlayer.PlayerGui or game:GetService("CoreGui"),
-			Name = "Infernox Hub"
+			Name = "XZY Hub"
 		})
 
 
@@ -429,7 +429,7 @@ local ClosureBindings = {
 		NotificationModule:Init(GUI)
 
 		local Library = {
-			Version = "V0.0.1",
+			Version = "V0.0.2",
 
 			OpenFrames = {},
 			Options = {},
@@ -439,7 +439,7 @@ local ClosureBindings = {
 			WindowFrame = nil,
 			Unloaded = false,
 
-			Theme = "InfernoX Hub",
+			Theme = "XZY RedDark",
 			DialogOpen = false,
 			UseAcrylic = false,
 			Acrylic = false,
@@ -6219,53 +6219,59 @@ local ClosureBindings = {
 		HoverChange = 0.04,
 		}
 	end,
+	[54] = function()local maui,script,require,getfenv,setfenv = ImportGlobals(54)
+    return {
+        Name = "RedDark Neon",
 
-	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
-        Name = "Test",
-Accent = Color3.fromRGB(255, 0, 0),
+        Accent = Color3.fromRGB(255, 70, 80),
 
-AcrylicMain = Color3.fromRGB(20, 20, 20),
-AcrylicBorder = Color3.fromRGB(255, 255, 255), -- ขอบชัดขึ้นสีขาว
-AcrylicGradient = ColorSequence.new(Color3.fromRGB(20,20,20), Color3.fromRGB(15,15,15)),
-AcrylicNoise = 0.98,
+        AcrylicMain = Color3.fromRGB(18,18,18),
+        AcrylicBorder = Color3.fromRGB(30, 10, 12),
+        AcrylicGradient = ColorSequence.new(
+            Color3.fromRGB(20,20,20),
+            Color3.fromRGB(14,14,14)
+        ),
+        AcrylicNoise = 0.95,
 
-TitleBarLine = Color3.fromRGB(255, 255, 255), -- ขอบ TitleBar ขาว
-Tab = Color3.fromRGB(255, 0, 0),
+        TitleBarLine = Color3.fromRGB(255, 70, 80),
+        Tab = Color3.fromRGB(255, 70, 80),
 
-Element = Color3.fromRGB(62,62,62),
-ElementBorder = Color3.fromRGB(255, 255, 255), -- ขอบ Element ขาว
-InElementBorder = Color3.fromRGB(255, 255, 255), -- ขอบด้านใน Element ขาว
-ElementTransparency = 0.87,
+        Element = Color3.fromRGB(48,48,48),
+        ElementBorder = Color3.fromRGB(35, 15, 18),
+        InElementBorder = Color3.fromRGB(25, 10, 12),
+        ElementTransparency = 0.9,
 
-ToggleSlider = Color3.fromRGB(223, 223, 223),
-ToggleToggled = Color3.fromRGB(40, 40, 40),
+        ToggleSlider = Color3.fromRGB(230,230,230),
+        ToggleToggled = Color3.fromRGB(255, 70, 80),
 
-SliderRail = Color3.fromRGB(189, 25, 74),
+        SliderRail = Color3.fromRGB(255, 60, 70),
 
-DropdownFrame = Color3.fromRGB(180,180,180),
-DropdownHolder = Color3.fromRGB(20,20,20),
-DropdownBorder = Color3.fromRGB(255, 255, 255), -- ขอบ Dropdown ขาว
-DropdownOption = Color3.fromRGB(57, 57, 57),
+        DropdownFrame = Color3.fromRGB(200,200,200),
+        DropdownHolder = Color3.fromRGB(18,18,18),
+        DropdownBorder = Color3.fromRGB(35, 15, 18),
+        DropdownOption = Color3.fromRGB(55,55,55),
 
-Keybind = Color3.fromRGB(20, 20, 20),
+        Keybind = Color3.fromRGB(18,18,18),
 
-Input = Color3.fromRGB(20, 20, 20),
-InputFocused = Color3.fromRGB(20, 10, 30),
-InputIndicator = Color3.fromRGB(25,25,25),
+        Input = Color3.fromRGB(18,18,18),
+        InputFocused = Color3.fromRGB(40, 15, 20),
+        InputIndicator = Color3.fromRGB(255, 70, 80),
 
-Dialog = Color3.fromRGB(24,24,24),
-DialogHolder = Color3.fromRGB(27,27,27),
-DialogHolderLine = Color3.fromRGB(255, 255, 255), -- ขอบ DialogHolder ขาว
-DialogButton = Color3.fromRGB(40,40,40),
-DialogButtonBorder = Color3.fromRGB(255, 255, 255), -- ขอบปุ่ม Dialog ขาว
-DialogBorder = Color3.fromRGB(255, 255, 255), -- ขอบ Dialog ขาว
-DialogInput = Color3.fromRGB(35,35,35),
-DialogInputLine = Color3.fromRGB(255, 255, 255), -- ขอบ Input ขาว
+        Dialog = Color3.fromRGB(22,22,22),
+        DialogHolder = Color3.fromRGB(26,26,26),
+        DialogHolderLine = Color3.fromRGB(255, 70, 80),
+        DialogButton = Color3.fromRGB(40,40,40),
+        DialogButtonBorder = Color3.fromRGB(35, 15, 18),
+        DialogBorder = Color3.fromRGB(255, 70, 80),
+        DialogInput = Color3.fromRGB(32,32,32),
+        DialogInputLine = Color3.fromRGB(35, 15, 18),
 
-Text = Color3.fromRGB(255, 255, 255),      -- ตัวหนังสือหลักเป็นขาว
-SubText = Color3.fromRGB(255, 255, 255),   -- ตัวหนังสือรองเป็นขาว
-Hover = Color3.fromRGB(35,35,35),
-HoverChange = 0.04,
+        Text = Color3.fromRGB(240,240,240),
+        SubText = Color3.fromRGB(170,170,170),
+
+        Hover = Color3.fromRGB(45,25,30),
+        HoverChange = 0.05,
+    
 		}
 	end
 } 
