@@ -6219,9 +6219,7 @@ local ClosureBindings = {
 		HoverChange = 0.04,
 		}
 	end,
-	[54] = function()local maui,script,require,getfenv,setfenv = ImportGlobals(54)
-
-    return {
+	[54] = function()local maui,script,require,getfenv,setfenv = ImportGlobals(54)return {
         Name = "RedDark Neon",
 
         Accent = Color3.fromRGB(255, 70, 80),
