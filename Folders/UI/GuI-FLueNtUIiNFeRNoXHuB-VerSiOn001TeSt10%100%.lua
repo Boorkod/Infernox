@@ -6220,6 +6220,7 @@ local ClosureBindings = {
 		}
 	end,
 	[54] = function()local maui,script,require,getfenv,setfenv = ImportGlobals(54)
+
     return {
         Name = "RedDark Neon",
 
@@ -6271,6 +6272,7 @@ local ClosureBindings = {
 
         Hover = Color3.fromRGB(45,25,30),
         HoverChange = 0.05,
+   
     
 		}
 	end
