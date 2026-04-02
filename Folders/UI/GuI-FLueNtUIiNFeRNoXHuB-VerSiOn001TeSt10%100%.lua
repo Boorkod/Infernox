@@ -6226,10 +6226,7 @@ local ClosureBindings = {
 
         AcrylicMain = Color3.fromRGB(18,18,18),
         AcrylicBorder = Color3.fromRGB(30, 10, 12),
-        AcrylicGradient = ColorSequence.new(
-            Color3.fromRGB(20,20,20),
-            Color3.fromRGB(14,14,14)
-        ),
+        AcrylicGradient = ColorSequence.new(Color3.fromRGB(20,20,20),Color3.fromRGB(14,14,14)),
         AcrylicNoise = 0.95,
 
         TitleBarLine = Color3.fromRGB(255, 70, 80),
