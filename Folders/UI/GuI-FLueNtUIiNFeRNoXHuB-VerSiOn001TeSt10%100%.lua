@@ -394,8 +394,8 @@ local ObjectTree = {
 	}
 }
 
-if game:GetService("CoreGui"):FindFirstChild('XZY Hub') then
-	game:GetService("CoreGui"):FindFirstChild('XZY Hub'):Destroy()
+if game:GetService("CoreGui"):FindFirstChild('Infernox Hub') then
+	game:GetService("CoreGui"):FindFirstChild('Infernox Hub'):Destroy()
 end
 
 -- Holds direct closure data
@@ -420,7 +420,7 @@ local ClosureBindings = {
 		local ProtectGui = protectgui or (syn and syn.protect_gui) or function() end
 		local GUI = New("ScreenGui", {
 			Parent = RunService:IsStudio() and LocalPlayer.PlayerGui or game:GetService("CoreGui"),
-			Name = "XZY Hub"
+			Name = "Infernox Hub"
 		})
 
 
@@ -439,7 +439,7 @@ local ClosureBindings = {
 			WindowFrame = nil,
 			Unloaded = false,
 
-			Theme = "XZY RedDark",
+			Theme = "RedDark",
 			DialogOpen = false,
 			UseAcrylic = false,
 			Acrylic = false,
