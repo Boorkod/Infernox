@@ -6265,54 +6265,6 @@ local ClosureBindings = {
 		SubText = Color3.fromRGB(170, 170, 170),
 		Hover = Color3.fromRGB(35,35,35),
 		HoverChange = 0.04,
-		  }
-		end,
-		[55] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(55)return {
-        Name = "SoftLight",
-Accent = Color3.fromRGB(0, 120, 210),
-
-AcrylicMain = Color3.fromRGB(235, 235, 235),
-AcrylicBorder = Color3.fromRGB(80, 80, 80),
-AcrylicGradient = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(230, 230, 230)),
-AcrylicNoise = 0.9,
-
-TitleBarLine = Color3.fromRGB(120, 120, 120),
-Tab = Color3.fromRGB(70, 70, 70),
-
-Element = Color3.fromRGB(250, 250, 250),
-ElementBorder = Color3.fromRGB(120, 120, 120),
-InElementBorder = Color3.fromRGB(90, 90, 90),
-ElementTransparency = 0.55,
-
-ToggleSlider = Color3.fromRGB(35, 35, 35),
-ToggleToggled = Color3.fromRGB(255, 255, 255),
-
-SliderRail = Color3.fromRGB(60, 60, 60),
-
-DropdownFrame = Color3.fromRGB(235, 235, 235),
-DropdownHolder = Color3.fromRGB(245, 245, 245),
-DropdownBorder = Color3.fromRGB(120, 120, 120),
-DropdownOption = Color3.fromRGB(80, 80, 80),
-
-Keybind = Color3.fromRGB(100, 100, 100),
-
-Input = Color3.fromRGB(240, 240, 240),
-InputFocused = Color3.fromRGB(120, 120, 120),
-InputIndicator = Color3.fromRGB(90, 90, 90),
-
-Dialog = Color3.fromRGB(250, 250, 250),
-DialogHolder = Color3.fromRGB(240, 240, 240),
-DialogHolderLine = Color3.fromRGB(210, 210, 210),
-DialogButton = Color3.fromRGB(255, 255, 255),
-DialogButtonBorder = Color3.fromRGB(120, 120, 120),
-DialogBorder = Color3.fromRGB(90, 90, 90),
-DialogInput = Color3.fromRGB(245, 245, 245),
-DialogInputLine = Color3.fromRGB(120, 120, 120),
-
-Text = Color3.fromRGB(20, 20, 20),
-SubText = Color3.fromRGB(70, 70, 70),
-Hover = Color3.fromRGB(60, 60, 60),
-  HoverChange = 0.18,
 		}
 	end
 } 
