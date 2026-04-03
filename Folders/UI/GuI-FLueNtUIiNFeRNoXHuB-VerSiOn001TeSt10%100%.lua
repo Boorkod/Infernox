@@ -6220,55 +6220,56 @@ local ClosureBindings = {
 		}
 	end,
 	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
-        Name = "RedDark Ultra",
-        -- ปรับสีหลักให้เป็นแดงสว่าง (Electric Red)
-        Accent = Color3.fromRGB(255, 10, 10),
+        Name = "RedDark Neon",
 
-        -- พื้นหลังเน้นเข้มสนิทเพื่อให้สีแดงลอยออกมา
-        AcrylicMain = Color3.fromRGB(10, 10, 10),
-        AcrylicBorder = Color3.fromRGB(255, 0, 0), -- ขอบสีแดงบางๆ
-        AcrylicGradient = ColorSequence.new(Color3.fromRGB(15, 5, 5), Color3.fromRGB(5, 5, 5)),
+        Accent = Color3.fromRGB(255, 70, 80),
+
+        AcrylicMain = Color3.fromRGB(18,18,18),
+        AcrylicBorder = Color3.fromRGB(30, 10, 12),
+        AcrylicGradient = ColorSequence.new(
+            Color3.fromRGB(20,20,20),
+            Color3.fromRGB(14,14,14)
+        ),
         AcrylicNoise = 0.95,
 
-        TitleBarLine = Color3.fromRGB(255, 0, 0),
-        Tab = Color3.fromRGB(255, 20, 20),
+        TitleBarLine = Color3.fromRGB(255, 70, 80),
+        Tab = Color3.fromRGB(255, 70, 80),
 
-        -- ส่วนของ Element ให้มีความโปร่งแสงเพื่อให้เห็นเงาสีแดงด้านหลัง
-        Element = Color3.fromRGB(25, 25, 25),
-        ElementBorder = Color3.fromRGB(45, 45, 45),
-        InElementBorder = Color3.fromRGB(255, 0, 0), 
-        ElementTransparency = 0.5,
+        Element = Color3.fromRGB(48,48,48),
+        ElementBorder = Color3.fromRGB(35, 15, 18),
+        InElementBorder = Color3.fromRGB(25, 10, 12),
+        ElementTransparency = 0.9,
 
-        ToggleSlider = Color3.fromRGB(255, 255, 255),
-        ToggleToggled = Color3.fromRGB(200, 0, 0), -- เมื่อกดเปิดจะเป็นสีแดงเข้ม
+        ToggleSlider = Color3.fromRGB(230,230,230),
+        ToggleToggled = Color3.fromRGB(255, 70, 80),
 
-        SliderRail = Color3.fromRGB(255, 0, 0),
+        SliderRail = Color3.fromRGB(255, 60, 70),
 
-        DropdownFrame = Color3.fromRGB(30, 30, 30),
-        DropdownHolder = Color3.fromRGB(15, 15, 15),
-        DropdownBorder = Color3.fromRGB(255, 0, 0),
-        DropdownOption = Color3.fromRGB(45, 45, 45),
+        DropdownFrame = Color3.fromRGB(200,200,200),
+        DropdownHolder = Color3.fromRGB(18,18,18),
+        DropdownBorder = Color3.fromRGB(35, 15, 18),
+        DropdownOption = Color3.fromRGB(55,55,55),
 
-        Keybind = Color3.fromRGB(35, 35, 35),
+        Keybind = Color3.fromRGB(18,18,18),
 
-        Input = Color3.fromRGB(25, 25, 25),
-        InputFocused = Color3.fromRGB(45, 10, 10),
-        InputIndicator = Color3.fromRGB(255, 0, 0),
+        Input = Color3.fromRGB(18,18,18),
+        InputFocused = Color3.fromRGB(40, 15, 20),
+        InputIndicator = Color3.fromRGB(255, 70, 80),
 
-        Dialog = Color3.fromRGB(15, 15, 15),
-        DialogHolder = Color3.fromRGB(20, 20, 20),
-        DialogHolderLine = Color3.fromRGB(255, 0, 0),
-        DialogButton = Color3.fromRGB(50, 10, 10),
-        DialogButtonBorder = Color3.fromRGB(255, 0, 0),
-        DialogBorder = Color3.fromRGB(255, 0, 0),
-        DialogInput = Color3.fromRGB(30, 30, 30),
-        DialogInputLine = Color3.fromRGB(255, 0, 0),
+        Dialog = Color3.fromRGB(22,22,22),
+        DialogHolder = Color3.fromRGB(26,26,26),
+        DialogHolderLine = Color3.fromRGB(255, 70, 80),
+        DialogButton = Color3.fromRGB(40,40,40),
+        DialogButtonBorder = Color3.fromRGB(35, 15, 18),
+        DialogBorder = Color3.fromRGB(255, 70, 80),
+        DialogInput = Color3.fromRGB(32,32,32),
+        DialogInputLine = Color3.fromRGB(35, 15, 18),
 
-        -- สีตัวหนังสือให้ขาวใสเพื่อให้ตัดกับสีแดง
-        Text = Color3.fromRGB(255, 255, 255),
-        SubText = Color3.fromRGB(220, 150, 150), -- สีแดงอ่อนๆ สำหรับข้อความรอง
-        Hover = Color3.fromRGB(60, 20, 20),
-        HoverChange = 0.08,
+        Text = Color3.fromRGB(240,240,240),
+        SubText = Color3.fromRGB(170,170,170),
+
+        Hover = Color3.fromRGB(45,25,30),
+        HoverChange = 0.05,
 		}
 	end
 } 
