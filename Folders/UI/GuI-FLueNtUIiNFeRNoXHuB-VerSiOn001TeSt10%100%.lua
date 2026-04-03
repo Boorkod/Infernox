@@ -5805,9 +5805,9 @@ local ClosureBindings = {
 				--    z = sin(a*c)/c
 				-- Take the Maclaurin expansion of z with respect to c:
 				--    z = a - (a^3*c^2)/6 + (a^5*c^4)/120 + O(c^6)
-				--    z ≈ a - (a^3*c^2)/6 + (a^5*c^4)/120
+				--    z â‰ˆ a - (a^3*c^2)/6 + (a^5*c^4)/120
 				-- Rewrite in Horner form:
-				--    z ≈ a + ((a*a)*(c*c)*(c*c)/20 - c*c)*(a*a*a)/6
+				--    z â‰ˆ a + ((a*a)*(c*c)*(c*c)/20 - c*c)*(a*a*a)/6
 
 				local z
 				if c > EPS then
