@@ -6217,7 +6217,7 @@ Text = Color3.fromRGB(255,120,120),
 SubText = Color3.fromRGB(200,120,120),
 
 Hover = Color3.fromRGB(40,0,0),
-HoverChange = 0.05,
+ HoverChange = 0.05,
 		}
 	end,
 	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
