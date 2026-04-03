@@ -6219,55 +6219,55 @@ local ClosureBindings = {
 		HoverChange = 0.04,
 		}
 	end,
-	[55] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(55)return {
-        Name = "BlueNeon",
-Accent = Color3.fromRGB(0, 170, 255),
+	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
+Name = "BlueNeon",
+Accent = Color3.fromRGB(0,170,255),
 
-AcrylicMain = Color3.fromRGB(20, 20, 20),
-AcrylicBorder = Color3.fromRGB(13, 13, 13),
-AcrylicGradient = ColorSequence.new(Color3.fromRGB(20, 20, 20), Color3.fromRGB(15, 15, 15)),
-AcrylicNoise = 0.98,
+AcrylicMain = Color3.fromRGB(40,40,40),
+AcrylicBorder = Color3.fromRGB(90,120,150),
+AcrylicGradient = ColorSequence.new(Color3.fromRGB(0,200,255),Color3.fromRGB(0,120,200)),
+AcrylicNoise = 0.92,
 
-TitleBarLine = Color3.fromRGB(13, 13, 13),
-Tab = Color3.fromRGB(0, 170, 255),
+TitleBarLine = Color3.fromRGB(90,120,150),
+Tab = Color3.fromRGB(120,170,220),
 
-Element = Color3.fromRGB(62, 62, 62),
-ElementBorder = Color3.fromRGB(18, 18, 18),
-InElementBorder = Color3.fromRGB(15, 15, 15),
-ElementTransparency = 0.87,
+Element = Color3.fromRGB(120,180,255),
+ElementBorder = Color3.fromRGB(70,110,150),
+InElementBorder = Color3.fromRGB(80,120,160),
+ElementTransparency = 0.86,
 
-ToggleSlider = Color3.fromRGB(223, 223, 223),
-ToggleToggled = Color3.fromRGB(40, 40, 40),
+ToggleSlider = Color3.fromRGB(120,180,255),
+ToggleToggled = Color3.fromRGB(0,0,0),
 
-SliderRail = Color3.fromRGB(0, 150, 255),
+SliderRail = Color3.fromRGB(120,180,255),
 
-DropdownFrame = Color3.fromRGB(180, 180, 180),
-DropdownHolder = Color3.fromRGB(20, 20, 20),
-DropdownBorder = Color3.fromRGB(15, 15, 15),
-DropdownOption = Color3.fromRGB(57, 57, 57),
+DropdownFrame = Color3.fromRGB(150,200,255),
+DropdownHolder = Color3.fromRGB(60,100,140),
+DropdownBorder = Color3.fromRGB(50,80,120),
+DropdownOption = Color3.fromRGB(120,180,255),
 
-Keybind = Color3.fromRGB(20, 20, 20),
+Keybind = Color3.fromRGB(120,180,255),
 
-Input = Color3.fromRGB(20, 20, 20),
-InputFocused = Color3.fromRGB(10, 20, 40),
-InputIndicator = Color3.fromRGB(25, 25, 25),
+Input = Color3.fromRGB(120,180,255),
+InputFocused = Color3.fromRGB(10,20,40),
+InputIndicator = Color3.fromRGB(150,200,255),
 
-Dialog = Color3.fromRGB(24, 24, 24),
-DialogHolder = Color3.fromRGB(27, 27, 27),
-DialogHolderLine = Color3.fromRGB(20, 20, 20),
-DialogButton = Color3.fromRGB(40, 40, 40),
-DialogButtonBorder = Color3.fromRGB(27, 27, 27),
-DialogBorder = Color3.fromRGB(120, 200, 255),
-DialogInput = Color3.fromRGB(35, 35, 35),
-DialogInputLine = Color3.fromRGB(13, 13, 13),
+Dialog = Color3.fromRGB(60,100,140),
+DialogHolder = Color3.fromRGB(50,80,120),
+DialogHolderLine = Color3.fromRGB(45,70,110),
+DialogButton = Color3.fromRGB(60,100,140),
+DialogButtonBorder = Color3.fromRGB(120,180,255),
+DialogBorder = Color3.fromRGB(80,120,160),
+DialogInput = Color3.fromRGB(80,120,160),
+DialogInputLine = Color3.fromRGB(150,200,255),
 
-Text = Color3.fromRGB(230, 245, 255),
-SubText = Color3.fromRGB(170, 170, 170),
-Hover = Color3.fromRGB(35,35,35),
+Text = Color3.fromRGB(255,255,255),
+SubText = Color3.fromRGB(170,170,170),
+Hover = Color3.fromRGB(120,180,255),
 HoverChange = 0.04,
-		}
-	end,
-	[56] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(56)return {
+}
+end,
+	[55] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(55)return {
         Name = "RedDark",
 		Accent = Color3.fromRGB(255, 0, 0),
 
