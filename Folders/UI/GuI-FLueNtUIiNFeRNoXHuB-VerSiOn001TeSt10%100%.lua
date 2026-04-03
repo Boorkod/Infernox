@@ -6315,6 +6315,7 @@ local ClosureBindings = {
 	HoverChange = 0.04,
       }
 end
+						
 } 
 do
 	-- Localizing certain libraries and built-ins for runtime efficiency
