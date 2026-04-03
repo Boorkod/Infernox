@@ -6171,105 +6171,57 @@ local ClosureBindings = {
 		HoverChange = 0.16,
 		}
 	end,
-	[53] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(53)return {
-		Name = "Rose",
-		Accent = Color3.fromRGB(180, 55, 90),
+	
+	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
+        Name = "RedDark",
+		Accent = Color3.fromRGB(255, 0, 0),
 
-		AcrylicMain = Color3.fromRGB(40, 40, 40),
-		AcrylicBorder = Color3.fromRGB(130, 90, 110),
-		AcrylicGradient = ColorSequence.new(Color3.fromRGB(190, 60, 135), Color3.fromRGB(165, 50, 70)),
-		AcrylicNoise = 0.92,
+		AcrylicMain = Color3.fromRGB(20, 20, 20),
+		AcrylicBorder = Color3.fromRGB(13, 13, 13),
+		AcrylicGradient = ColorSequence.new(Color3.fromRGB(20,20,20), Color3.fromRGB(15,15,15)),
+		AcrylicNoise = 0.98,
 
-		TitleBarLine = Color3.fromRGB(140, 85, 105),
-		Tab = Color3.fromRGB(180, 140, 160),
+		TitleBarLine = Color3.fromRGB(13, 13, 13),
+		Tab = Color3.fromRGB(255, 0, 0),
 
-		Element = Color3.fromRGB(200, 120, 170),
-		ElementBorder = Color3.fromRGB(110, 70, 85),
-		InElementBorder = Color3.fromRGB(120, 90, 90),
-		ElementTransparency = 0.86,
+		Element = Color3.fromRGB(62,62,62),
+		ElementBorder = Color3.fromRGB(18,18,18),
+		InElementBorder = Color3.fromRGB(15,15,15),
+		ElementTransparency = 0.87,
 
-		ToggleSlider = Color3.fromRGB(200, 120, 170),
-		ToggleToggled = Color3.fromRGB(0, 0, 0),
+		ToggleSlider = Color3.fromRGB(223, 223, 223),
+		ToggleToggled = Color3.fromRGB(40, 40, 40),
 
-		SliderRail = Color3.fromRGB(200, 120, 170),
+		SliderRail = Color3.fromRGB(189, 25, 74),
 
-		DropdownFrame = Color3.fromRGB(200, 160, 180),
-		DropdownHolder = Color3.fromRGB(120, 50, 75),
-		DropdownBorder = Color3.fromRGB(90, 40, 55),
-		DropdownOption = Color3.fromRGB(200, 120, 170),
+		DropdownFrame = Color3.fromRGB(180,180,180),
+		DropdownHolder = Color3.fromRGB(20,20,20),
+		DropdownBorder = Color3.fromRGB(15,15,15),
+		DropdownOption = Color3.fromRGB(57, 57, 57),
 
-		Keybind = Color3.fromRGB(200, 120, 170),
+		Keybind = Color3.fromRGB(20, 20, 20),
 
-		Input = Color3.fromRGB(200, 120, 170),
+		Input = Color3.fromRGB(20, 20, 20),
 		InputFocused = Color3.fromRGB(20, 10, 30),
-		InputIndicator = Color3.fromRGB(170, 150, 190),
+		InputIndicator = Color3.fromRGB(25,25,25),
 
-		Dialog = Color3.fromRGB(120, 50, 75),
-		DialogHolder = Color3.fromRGB(95, 40, 60),
-		DialogHolderLine = Color3.fromRGB(90, 35, 55),
-		DialogButton = Color3.fromRGB(120, 50, 75),
-		DialogButtonBorder = Color3.fromRGB(155, 90, 115),
-		DialogBorder = Color3.fromRGB(100, 70, 90),
-		DialogInput = Color3.fromRGB(135, 55, 80),
-		DialogInputLine = Color3.fromRGB(190, 160, 180),
+		Dialog = Color3.fromRGB(24,24,24),
+		DialogHolder = Color3.fromRGB(27,27,27),
+		DialogHolderLine = Color3.fromRGB(20,20,20),
+		DialogButton = Color3.fromRGB(40,40,40),
+		DialogButtonBorder = Color3.fromRGB(27,27,27),
+		DialogBorder = Color3.fromRGB(172, 172, 172),
+		DialogInput = Color3.fromRGB(35,35,35),
+		DialogInputLine = Color3.fromRGB(13,13,13),
 
-		Text = Color3.fromRGB(255, 255, 255),
+		Text = Color3.fromRGB(247, 227, 233),
 		SubText = Color3.fromRGB(170, 170, 170),
-		Hover = Color3.fromRGB(200, 120, 170),
+		Hover = Color3.fromRGB(35,35,35),
 		HoverChange = 0.04,
 		}
 	end,
-[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
-        Name = "BlueDark",
-		Accent = Color3.fromRGB(0, 170, 255), -- สีฟ้าหลัก (Accent)
-
-		AcrylicMain = Color3.fromRGB(15, 18, 22),
-		AcrylicBorder = Color3.fromRGB(10, 12, 15),
-		AcrylicGradient = ColorSequence.new(Color3.fromRGB(20, 25, 30), Color3.fromRGB(15, 15, 20)),
-		AcrylicNoise = 0.98,
-
-		TitleBarLine = Color3.fromRGB(10, 12, 15),
-		Tab = Color3.fromRGB(0, 170, 255), -- สี Tab ตอนเลือกเป็นสีฟ้า
-
-		Element = Color3.fromRGB(35, 45, 55),
-		ElementBorder = Color3.fromRGB(20, 20, 25),
-		InElementBorder = Color3.fromRGB(15, 15, 20),
-		ElementTransparency = 0.85,
-
-		ToggleSlider = Color3.fromRGB(200, 230, 255),
-		ToggleToggled = Color3.fromRGB(30, 40, 50),
-
-		SliderRail = Color3.fromRGB(0, 120, 215), -- รางสไลเดอร์สีฟ้าเข้ม
-
-		DropdownFrame = Color3.fromRGB(40, 50, 60),
-		DropdownHolder = Color3.fromRGB(20, 25, 30),
-		DropdownBorder = Color3.fromRGB(15, 15, 20),
-		DropdownOption = Color3.fromRGB(50, 60, 75),
-
-		Keybind = Color3.fromRGB(20, 25, 30),
-
-		Input = Color3.fromRGB(20, 25, 30),
-		InputFocused = Color3.fromRGB(25, 35, 50),
-		InputIndicator = Color3.fromRGB(30, 35, 40),
-
-		Dialog = Color3.fromRGB(20, 24, 28),
-		DialogHolder = Color3.fromRGB(25, 30, 35),
-		DialogHolderLine = Color3.fromRGB(15, 20, 25),
-		DialogButton = Color3.fromRGB(45, 55, 65),
-		DialogButtonBorder = Color3.fromRGB(30, 35, 40),
-		DialogBorder = Color3.fromRGB(100, 180, 255), -- ขอบหน้าต่าง Dialog สีฟ้าอ่อน
-		DialogInput = Color3.fromRGB(30, 35, 40),
-		DialogInputLine = Color3.fromRGB(15, 15, 20),
-
-		Text = Color3.fromRGB(225, 245, 255), -- ตัวอักษรสีขาวอมฟ้าสว่าง
-		SubText = Color3.fromRGB(150, 170, 190), -- ตัวอักษรรองสีเทาอมฟ้า
-		Hover = Color3.fromRGB(45, 55, 70),
-		HoverChange = 0.05,
-		}
-	end,
-
 [55] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(55)return {
-        Name = "XZY RedDark",
+        Name = "RedDark",
 		Accent = Color3.fromRGB(255, 0, 0),
 
 		AcrylicMain = Color3.fromRGB(20, 20, 20),
