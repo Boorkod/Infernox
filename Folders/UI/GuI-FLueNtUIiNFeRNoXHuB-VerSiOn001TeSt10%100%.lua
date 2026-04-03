@@ -6220,7 +6220,7 @@ local ClosureBindings = {
 		}
 	end,
 	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
-        Name = "XZY RedDark",
+        Name = "RedDark",
 		Accent = Color3.fromRGB(255, 0, 0),
 
 		AcrylicMain = Color3.fromRGB(20, 20, 20),
@@ -6266,7 +6266,55 @@ local ClosureBindings = {
 		Hover = Color3.fromRGB(35,35,35),
 		HoverChange = 0.04,
 		}
-	end
+	end,
+	[55] = function()local maui,script,require,getfenv,setfenv = ImportGlobals(56)return {
+	Name = "BlueNeon",
+	Accent = Color3.fromRGB(0, 170, 255),
+
+	AcrylicMain = Color3.fromRGB(20, 25, 35),
+	AcrylicBorder = Color3.fromRGB(40, 90, 130),
+	AcrylicGradient = ColorSequence.new(Color3.fromRGB(0, 200, 255), Color3.fromRGB(0, 90, 180)),
+	AcrylicNoise = 0.90,
+
+	TitleBarLine = Color3.fromRGB(0, 150, 220),
+	Tab = Color3.fromRGB(70, 140, 200),
+
+	Element = Color3.fromRGB(0, 170, 255),
+	ElementBorder = Color3.fromRGB(30, 70, 100),
+	InElementBorder = Color3.fromRGB(40, 90, 120),
+	ElementTransparency = 0.86,
+
+	ToggleSlider = Color3.fromRGB(0, 200, 255),
+	ToggleToggled = Color3.fromRGB(0, 0, 0),
+
+	SliderRail = Color3.fromRGB(0, 170, 255),
+
+	DropdownFrame = Color3.fromRGB(80, 150, 210),
+	DropdownHolder = Color3.fromRGB(20, 60, 90),
+	DropdownBorder = Color3.fromRGB(20, 50, 70),
+	DropdownOption = Color3.fromRGB(0, 170, 255),
+
+	Keybind = Color3.fromRGB(0, 170, 255),
+
+	Input = Color3.fromRGB(0, 170, 255),
+	InputFocused = Color3.fromRGB(10, 20, 40),
+	InputIndicator = Color3.fromRGB(120, 200, 255),
+
+	Dialog = Color3.fromRGB(20, 60, 90),
+	DialogHolder = Color3.fromRGB(15, 45, 70),
+	DialogHolderLine = Color3.fromRGB(20, 50, 80),
+	DialogButton = Color3.fromRGB(30, 80, 120),
+	DialogButtonBorder = Color3.fromRGB(90, 170, 255),
+	DialogBorder = Color3.fromRGB(40, 90, 120),
+	DialogInput = Color3.fromRGB(40, 100, 140),
+	DialogInputLine = Color3.fromRGB(120, 200, 255),
+
+	Text = Color3.fromRGB(255, 255, 255),
+	SubText = Color3.fromRGB(170, 190, 210),
+	Hover = Color3.fromRGB(0, 170, 255),
+	HoverChange = 0.04,
+      }
+end
 } 
 do
 	-- Localizing certain libraries and built-ins for runtime efficiency
