@@ -6273,8 +6273,7 @@ Accent = Color3.fromRGB(0, 120, 210),
 
 AcrylicMain = Color3.fromRGB(235, 235, 235),
 AcrylicBorder = Color3.fromRGB(80, 80, 80),
-AcrylicGradient = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(230, 230, 230)
-),
+AcrylicGradient = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(230, 230, 230)),
 AcrylicNoise = 0.9,
 
 TitleBarLine = Color3.fromRGB(120, 120, 120),
@@ -6313,56 +6312,7 @@ DialogInputLine = Color3.fromRGB(120, 120, 120),
 Text = Color3.fromRGB(20, 20, 20),
 SubText = Color3.fromRGB(70, 70, 70),
 Hover = Color3.fromRGB(60, 60, 60),
-HoverChange = 0.18,
-}
-end,
-	
-		[56] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(56)return {
-		Name = "Minimal White",
-Accent = Color3.fromRGB(0, 120, 215),
-
-AcrylicMain = Color3.fromRGB(245, 245, 245),
-AcrylicBorder = Color3.fromRGB(100, 100, 100),
-AcrylicGradient = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(240, 240, 240)),
-AcrylicNoise = 0.92,
-
-TitleBarLine = Color3.fromRGB(170, 170, 170),
-Tab = Color3.fromRGB(80, 80, 80),
-
-Element = Color3.fromRGB(255, 255, 255),
-ElementBorder = Color3.fromRGB(200, 200, 200),
-InElementBorder = Color3.fromRGB(160, 160, 160),
-ElementTransparency = 0.6,
-
-ToggleSlider = Color3.fromRGB(60, 60, 60),
-ToggleToggled = Color3.fromRGB(255, 255, 255),
-
-SliderRail = Color3.fromRGB(90, 90, 90),
-
-DropdownFrame = Color3.fromRGB(245, 245, 245),
-DropdownHolder = Color3.fromRGB(250, 250, 250),
-DropdownBorder = Color3.fromRGB(200, 200, 200),
-DropdownOption = Color3.fromRGB(120, 120, 120),
-
-Keybind = Color3.fromRGB(120, 120, 120),
-
-Input = Color3.fromRGB(245, 245, 245),
-InputFocused = Color3.fromRGB(140, 140, 140),
-InputIndicator = Color3.fromRGB(110, 110, 110),
-
-Dialog = Color3.fromRGB(255, 255, 255),
-DialogHolder = Color3.fromRGB(245, 245, 245),
-DialogHolderLine = Color3.fromRGB(220, 220, 220),
-DialogButton = Color3.fromRGB(255, 255, 255),
-DialogButtonBorder = Color3.fromRGB(180, 180, 180),
-DialogBorder = Color3.fromRGB(140, 140, 140),
-DialogInput = Color3.fromRGB(248, 248, 248),
-DialogInputLine = Color3.fromRGB(160, 160, 160),
-
-Text = Color3.fromRGB(25, 25, 25),
-SubText = Color3.fromRGB(90, 90, 90),
-Hover = Color3.fromRGB(70, 70, 70),
-HoverChange = 0.15,
+  HoverChange = 0.18,
 		}
 	end
 } 
