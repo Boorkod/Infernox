@@ -6172,8 +6172,8 @@ local ClosureBindings = {
 		}
 	end,
 [53] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(53)return {
-	Name = "Blue",
-		Accent = Color3.fromRGB(0, 170, 255),
+        Name = "BlueDark",
+		Accent = Color3.fromRGB(0, 170, 255), -- สีฟ้าหลัก (Accent)
 
 		AcrylicMain = Color3.fromRGB(15, 18, 22),
 		AcrylicBorder = Color3.fromRGB(10, 12, 15),
@@ -6181,7 +6181,7 @@ local ClosureBindings = {
 		AcrylicNoise = 0.98,
 
 		TitleBarLine = Color3.fromRGB(10, 12, 15),
-		Tab = Color3.fromRGB(0, 170, 255),
+		Tab = Color3.fromRGB(0, 170, 255), -- สี Tab ตอนเลือกเป็นสีฟ้า
 
 		Element = Color3.fromRGB(35, 45, 55),
 		ElementBorder = Color3.fromRGB(20, 20, 25),
@@ -6191,7 +6191,7 @@ local ClosureBindings = {
 		ToggleSlider = Color3.fromRGB(200, 230, 255),
 		ToggleToggled = Color3.fromRGB(30, 40, 50),
 
-		SliderRail = Color3.fromRGB(0, 120, 215),
+		SliderRail = Color3.fromRGB(0, 120, 215), -- รางสไลเดอร์สีฟ้าเข้ม
 
 		DropdownFrame = Color3.fromRGB(40, 50, 60),
 		DropdownHolder = Color3.fromRGB(20, 25, 30),
@@ -6209,12 +6209,12 @@ local ClosureBindings = {
 		DialogHolderLine = Color3.fromRGB(15, 20, 25),
 		DialogButton = Color3.fromRGB(45, 55, 65),
 		DialogButtonBorder = Color3.fromRGB(30, 35, 40),
-		DialogBorder = Color3.fromRGB(100, 180, 255), 
+		DialogBorder = Color3.fromRGB(100, 180, 255), -- ขอบหน้าต่าง Dialog สีฟ้าอ่อน
 		DialogInput = Color3.fromRGB(30, 35, 40),
 		DialogInputLine = Color3.fromRGB(15, 15, 20),
 
-		Text = Color3.fromRGB(225, 245, 255),
-		SubText = Color3.fromRGB(150, 170, 190),
+		Text = Color3.fromRGB(225, 245, 255), -- ตัวอักษรสีขาวอมฟ้าสว่าง
+		SubText = Color3.fromRGB(150, 170, 190), -- ตัวอักษรรองสีเทาอมฟ้า
 		Hover = Color3.fromRGB(45, 55, 70),
 		HoverChange = 0.05,
 		}
