@@ -6220,7 +6220,7 @@ local ClosureBindings = {
 		}
 	end,
 	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
-        Name = "RedDark",
+        Name = "XZY RedDark",
 		Accent = Color3.fromRGB(255, 0, 0),
 
 		AcrylicMain = Color3.fromRGB(20, 20, 20),
@@ -6264,54 +6264,6 @@ local ClosureBindings = {
 		Text = Color3.fromRGB(247, 227, 233),
 		SubText = Color3.fromRGB(170, 170, 170),
 		Hover = Color3.fromRGB(35,35,35),
-		HoverChange = 0.04,
-		}
-	end,
-[55] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(55)return {
-		Name = "CyanNeon",
-		Accent = Color3.fromRGB(0, 220, 255),
-
-		AcrylicMain = Color3.fromRGB(10, 30, 40),
-		AcrylicBorder = Color3.fromRGB(0, 150, 180),
-		AcrylicGradient = ColorSequence.new(Color3.fromRGB(0, 210, 255), Color3.fromRGB(0, 160, 200)),
-		AcrylicNoise = 0.92,
-
-		TitleBarLine = Color3.fromRGB(0, 180, 210),
-		Tab = Color3.fromRGB(100, 220, 240),
-
-		Element = Color3.fromRGB(0, 200, 240),
-		ElementBorder = Color3.fromRGB(0, 120, 150),
-		InElementBorder = Color3.fromRGB(0, 140, 160),
-		ElementTransparency = 0.86,
-
-		ToggleSlider = Color3.fromRGB(0, 200, 240),
-		ToggleToggled = Color3.fromRGB(0, 0, 0),
-
-		SliderRail = Color3.fromRGB(0, 200, 240),
-
-		DropdownFrame = Color3.fromRGB(80, 220, 245),
-		DropdownHolder = Color3.fromRGB(0, 80, 110),
-		DropdownBorder = Color3.fromRGB(0, 60, 85),
-		DropdownOption = Color3.fromRGB(0, 200, 240),
-
-		Keybind = Color3.fromRGB(0, 200, 240),
-
-		Input = Color3.fromRGB(0, 200, 240),
-		InputFocused = Color3.fromRGB(0, 20, 35),
-		InputIndicator = Color3.fromRGB(120, 220, 240),
-
-		Dialog = Color3.fromRGB(0, 80, 110),
-		DialogHolder = Color3.fromRGB(0, 65, 90),
-		DialogHolderLine = Color3.fromRGB(0, 55, 80),
-		DialogButton = Color3.fromRGB(0, 80, 110),
-		DialogButtonBorder = Color3.fromRGB(0, 150, 185),
-		DialogBorder = Color3.fromRGB(0, 110, 140),
-		DialogInput = Color3.fromRGB(0, 90, 120),
-		DialogInputLine = Color3.fromRGB(100, 210, 230),
-
-		Text = Color3.fromRGB(255, 255, 255),
-		SubText = Color3.fromRGB(170, 170, 170),
-		Hover = Color3.fromRGB(0, 200, 240),
 		HoverChange = 0.04,
 		}
 	end
