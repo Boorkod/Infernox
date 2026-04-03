@@ -5947,8 +5947,104 @@ local ClosureBindings = {
 		end
 		table.sort(Themes.Names)
 		return Themes
-	end
+	end,
 	[48] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(48)return {
+		Name = "Amethyst",
+		Accent = Color3.fromRGB(97, 62, 167),
+
+		AcrylicMain = Color3.fromRGB(20, 20, 20),
+		AcrylicBorder = Color3.fromRGB(110, 90, 130),
+		AcrylicGradient = ColorSequence.new(Color3.fromRGB(85, 57, 139), Color3.fromRGB(40, 25, 65)),
+		AcrylicNoise = 0.92,
+
+		TitleBarLine = Color3.fromRGB(95, 75, 110),
+		Tab = Color3.fromRGB(160, 140, 180),
+
+		Element = Color3.fromRGB(140, 120, 160),
+		ElementBorder = Color3.fromRGB(60, 50, 70),
+		InElementBorder = Color3.fromRGB(100, 90, 110),
+		ElementTransparency = 0.87,
+
+		ToggleSlider = Color3.fromRGB(140, 120, 160),
+		ToggleToggled = Color3.fromRGB(0, 0, 0),
+
+		SliderRail = Color3.fromRGB(140, 120, 160),
+
+		DropdownFrame = Color3.fromRGB(170, 160, 200),
+		DropdownHolder = Color3.fromRGB(60, 45, 80),
+		DropdownBorder = Color3.fromRGB(50, 40, 65),
+		DropdownOption = Color3.fromRGB(140, 120, 160),
+
+		Keybind = Color3.fromRGB(140, 120, 160),
+
+		Input = Color3.fromRGB(140, 120, 160),
+		InputFocused = Color3.fromRGB(20, 10, 30),
+		InputIndicator = Color3.fromRGB(170, 150, 190),
+
+		Dialog = Color3.fromRGB(60, 45, 80),
+		DialogHolder = Color3.fromRGB(45, 30, 65),
+		DialogHolderLine = Color3.fromRGB(40, 25, 60),
+		DialogButton = Color3.fromRGB(60, 45, 80),
+		DialogButtonBorder = Color3.fromRGB(95, 80, 110),
+		DialogBorder = Color3.fromRGB(85, 70, 100),
+		DialogInput = Color3.fromRGB(70, 55, 85),
+		DialogInputLine = Color3.fromRGB(175, 160, 190),
+
+		Text = Color3.fromRGB(240, 240, 240),
+		SubText = Color3.fromRGB(170, 170, 170),
+		Hover = Color3.fromRGB(140, 120, 160),
+		HoverChange = 0.04,
+		}
+	end,
+	[49] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(49)return {
+		Name = "Aqua",
+		Accent = Color3.fromRGB(60, 165, 165),
+
+		AcrylicMain = Color3.fromRGB(20, 20, 20),
+		AcrylicBorder = Color3.fromRGB(50, 100, 100),
+		AcrylicGradient = ColorSequence.new(Color3.fromRGB(60, 140, 140), Color3.fromRGB(40, 80, 80)),
+		AcrylicNoise = 0.92,
+
+		TitleBarLine = Color3.fromRGB(60, 120, 120),
+		Tab = Color3.fromRGB(140, 180, 180),
+
+		Element = Color3.fromRGB(110, 160, 160),
+		ElementBorder = Color3.fromRGB(40, 70, 70),
+		InElementBorder = Color3.fromRGB(80, 110, 110),
+		ElementTransparency = 0.84,
+
+		ToggleSlider = Color3.fromRGB(110, 160, 160),
+		ToggleToggled = Color3.fromRGB(0, 0, 0),
+
+		SliderRail = Color3.fromRGB(110, 160, 160),
+
+		DropdownFrame = Color3.fromRGB(160, 200, 200),
+		DropdownHolder = Color3.fromRGB(40, 80, 80),
+		DropdownBorder = Color3.fromRGB(40, 65, 65),
+		DropdownOption = Color3.fromRGB(110, 160, 160),
+
+		Keybind = Color3.fromRGB(110, 160, 160),
+
+		Input = Color3.fromRGB(110, 160, 160),
+		InputFocused = Color3.fromRGB(20, 10, 30),
+		InputIndicator = Color3.fromRGB(130, 170, 170),
+
+		Dialog = Color3.fromRGB(40, 80, 80),
+		DialogHolder = Color3.fromRGB(30, 60, 60),
+		DialogHolderLine = Color3.fromRGB(25, 50, 50),
+		DialogButton = Color3.fromRGB(40, 80, 80),
+		DialogButtonBorder = Color3.fromRGB(80, 110, 110),
+		DialogBorder = Color3.fromRGB(50, 100, 100),
+		DialogInput = Color3.fromRGB(45, 90, 90),
+		DialogInputLine = Color3.fromRGB(130, 170, 170),
+
+		Text = Color3.fromRGB(240, 240, 240),
+		SubText = Color3.fromRGB(170, 170, 170),
+		Hover = Color3.fromRGB(110, 160, 160),
+		HoverChange = 0.04,
+		}
+	end,
+	[50] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(50)return {
 		Name = "Dark",
 		Accent = Color3.fromRGB(96, 205, 255),
 
@@ -5996,7 +6092,7 @@ local ClosureBindings = {
 		HoverChange = 0.07,
 		}
 	end,
-	[49] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(49)return {
+	[51] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(51)return {
 		Name = "Darker",
 		Accent = Color3.fromRGB(72, 138, 182),
 
@@ -6027,7 +6123,7 @@ local ClosureBindings = {
 		DialogInputLine = Color3.fromRGB(120, 120, 120),
 		}
 	end,
-	[50] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(50)return {
+	[52] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(52)return {
 		Name = "Light",
 		Accent = Color3.fromRGB(0, 103, 192),
 
@@ -6075,7 +6171,7 @@ local ClosureBindings = {
 		HoverChange = 0.16,
 		}
 	end,
-	[51] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(51)return {
+	[53] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(53)return {
 		Name = "Rose",
 		Accent = Color3.fromRGB(180, 55, 90),
 
@@ -6123,56 +6219,8 @@ local ClosureBindings = {
 		HoverChange = 0.04,
 		}
 	end,
-	[52] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(52)return {
-Name = "BlueNeon",
-Accent = Color3.fromRGB(0,170,255),
-
-AcrylicMain = Color3.fromRGB(40,40,40),
-AcrylicBorder = Color3.fromRGB(90,120,150),
-AcrylicGradient = ColorSequence.new(Color3.fromRGB(0,200,255),Color3.fromRGB(0,120,200)),
-AcrylicNoise = 0.92,
-
-TitleBarLine = Color3.fromRGB(90,120,150),
-Tab = Color3.fromRGB(120,170,220),
-
-Element = Color3.fromRGB(120,180,255),
-ElementBorder = Color3.fromRGB(70,110,150),
-InElementBorder = Color3.fromRGB(80,120,160),
-ElementTransparency = 0.86,
-
-ToggleSlider = Color3.fromRGB(120,180,255),
-ToggleToggled = Color3.fromRGB(0,0,0),
-
-SliderRail = Color3.fromRGB(120,180,255),
-
-DropdownFrame = Color3.fromRGB(150,200,255),
-DropdownHolder = Color3.fromRGB(60,100,140),
-DropdownBorder = Color3.fromRGB(50,80,120),
-DropdownOption = Color3.fromRGB(120,180,255),
-
-Keybind = Color3.fromRGB(120,180,255),
-
-Input = Color3.fromRGB(120,180,255),
-InputFocused = Color3.fromRGB(10,20,40),
-InputIndicator = Color3.fromRGB(150,200,255),
-
-Dialog = Color3.fromRGB(60,100,140),
-DialogHolder = Color3.fromRGB(50,80,120),
-DialogHolderLine = Color3.fromRGB(45,70,110),
-DialogButton = Color3.fromRGB(60,100,140),
-DialogButtonBorder = Color3.fromRGB(120,180,255),
-DialogBorder = Color3.fromRGB(80,120,160),
-DialogInput = Color3.fromRGB(80,120,160),
-DialogInputLine = Color3.fromRGB(150,200,255),
-
-Text = Color3.fromRGB(255,255,255),
-SubText = Color3.fromRGB(170,170,170),
-Hover = Color3.fromRGB(120,180,255),
-HoverChange = 0.04,
-}
-end,
-	[53] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(53)return {
-        Name = "RedDark",
+	[54] = function()local maui,script,require,getfenv,setfenv=ImportGlobals(54)return {
+        Name = "XZY RedDark",
 		Accent = Color3.fromRGB(255, 0, 0),
 
 		AcrylicMain = Color3.fromRGB(20, 20, 20),
@@ -6209,6 +6257,413 @@ end,
 		DialogHolderLine = Color3.fromRGB(20,20,20),
 		DialogButton = Color3.fromRGB(40,40,40),
 		DialogButtonBorder = Color3.fromRGB(27,27,27),
+		DialogBorder = Color3.fromRGB(172, 172, 172),
+		DialogInput = Color3.fromRGB(35,35,35),
+		DialogInputLine = Color3.fromRGB(13,13,13),
+
+		Text = Color3.fromRGB(247, 227, 233),
+		SubText = Color3.fromRGB(170, 170, 170),
+		Hover = Color3.fromRGB(35,35,35),
+		HoverChange = 0.04,
+		}
+	end
+} 
+do
+	-- Localizing certain libraries and built-ins for runtime efficiency
+	local task, setmetatable, error, newproxy, getmetatable, next, table, unpack, coroutine, script, type, require, pcall, getfenv, setfenv, rawget= task, setmetatable, error, newproxy, getmetatable, next, table, unpack, coroutine, script, type, require, pcall, getfenv, setfenv, rawget
+
+	local table_insert = table.insert
+	local table_remove = table.remove
+
+	-- lol
+	local table_freeze = table.freeze or function(t) return t end
+
+	-- If we're not running on Roblox or Lune runtime, we won't have a task library
+	local Defer = task and task.defer or function(f, ...)
+		local Thread = coroutine.create(f)
+		coroutine.resume(Thread, ...)
+		return Thread
+	end
+
+	-- `maui.Version` compat
+	local Version = "0.0.0-venv"
+
+	local RefBindings = {} -- [RefId] = RealObject
+
+	local ScriptClosures = {}
+	local StoredModuleValues = {}
+	local ScriptsToRun = {}
+
+	-- maui.Shared
+	local SharedEnvironment = {}
+
+	-- We're creating 'fake' instance refs soley for traversal of the DOM for require() compatibility
+	-- It's meant to be as lazy as possible lol
+	local RefChildren = {} -- [Ref] = {ChildrenRef, ...}
+
+	-- Implemented instance methods
+	local InstanceMethods = {
+		GetChildren = function(self)
+			local Children = RefChildren[self]
+			local ReturnArray = {}
+
+			for Child in next, Children do
+				table_insert(ReturnArray, Child)
+			end
+
+			return ReturnArray
+		end,
+
+		-- Not implementing `recursive` arg, as it isn't needed for us here
+		FindFirstChild = function(self, name)
+			if not name then
+				error("Argument 1 missing or nil", 2)
+			end
+
+			for Child in next, RefChildren[self] do
+				if Child.Name == name then
+					return Child
+				end
+			end
+
+			return
+		end,
+
+		GetFullName = function(self)
+			local Path = self.Name
+			local ObjectPointer = self.Parent
+
+			while ObjectPointer do
+				Path = ObjectPointer.Name .. "." .. Path
+
+				-- Move up the DOM (parent will be nil at the end, and this while loop will stop)
+				ObjectPointer = ObjectPointer.Parent
+			end
+
+			return "VirtualEnv." .. Path
+		end,
+	}
+
+	-- "Proxies" to instance methods, with err checks etc
+	local InstanceMethodProxies = {}
+	for MethodName, Method in next, InstanceMethods do
+		InstanceMethodProxies[MethodName] = function(self, ...)
+			if not RefChildren[self] then
+				error("Expected ':' not '.' calling member function " .. MethodName, 1)
+			end
+
+			return Method(self, ...)
+		end
+	end
+
+	local function CreateRef(className, name, parent)
+		-- `name` and `parent` can also be set later by the init script if they're absent
+
+		-- Extras
+		local StringValue_Value
+
+		-- Will be set to RefChildren later aswell
+		local Children = setmetatable({}, {__mode = "k"})
+
+		-- Err funcs
+		local function InvalidMember(member)
+			error(member .. " is not a valid (virtual) member of " .. className .. " \"" .. name .. "\"", 1)
+		end
+
+		local function ReadOnlyProperty(property)
+			error("Unable to assign (virtual) property " .. property .. ". Property is read only", 1)
+		end
+
+		local Ref = newproxy(true)
+		local RefMetatable = getmetatable(Ref)
+
+		RefMetatable.__index = function(_, index)
+			if index == "ClassName" then -- First check "properties"
+				return className
+			elseif index == "Name" then
+				return name
+			elseif index == "Parent" then
+				return parent
+			elseif className == "StringValue" and index == "Value" then
+				-- Supporting StringValue.Value for Rojo .txt file conv
+				return StringValue_Value
+			else -- Lastly, check "methods"
+				local InstanceMethod = InstanceMethodProxies[index]
+
+				if InstanceMethod then
+					return InstanceMethod
+				end
+			end
+
+			-- Next we'll look thru child refs
+			for Child in next, Children do
+				if Child.Name == index then
+					return Child
+				end
+			end
+
+			-- At this point, no member was found; this is the same err format as Roblox
+			InvalidMember(index)
+		end
+
+		RefMetatable.__newindex = function(_, index, value)
+			-- __newindex is only for props fyi
+			if index == "ClassName" then
+				ReadOnlyProperty(index)
+			elseif index == "Name" then
+				name = value
+			elseif index == "Parent" then
+				-- We'll just ignore the process if it's trying to set itself
+				if value == Ref then
+					return
+				end
+
+				if parent ~= nil then
+					-- Remove this ref from the CURRENT parent
+					RefChildren[parent][Ref] = nil
+				end
+
+				parent = value
+
+				if value ~= nil then
+					-- And NOW we're setting the new parent
+					RefChildren[value][Ref] = true
+				end
+			elseif className == "StringValue" and index == "Value" then
+				-- Supporting StringValue.Value for Rojo .txt file conv
+				StringValue_Value = value
+			else
+				-- Same err as __index when no member is found
+				InvalidMember(index)
+			end
+		end
+
+		RefMetatable.__tostring = function()
+			return name
+		end
+
+		RefChildren[Ref] = Children
+
+		if parent ~= nil then
+			RefChildren[parent][Ref] = true
+		end
+
+		return Ref
+	end
+
+	-- Create real ref DOM from object tree
+	local function CreateRefFromObject(object, parent)
+		local RefId = object[1]
+		local ClassName = object[2]
+		local Properties = object[3]
+		local Children = object[4] -- Optional
+
+		local Name = table_remove(Properties, 1)
+
+		local Ref = CreateRef(ClassName, Name, parent) -- 3rd arg may be nil if this is from root
+		RefBindings[RefId] = Ref
+
+		if Properties then
+			for PropertyName, PropertyValue in next, Properties do
+				Ref[PropertyName] = PropertyValue
+			end
+		end
+
+		if Children then
+			for _, ChildObject in next, Children do
+				CreateRefFromObject(ChildObject, Ref)
+			end
+		end
+
+		return Ref
+	end
+
+	local RealObjectRoot = {}
+	for _, Object in next, ObjectTree do
+		table_insert(RealObjectRoot, CreateRefFromObject(Object))
+	end
+
+	-- Now we'll set script closure refs and check if they should be ran as a BaseScript
+	for RefId, Closure in next, ClosureBindings do
+		local Ref = RefBindings[RefId]
+
+		ScriptClosures[Ref] = Closure
+
+		local ClassName = Ref.ClassName
+		if ClassName == "LocalScript" or ClassName == "Script" then
+			table_insert(ScriptsToRun, Ref)
+		end
+	end
+
+	local function LoadScript(scriptRef)
+		local ScriptClassName = scriptRef.ClassName
+
+		-- First we'll check for a cached module value (packed into a tbl)
+		local StoredModuleValue = StoredModuleValues[scriptRef]
+		if StoredModuleValue and ScriptClassName == "ModuleScript" then
+			return unpack(StoredModuleValue)
+		end
+
+		local Closure = ScriptClosures[scriptRef]
+		if not Closure then
+			return
+		end
+
+		-- If it's a BaseScript, we'll just run it directly!
+		if ScriptClassName == "LocalScript" or ScriptClassName == "Script" then
+			Closure()
+			return
+		else
+			local ClosureReturn = {Closure()}
+			StoredModuleValues[scriptRef] = ClosureReturn
+			return unpack(ClosureReturn)
+		end
+	end
+
+	-- We'll assign the actual func from the top of this output for flattening user globals at runtime
+	-- Returns (in a tuple order): maui, script, require, getfenv, setfenv
+	function ImportGlobals(refId)
+		local ScriptRef = RefBindings[refId]
+
+		local Closure = ScriptClosures[ScriptRef]
+		if not Closure then
+			return
+		end
+
+		-- This will be set right after the other global funcs, it's for handling proper behavior when
+		-- getfenv/setfenv is called and safeenv needs to be disabled
+		local EnvHasBeenSet = false
+		local RealEnv
+		local VirtualEnv
+		local SetEnv
+
+		local Global_maui = table_freeze({
+			Version = Version,
+			Script = script, -- The actual script object for the script this is running on, not a fake ref
+			Shared = SharedEnvironment,
+
+			-- For compatibility purposes..
+			GetScript = function()
+				return script
+			end,
+			GetShared = function()
+				return SharedEnvironment
+			end,
+		})
+
+		local Global_script = ScriptRef
+
+		local function Global_require(module, ...)
+			if RefChildren[module] and module.ClassName == "ModuleScript" and ScriptClosures[module] then
+				return LoadScript(module)
+			end
+
+			return require(module, ...)
+		end
+
+		-- Calling these flattened getfenv/setfenv functions will disable safeenv for the WHOLE SCRIPT
+		local function Global_getfenv(stackLevel, ...)
+			-- Now we have to set the env for the other variables used here to be valid
+			if not EnvHasBeenSet then
+				SetEnv()
+			end
+
+			if type(stackLevel) == "number" and stackLevel >= 0 then
+				if stackLevel == 0 then
+					return VirtualEnv
+				else
+					-- Offset by 1 for the actual env
+					stackLevel = stackLevel + 1
+
+					local GetOk, FunctionEnv = pcall(getfenv, stackLevel)
+					if GetOk and FunctionEnv == RealEnv then
+						return VirtualEnv
+					end
+				end
+			end
+
+			return getfenv(stackLevel, ...)
+		end
+
+		local function Global_setfenv(stackLevel, newEnv, ...)
+			if not EnvHasBeenSet then
+				SetEnv()
+			end
+
+			if type(stackLevel) == "number" and stackLevel >= 0 then
+				if stackLevel == 0 then
+					return setfenv(VirtualEnv, newEnv)
+				else
+					stackLevel = stackLevel + 1
+
+					local GetOk, FunctionEnv = pcall(getfenv, stackLevel)
+					if GetOk and FunctionEnv == RealEnv then
+						return setfenv(VirtualEnv, newEnv)
+					end
+				end
+			end
+
+			return setfenv(stackLevel, newEnv, ...)
+		end
+
+		-- From earlier, will ONLY be set if needed
+		function SetEnv()
+			RealEnv = getfenv(0)
+
+			local GlobalEnvOverride = {
+				["maui"] = Global_maui,
+				["script"] = Global_script,
+				["require"] = Global_require,
+				["getfenv"] = Global_getfenv,
+				["setfenv"] = Global_setfenv,
+			}
+
+			VirtualEnv = setmetatable({}, {
+				__index = function(_, index)
+					local IndexInVirtualEnv = rawget(VirtualEnv, index)
+					if IndexInVirtualEnv ~= nil then
+						return IndexInVirtualEnv
+					end
+
+					local IndexInGlobalEnvOverride = GlobalEnvOverride[index]
+					if IndexInGlobalEnvOverride ~= nil then
+						return IndexInGlobalEnvOverride
+					end
+
+					return RealEnv[index]
+				end
+			})
+
+			setfenv(Closure, VirtualEnv)
+			EnvHasBeenSet = true
+		end
+
+		-- Now, return flattened globals ready for direct runtime exec
+		return Global_maui, Global_script, Global_require, Global_getfenv, Global_setfenv
+	end
+
+	for _, ScriptRef in next, ScriptsToRun do
+		Defer(LoadScript, ScriptRef)
+	end
+
+	-- If there's a "MainModule" top-level modulescript, we'll return it from the output's closure directly
+	do
+		local MainModule
+		for _, Ref in next, RealObjectRoot do
+			if Ref.ClassName == "ModuleScript" and Ref.Name == "MainModule" then
+				MainModule = Ref
+				break
+			end
+		end
+
+		if MainModule then
+			return LoadScript(MainModule)
+		end
+	end
+
+	-- If any scripts are currently running now from task scheduler, the scope won't close until all running threads are closed
+	-- (thanks for coming to my ted talk)
+end
 		DialogBorder = Color3.fromRGB(172, 172, 172),
 		DialogInput = Color3.fromRGB(35,35,35),
 		DialogInputLine = Color3.fromRGB(13,13,13),
