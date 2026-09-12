@@ -37,6 +37,7 @@ getgenv().AutoBuso=true
 getgenv().AutoKen=true
 getgenv().Allskill=false
 getgenv().SelectUpStats={"Melee","Defense"}
+local HideNotification=false
 
 local Core={}
 local HRP,FarmOffset=CFrame.new(),nil
@@ -48,6 +49,7 @@ local SpawnMob=""
 local SpawnPoints={}
 local UnderwaterState="None"
 local UnderwaterMoving=false
+local NotificationConnection
 
 local function SetFastAttack(state)
     getgenv().FastAttack=state==true
@@ -478,7 +480,7 @@ function Core.UpdateFarmOffset()
 
     elseif FarmMode=="Upper" then
         FarmOffset=
-            CFrame.new(0,height*2,0)*
+            CFrame.new(0,height*4,0)*
             CFrame.Angles(0,math.rad(90),0)
 
     else
@@ -1089,6 +1091,31 @@ task.spawn(function()
         end)
     end
 end)
+local function SetupNotificationBlock()
+    local Notifications=PlayerGui:FindFirstChild("Notifications")
+    local Stack=Notifications and Notifications:FindFirstChild("NotificationStack")
+
+    if not Stack then
+        return
+    end
+
+    if NotificationConnection then
+        NotificationConnection:Disconnect()
+        NotificationConnection=nil
+    end
+
+    if HideNotification then
+        for _,v in ipairs(Stack:GetChildren()) do
+            v:Destroy()
+        end
+
+        NotificationConnection=Stack.ChildAdded:Connect(function(v)
+            if HideNotification then
+                v:Destroy()
+            end
+        end)
+    end
+end
 
 local Window=Fluent:CreateWindow({
     Title="InfernoX HUB "..Fluent.Version,
@@ -1283,7 +1310,7 @@ end)
 
 local FarmHeightSlider=Tabs.FarmSetting:AddSlider("FarmHeightSlider",{
     Title="Farm Height",
-    Description="Upper = ความสูง ×2",
+    Description="why????",
     Default=5,
     Min=1,
     Max=10,
@@ -1295,10 +1322,27 @@ FarmHeightSlider:OnChanged(function(Value)
     Core.UpdateFarmOffset()
 end)
 
-Tabs.FarmSetting:AddParagraph({
-    Title="Tween Height",
-    Content="เดินทางไป NPC / จุดเกิด สูงเพิ่ม 20 studs"
-})
+Tabs.FarmSetting:AddToggle("HideNotificationToggle",{
+    Title="Notification",
+    Description="ลบ Notification ที่แสดงบนหน้าจอ",
+    Default=false
+}):OnChanged(function(Value)
+    HideNotification=Value
+
+    if Value then
+        SetupNotificationBlock()
+    elseif NotificationConnection then
+        NotificationConnection:Disconnect()
+        NotificationConnection=nil
+    end
+end)
+
+PlayerGui.ChildAdded:Connect(function(child)
+    if child.Name=="Notifications" and HideNotification then
+        task.wait()
+        SetupNotificationBlock()
+    end
+end)
 
 Tabs.FarmSetting:AddParagraph({
     Title="Farm Settings",
