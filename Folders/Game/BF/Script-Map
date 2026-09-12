@@ -183,6 +183,13 @@ function Core.GetQuestNPC(questName)
         return
     end
 
+    if not Core.UpdateCharacter() or not HRP then
+        return
+    end
+
+    local nearestName,nearestPosition
+    local nearestDistance=math.huge
+
     for _,npc in pairs(Guide.Data.NPCList) do
         if npc.InternalQuestName==questName then
             local pos=npc.Position
@@ -191,9 +198,19 @@ function Core.GetQuestNPC(questName)
                 pos=pos.Position
             end
 
-            return npc.NPCName,pos
+            if typeof(pos)=="Vector3" then
+                local distance=(HRP.Position-pos).Magnitude
+
+                if distance<nearestDistance then
+                    nearestDistance=distance
+                    nearestName=npc.NPCName
+                    nearestPosition=pos
+                end
+            end
         end
     end
+
+    return nearestName,nearestPosition
 end
 
 local function NormalizeText(text)
