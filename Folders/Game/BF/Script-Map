@@ -37,7 +37,8 @@ getgenv().AutoBuso=true
 getgenv().AutoKen=true
 getgenv().Allskill=false
 getgenv().SelectUpStats={"Melee","Defense"}
-local HideNotification=false
+local HideNotification=true
+
 
 local Core={}
 local HRP,FarmOffset=CFrame.new(),nil
@@ -50,6 +51,7 @@ local SpawnPoints={}
 local UnderwaterState="None"
 local UnderwaterMoving=false
 local NotificationConnection
+local NotificationsConnection
 
 local function SetFastAttack(state)
     getgenv().FastAttack=state==true
@@ -1094,21 +1096,14 @@ end)
 local function SetupNotificationBlock()
     local Notifications=PlayerGui:FindFirstChild("Notifications")
     local Stack=Notifications and Notifications:FindFirstChild("NotificationStack")
-
-    if not Stack then
-        return
-    end
-
+    if not Stack then return end
     if NotificationConnection then
         NotificationConnection:Disconnect()
-        NotificationConnection=nil
     end
-
     if HideNotification then
         for _,v in ipairs(Stack:GetChildren()) do
             v:Destroy()
         end
-
         NotificationConnection=Stack.ChildAdded:Connect(function(v)
             if HideNotification then
                 v:Destroy()
@@ -1116,6 +1111,24 @@ local function SetupNotificationBlock()
         end)
     end
 end
+local function WatchNotifications()
+    local Notifications=PlayerGui:FindFirstChild("Notifications")
+    if not Notifications then return end
+    if NotificationsConnection then
+        NotificationsConnection:Disconnect()
+    end
+    NotificationsConnection=Notifications.ChildAdded:Connect(function(v)
+        if v.Name=="NotificationStack" then
+            task.defer(SetupNotificationBlock)
+        end
+    end)
+    SetupNotificationBlock()
+end
+PlayerGui.ChildAdded:Connect(function(v)
+    if v.Name=="Notifications" then
+        task.defer(WatchNotifications)
+    end
+end)
 
 local Window=Fluent:CreateWindow({
     Title="InfernoX HUB "..Fluent.Version,
@@ -1325,22 +1338,14 @@ end)
 Tabs.FarmSetting:AddToggle("HideNotificationToggle",{
     Title="Notification",
     Description="ลบ Notification ที่แสดงบนหน้าจอ",
-    Default=false
+    Default=true
 }):OnChanged(function(Value)
     HideNotification=Value
-
     if Value then
-        SetupNotificationBlock()
+        WatchNotifications()
     elseif NotificationConnection then
         NotificationConnection:Disconnect()
         NotificationConnection=nil
-    end
-end)
-
-PlayerGui.ChildAdded:Connect(function(child)
-    if child.Name=="Notifications" and HideNotification then
-        task.wait()
-        SetupNotificationBlock()
     end
 end)
 
