@@ -24,6 +24,8 @@ local Global=require(ReplicatedStorage:WaitForChild("Global"))
 
 local FarmMode="Upper"
 local FarmDistance=7
+local FarmHeight
+local TweenHeight=20
 local TweenSpeed=150
 local SelectedWeaponType="Melee"
 
@@ -331,9 +333,13 @@ function Core.HasQuest()
     return Core.IsQuestActive()
 end
 
-function Core.TweenTo(position)
+function Core.TweenTo(position,extraHeight)
     if typeof(position)~="Vector3" or not Core.UpdateCharacter() then
         return false
+    end
+
+    if extraHeight then
+        position=position+Vector3.new(0,extraHeight,0)
     end
 
     SetFastAttack(false)
@@ -437,13 +443,27 @@ function Core.TweenTo(position)
     return root.Parent and (root.Position-position).Magnitude<=8
 end
 
+-- Tween เดินทางทั่วไป +20 studs
+function Core.TweenToTravel(position)
+    return Core.TweenTo(position,TweenHeight)
+end
+
 function Core.UpdateFarmOffset()
+    local height=tonumber(FarmHeight) or 5
+
     if FarmMode=="Behind" then
         FarmOffset=CFrame.new(0,0,FarmDistance)
+
     elseif FarmMode=="Below" then
-        FarmOffset=CFrame.new(0,-FarmDistance,0)*CFrame.Angles(math.rad(90),0,0)
+        FarmOffset=
+            CFrame.new(0,-height,0)*
+            CFrame.Angles(math.rad(90),0,0)
+
     elseif FarmMode=="Upper" then
-        FarmOffset=CFrame.new(0,FarmDistance,0)*CFrame.Angles(0,math.rad(90),0)
+        FarmOffset=
+            CFrame.new(0,height*2,0)*
+            CFrame.Angles(0,math.rad(90),0)
+
     else
         FarmOffset=CFrame.new()
     end
@@ -532,7 +552,9 @@ function Core.ScanMobSpawn(quest)
 
         if spawn and spawn.Parent then
             SetFastAttack(false)
-            Core.TweenTo(spawn.Position)
+
+            -- ไปจุดเกิด +20 studs
+            Core.TweenToTravel(spawn.Position)
 
             local timeout=os.clock()+2
 
@@ -591,6 +613,7 @@ function Core.FarmMob()
         EquipTool(SelectedWeaponType)
     end
 
+    -- ใช้ Farm Height ตอนฟาร์มจริง
     Core.UpdateFarmOffset()
 
     local TargetCFrame=Head.CFrame*FarmOffset
@@ -599,6 +622,8 @@ function Core.FarmMob()
         SetFastAttack(false)
         CurrentTarget=target
 
+        -- ไม่บวก TweenHeight ตรงนี้
+        -- ตำแหน่งฟาร์มถูกควบคุมด้วย FarmHeight
         Core.TweenTo(TargetCFrame.Position)
 
         if CurrentTarget==target and
@@ -869,7 +894,7 @@ function FastAttack:Attack()
     end
 
     pcall(function()
-        RegisterAttack:FireServer(0.000000000000000001)
+        RegisterAttack:FireServer(0.00)
     end)
 end
 
@@ -933,7 +958,8 @@ function Core.CheckUnderwater()
         end
 
         return UnderwaterMoving
-    elseif lv>=450 then
+
+    elseif lv==450 then
         if UnderwaterState~="Exited" and Exit and not UnderwaterMoving then
             UnderwaterMoving=true
 
@@ -1026,7 +1052,8 @@ task.spawn(function()
             local npcName,position=Core.GetQuestNPC(quest.Name)
 
             if position then
-                Core.TweenTo(position)
+                -- ไปหา NPC รับเควสต์ +20 studs
+                Core.TweenToTravel(position)
 
                 task.wait(.25)
 
@@ -1219,6 +1246,42 @@ Tabs.Main:AddToggle("FastAttackToggle",{
 }):OnChanged(function(Value)
     getgenv().FastAttack=Value
 end)
+
+--==================================================
+-- FARM POSITION
+--==================================================
+
+Tabs.FarmSetting:AddSection("Farm Position")
+
+local FarmModeDropdown=Tabs.FarmSetting:AddDropdown("FarmModeDropdown",{
+    Title="Farm Mode",
+    Values={"Upper","Behind","Below"},
+    Default="Upper"
+})
+
+FarmModeDropdown:OnChanged(function(Value)
+    FarmMode=Value
+    Core.UpdateFarmOffset()
+end)
+
+local FarmHeightSlider=Tabs.FarmSetting:AddSlider("FarmHeightSlider",{
+    Title="Farm Height",
+    Description="Upper = ความสูง ×2",
+    Default=5,
+    Min=1,
+    Max=10,
+    Rounding=0
+})
+
+FarmHeightSlider:OnChanged(function(Value)
+    FarmHeight=tonumber(Value) or 5
+    Core.UpdateFarmOffset()
+end)
+
+Tabs.FarmSetting:AddParagraph({
+    Title="Tween Height",
+    Content="เดินทางไป NPC / จุดเกิด สูงเพิ่ม 20 studs"
+})
 
 Tabs.FarmSetting:AddParagraph({
     Title="Farm Settings",
@@ -1456,7 +1519,7 @@ Window:SelectTab(1)
 
 Fluent:Notify({
     Title="InfernoX Hub",
-    Content="Core + Farm + BringMob + FastAttack + EquipTool loaded.",
+    Content="Core + Farm + BringMob + FastAttack + FarmMode + FarmHeight loaded.",
     Duration=5
 })
 
