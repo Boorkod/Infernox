@@ -24,7 +24,7 @@ local Global=require(ReplicatedStorage:WaitForChild("Global"))
 
 local FarmMode="Upper"
 local FarmDistance=7
-local FarmHeight
+local FarmHeight=5
 local TweenHeight=20
 local TweenSpeed=150
 local SelectedWeaponType="Melee"
@@ -37,8 +37,8 @@ getgenv().AutoBuso=true
 getgenv().AutoKen=true
 getgenv().Allskill=false
 getgenv().SelectUpStats={"Melee","Defense"}
-local HideNotification=true
 
+local HideNotification=true
 
 local Core={}
 local HRP,FarmOffset=CFrame.new(),nil
@@ -53,6 +53,28 @@ local UnderwaterMoving=false
 local NotificationConnection
 local NotificationsConnection
 
+local QuestCache={
+    Level=nil,
+    Data=nil
+}
+
+local CurrentQuestCache={
+    Frame=nil,
+    Header=nil,
+    Description=nil,
+    Mob=nil
+}
+
+local function ClearQuestCache()
+    QuestCache.Level=nil
+    QuestCache.Data=nil
+
+    CurrentQuestCache.Frame=nil
+    CurrentQuestCache.Header=nil
+    CurrentQuestCache.Description=nil
+    CurrentQuestCache.Mob=nil
+end
+
 local function SetFastAttack(state)
     getgenv().FastAttack=state==true
 end
@@ -61,7 +83,10 @@ local function EquipTool(Type)
     local char=plr.Character
     local hum=char and char:FindFirstChildOfClass("Humanoid")
     local backpack=plr:FindFirstChild("Backpack")
-    if not hum or not backpack then return false end
+
+    if not hum or not backpack then
+        return false
+    end
 
     for _,tool in ipairs(char:GetChildren()) do
         if tool:IsA("Tool") and tool:GetAttribute("WeaponType")==Type then
@@ -78,6 +103,7 @@ local function EquipTool(Type)
             task.wait(.15)
 
             local event=tool:FindFirstChild("EquipEvent")
+
             if event then
                 pcall(function()
                     event:FireServer(true)
@@ -151,10 +177,16 @@ function Core.GetQuest()
     local level=data and data:FindFirstChild("Level")
 
     if not level then
+        ClearQuestCache()
         return
     end
 
     local lv=level.Value
+
+    if QuestCache.Level==lv and QuestCache.Data then
+        return QuestCache.Data
+    end
+
     local best,bestReq=nil,-1
 
     for name,list in pairs(Q) do
@@ -178,6 +210,9 @@ function Core.GetQuest()
             end
         end
     end
+
+    QuestCache.Level=lv
+    QuestCache.Data=best
 
     return best
 end
@@ -323,29 +358,49 @@ function Core.GetCurrentQuestMob()
     local frame=tracked and tracked:FindFirstChild("Frame")
 
     if not frame or frame:IsA("GuiObject") and not frame.Visible then
+        CurrentQuestCache.Frame=nil
+        CurrentQuestCache.Header=nil
+        CurrentQuestCache.Description=nil
+        CurrentQuestCache.Mob=nil
         return
     end
 
     local header=frame:FindFirstChild("header")
     local headerLabel=header and header:FindFirstChild("textLabel")
     local description=frame:FindFirstChild("description")
+
+    local h=headerLabel and headerLabel.Text or ""
+    local d=description and description.Text or ""
+
+    if CurrentQuestCache.Frame==frame
+        and CurrentQuestCache.Header==h
+        and CurrentQuestCache.Description==d then
+
+        return CurrentQuestCache.Mob
+    end
+
     local bestMob,bestScore=nil,0
 
-    if headerLabel and headerLabel:IsA("TextLabel") then
-        local mob,score=FindMobFromText(headerLabel.Text)
+    if h~="" then
+        local mob,score=FindMobFromText(h)
 
         if mob and score>bestScore then
             bestMob,bestScore=mob,score
         end
     end
 
-    if description and description:IsA("TextLabel") then
-        local mob,score=FindMobFromText(description.Text)
+    if d~="" then
+        local mob,score=FindMobFromText(d)
 
         if mob and score>bestScore then
             bestMob,bestScore=mob,score
         end
     end
+
+    CurrentQuestCache.Frame=frame
+    CurrentQuestCache.Header=h
+    CurrentQuestCache.Description=d
+    CurrentQuestCache.Mob=bestMob
 
     return bestMob
 end
@@ -464,7 +519,6 @@ function Core.TweenTo(position,extraHeight)
     return root.Parent and (root.Position-position).Magnitude<=8
 end
 
--- Tween เดินทางทั่วไป +20 studs
 function Core.TweenToTravel(position)
     return Core.TweenTo(position,TweenHeight)
 end
@@ -492,12 +546,13 @@ function Core.UpdateFarmOffset()
     return FarmOffset
 end
 
+Core.UpdateFarmOffset()
+
 function Core.ModeFarm()
     if not HRP or not HRP.Parent then
         return
     end
 
-    Core.UpdateFarmOffset()
     Core.SetBodyClip(getgenv().AutoFarm==true)
 end
 
@@ -515,10 +570,10 @@ function Core.GetTargetMob()
             local Humanoid=mob:FindFirstChildOfClass("Humanoid")
             local Head=mob:FindFirstChild("Head")
 
-            if Humanoid and Head and
-                Humanoid.Health>0 and
-                Humanoid:GetState()~=Enum.HumanoidStateType.Dead and
-                Humanoid.Health<lowestHealth then
+            if Humanoid and Head
+                and Humanoid.Health>0
+                and Humanoid:GetState()~=Enum.HumanoidStateType.Dead
+                and Humanoid.Health<lowestHealth then
 
                 target,lowestHealth=mob,Humanoid.Health
             end
@@ -573,8 +628,6 @@ function Core.ScanMobSpawn(quest)
 
         if spawn and spawn.Parent then
             SetFastAttack(false)
-
-            -- ไปจุดเกิด +20 studs
             Core.TweenToTravel(spawn.Position)
 
             local timeout=os.clock()+2
@@ -634,22 +687,17 @@ function Core.FarmMob()
         EquipTool(SelectedWeaponType)
     end
 
-    -- ใช้ Farm Height ตอนฟาร์มจริง
-    Core.UpdateFarmOffset()
-
     local TargetCFrame=Head.CFrame*FarmOffset
 
     if CurrentTarget~=target then
         SetFastAttack(false)
         CurrentTarget=target
 
-        -- ไม่บวก TweenHeight ตรงนี้
-        -- ตำแหน่งฟาร์มถูกควบคุมด้วย FarmHeight
         Core.TweenTo(TargetCFrame.Position)
 
-        if CurrentTarget==target and
-            target.Parent and
-            Humanoid.Health>0 then
+        if CurrentTarget==target
+            and target.Parent
+            and Humanoid.Health>0 then
 
             SetFastAttack(true)
         end
@@ -657,10 +705,11 @@ function Core.FarmMob()
         SetFastAttack(true)
     end
 
-    if CurrentTarget==target and
-        HRP and HRP.Parent and
-        Head.Parent and
-        Humanoid.Health>0 then
+    if CurrentTarget==target
+        and HRP
+        and HRP.Parent
+        and Head.Parent
+        and Humanoid.Health>0 then
 
         HRP.CFrame=Head.CFrame*FarmOffset
         HRP.AssemblyLinearVelocity=Vector3.zero
@@ -678,9 +727,9 @@ function Core.IsValidBringMob(mob,name)
     local Humanoid=mob:FindFirstChildOfClass("Humanoid")
     local Root=mob:FindFirstChild("HumanoidRootPart")
 
-    return Humanoid and Root and
-        Humanoid.Health>0 and
-        Humanoid:GetState()~=Enum.HumanoidStateType.Dead
+    return Humanoid and Root
+        and Humanoid.Health>0
+        and Humanoid:GetState()~=Enum.HumanoidStateType.Dead
 end
 
 function Core.ClearBring()
@@ -713,6 +762,7 @@ function Core.Cleanup()
     UnderwaterState="None"
     UnderwaterMoving=false
 
+    ClearQuestCache()
     Core.ClearBring()
 end
 
@@ -727,7 +777,12 @@ CharacterConnection=plr.CharacterAdded:Connect(function(Character)
     UnderwaterState="None"
     UnderwaterMoving=false
 
+    ClearQuestCache()
     Core.ClearBring()
+
+    SpawnMob=""
+    SpawnIndex=1
+    table.clear(SpawnPoints)
 
     if CurrentTween then
         pcall(function()
@@ -972,9 +1027,7 @@ function Core.CheckUnderwater()
             end
 
             task.wait(3)
-
             UnderwaterMoving=false
-
             return true
         end
 
@@ -1000,9 +1053,7 @@ function Core.CheckUnderwater()
             end
 
             task.wait(3)
-
             UnderwaterMoving=false
-
             return true
         end
 
@@ -1057,6 +1108,8 @@ task.spawn(function()
             CurrentTarget=nil
             Core.ClearBring()
 
+            ClearQuestCache()
+
             pcall(function()
                 CommF:InvokeServer("AbandonQuest")
             end)
@@ -1070,12 +1123,15 @@ task.spawn(function()
             CurrentTarget=nil
             Core.ClearBring()
 
+            CurrentQuestCache.Frame=nil
+            CurrentQuestCache.Header=nil
+            CurrentQuestCache.Description=nil
+            CurrentQuestCache.Mob=nil
+
             local npcName,position=Core.GetQuestNPC(quest.Name)
 
             if position then
-                -- ไปหา NPC รับเควสต์ +20 studs
                 Core.TweenToTravel(position)
-
                 task.wait(.25)
 
                 if not Core.IsQuestActive() then
@@ -1093,17 +1149,24 @@ task.spawn(function()
         end)
     end
 end)
+
 local function SetupNotificationBlock()
     local Notifications=PlayerGui:FindFirstChild("Notifications")
     local Stack=Notifications and Notifications:FindFirstChild("NotificationStack")
-    if not Stack then return end
+
+    if not Stack then
+        return
+    end
+
     if NotificationConnection then
         NotificationConnection:Disconnect()
     end
+
     if HideNotification then
         for _,v in ipairs(Stack:GetChildren()) do
             v:Destroy()
         end
+
         NotificationConnection=Stack.ChildAdded:Connect(function(v)
             if HideNotification then
                 v:Destroy()
@@ -1111,19 +1174,27 @@ local function SetupNotificationBlock()
         end)
     end
 end
+
 local function WatchNotifications()
     local Notifications=PlayerGui:FindFirstChild("Notifications")
-    if not Notifications then return end
+
+    if not Notifications then
+        return
+    end
+
     if NotificationsConnection then
         NotificationsConnection:Disconnect()
     end
+
     NotificationsConnection=Notifications.ChildAdded:Connect(function(v)
         if v.Name=="NotificationStack" then
             task.defer(SetupNotificationBlock)
         end
     end)
+
     SetupNotificationBlock()
 end
+
 PlayerGui.ChildAdded:Connect(function(v)
     if v.Name=="Notifications" then
         task.defer(WatchNotifications)
@@ -1304,10 +1375,6 @@ Tabs.Main:AddToggle("FastAttackToggle",{
     getgenv().FastAttack=Value
 end)
 
---==================================================
--- FARM POSITION
---==================================================
-
 Tabs.FarmSetting:AddSection("Farm Position")
 
 local FarmModeDropdown=Tabs.FarmSetting:AddDropdown("FarmModeDropdown",{
@@ -1341,6 +1408,7 @@ Tabs.FarmSetting:AddToggle("HideNotificationToggle",{
     Default=true
 }):OnChanged(function(Value)
     HideNotification=Value
+
     if Value then
         WatchNotifications()
     elseif NotificationConnection then
