@@ -1095,31 +1095,42 @@ end
 
 -- NOTIFICATION
 
+local function HideNotificationObject(Object)
+    if not Object or not Object.Parent then return end
+    if Object:IsA("GuiObject") then
+        Object.Visible=false
+    end
+end
+
 local function SetupNotificationBlock()
     local Notifications=PlayerGui:FindFirstChild("Notifications")
     local Stack=Notifications and Notifications:FindFirstChild("NotificationStack")
     if not Stack then return end
     if NotificationConnection then
         NotificationConnection:Disconnect()
+        NotificationConnection=nil
     end
     if HideNotification then
         for _,v in ipairs(Stack:GetChildren()) do
-            v:Destroy()
+            HideNotificationObject(v)
         end
         NotificationConnection=Stack.ChildAdded:Connect(function(v)
             if HideNotification then
-                v:Destroy()
+                task.defer(function()
+                    HideNotificationObject(v)
+                end)
             end
         end)
     end
 end
 
 local function WatchNotifications()
-    local Notifications=PlayerGui:FindFirstChild("Notifications")
-    if not Notifications then return end
     if NotificationsConnection then
         NotificationsConnection:Disconnect()
+        NotificationsConnection=nil
     end
+    local Notifications=PlayerGui:FindFirstChild("Notifications")
+    if not Notifications then return end
     NotificationsConnection=Notifications.ChildAdded:Connect(function(v)
         if v.Name=="NotificationStack" then
             task.defer(SetupNotificationBlock)
@@ -1133,6 +1144,8 @@ PlayerGui.ChildAdded:Connect(function(v)
         task.defer(WatchNotifications)
     end
 end)
+
+task.defer(WatchNotifications)
 
 -- UI
 
@@ -1517,12 +1530,21 @@ Tabs.Shop:AddButton({
 Tabs.Shop:AddSection("Melee")
 
 Tabs.Shop:AddButton({
-    Title="Buy Dark Leg",
-    Description="ซื้อ Dark Leg",
+    Title="Buy Black Leg",
+    Description="ซื้อ Black Leg / Dark Step",
     Callback=function()
-        pcall(function()
-            CommF:InvokeServer("BuyBlackLeg")
-        end)
+        if not Core.UpdateCharacter() then return end
+        local NPC=workspace.NPCs:FindFirstChild("Dark Step Teacher")
+        if not NPC then return end
+        local Root=HRP
+        local OldCFrame=Root.CFrame
+        local NPCPart=NPC:FindFirstChild("HumanoidRootPart")
+        if not NPCPart then return end
+        Core.TweenTo(NPCPart.Position+Vector3.new(0,0,3))
+        task.wait(.3)
+        local Result=CommF:InvokeServer("BuyBlackLeg")
+        print("BuyBlackLeg:",Result)
+        Root.CFrame=OldCFrame
     end
 })
 
