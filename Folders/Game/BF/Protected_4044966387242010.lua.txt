@@ -51,6 +51,7 @@ local SpawnPoints={}
 local UnderwaterState="None"
 local UnderwaterMoving=false
 local SaberQuestRunning=false
+local ManualMoving=false
 
 local function SetFastAttack(state)
     getgenv().FastAttack=state==true
@@ -282,7 +283,9 @@ end
 -- TWEEN
 
 function Core.TweenTo(position,extraHeight)
-    if typeof(position)~="Vector3" or not Core.UpdateCharacter() then return false end
+    if typeof(position)~="Vector3" or not Core.UpdateCharacter() then
+        return false
+    end
     local RealPosition=position
     if extraHeight then
         position=position+Vector3.new(0,extraHeight,0)
@@ -316,13 +319,18 @@ function Core.TweenTo(position,extraHeight)
         completed=true
     end)
     while not completed do
-        if not getgenv().AutoFarm and not UnderwaterMoving and not getgenv().SaberQuest then
+        if not getgenv().AutoFarm
+        and not UnderwaterMoving
+        and not getgenv().SaberQuest
+        and not ManualMoving then
             pcall(function()
                 tween:Cancel()
             end)
             break
         end
-        if not root.Parent then break end
+        if not root.Parent then
+            break
+        end
         task.wait()
     end
     pcall(function()
@@ -334,7 +342,9 @@ function Core.TweenTo(position,extraHeight)
     pcall(function()
         tween:Destroy()
     end)
-    if not root.Parent then return false end
+    if not root.Parent then
+        return false
+    end
     root.AssemblyLinearVelocity=Vector3.zero
     root.AssemblyAngularVelocity=Vector3.zero
     local remain=(root.Position-RealPosition).Magnitude
@@ -511,6 +521,7 @@ function Core.Cleanup()
     getgenv().Noclip=false
     getgenv().bringmob=false
     SetFastAttack(false)
+    ManualMoving=false
     if CurrentTween then
         pcall(function()
             CurrentTween:Cancel()
@@ -1309,6 +1320,7 @@ Tabs.FarmSetting:AddToggle("HideNotificationToggle",{
 }):OnChanged(function(Value)
     SetNotification(Value)
 end)
+
 task.defer(function()
     SetNotification(HideNotification)
 end)
@@ -1482,27 +1494,58 @@ Tabs.Shop:AddButton({
     Title="Buy Black Leg",
     Description="ซื้อ Black Leg / Dark Step",
     Callback=function()
-        if not Core.UpdateCharacter() then return end
+        if not Core.UpdateCharacter() then
+            return
+        end
+
+        local NPC
         local RepNPCs=ReplicatedStorage:FindFirstChild("NPCs")
-        local NPC=RepNPCs and RepNPCs:FindFirstChild("Dark Step Teacher")
-        if not NPC then return end
-        local NPCPosition=NPC:GetPivot().Position
-        local WorkspaceNPC=workspace:FindFirstChild("NPCs")
-        local RealNPC=WorkspaceNPC and WorkspaceNPC:FindFirstChild("Dark Step Teacher")
-        if RealNPC then
-            local Part=RealNPC:FindFirstChild("HumanoidRootPart") or RealNPC.PrimaryPart
-            if Part then
-                NPCPosition=Part.Position
+
+        if RepNPCs then
+            NPC=RepNPCs:FindFirstChild("Dark Step Teacher")
+        end
+
+        local NPCPosition
+
+        if NPC then
+            pcall(function()
+                NPCPosition=NPC:GetPivot().Position
+            end)
+        end
+
+        if not NPCPosition then
+            local WorkspaceNPC=workspace:FindFirstChild("NPCs")
+            local RealNPC=WorkspaceNPC and WorkspaceNPC:FindFirstChild("Dark Step Teacher")
+            if RealNPC then
+                local Part=RealNPC:FindFirstChild("HumanoidRootPart") or RealNPC.PrimaryPart
+                if Part then
+                    NPCPosition=Part.Position
+                else
+                    pcall(function()
+                        NPCPosition=RealNPC:GetPivot().Position
+                    end)
+                end
             end
         end
-        local OldCFrame=HRP.CFrame
-        Core.TweenTo(NPCPosition+Vector3.new(0,0,3))
+
+        if not NPCPosition then
+            warn("ไม่พบ Position ของ Dark Step Teacher")
+            return
+        end
+
+        ManualMoving=true
+        local Arrived=Core.TweenTo(NPCPosition+Vector3.new(0,0,3))
+        ManualMoving=false
+
+        if not Arrived then
+            warn("ไปหา Dark Step Teacher ไม่สำเร็จ")
+            return
+        end
+
         task.wait(.3)
+
         local Result=CommF:InvokeServer("BuyBlackLeg")
         print("BuyBlackLeg:",Result)
-        if HRP and HRP.Parent then
-            HRP.CFrame=OldCFrame
-        end
     end
 })
 
