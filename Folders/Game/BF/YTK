@@ -279,8 +279,6 @@ function Core.HasQuest()
     return Core.IsQuestActive()
 end
 
--- TWEEN
-
 function Core.TweenTo(position,extraHeight)
     if typeof(position)~="Vector3" or not Core.UpdateCharacter() then return false end
     local RealPosition=position
@@ -361,8 +359,6 @@ end
 function Core.TweenToTravel(position)
     return Core.TweenTo(position,TweenHeight)
 end
-
--- FARM POSITION
 
 function Core.UpdateFarmOffset()
     local height=tonumber(FarmHeight) or 5
@@ -491,8 +487,6 @@ function Core.FarmMob()
     end
 end
 
--- BRING MOB
-
 function Core.IsValidBringMob(mob,name)
     if not mob or not mob.Parent or mob.Name~=name then return false end
     local Humanoid=mob:FindFirstChildOfClass("Humanoid")
@@ -553,8 +547,6 @@ CharacterConnection=plr.CharacterAdded:Connect(function(Character)
 end)
 
 Core.UpdateCharacter()
-
--- BRING LOOP
 
 task.spawn(function()
     while task.wait(.1) do
@@ -642,8 +634,6 @@ task.spawn(function()
     end)
 end)
 
--- FAST ATTACK
-
 local RegisterAttack=Net:WaitForChild("RE/RegisterAttack")
 local FastAttack={Distance=30}
 
@@ -685,8 +675,6 @@ task.spawn(function()
         end
     end
 end)
-
--- UNDERWATER
 
 function Core.CheckUnderwater()
     local data=plr:FindFirstChild("Data")
@@ -739,8 +727,6 @@ function Core.CheckUnderwater()
     UnderwaterMoving=false
     return false
 end
-
--- AUTO FARM LOOP
 
 task.spawn(function()
     while task.wait(.15) do
@@ -800,8 +786,6 @@ task.spawn(function()
         end)
     end
 end)
-
--- SABER QUEST
 
 local SaberData={
     TorchPos=Vector3.new(-1679.2634,20.4901,170.7659),
@@ -1099,8 +1083,6 @@ local function SetNotification(state)
     end
 end
 
--- UI
-
 local Window=Fluent:CreateWindow({
     Title="InfernoX HUB "..Fluent.Version,
     SubTitle="by TeamInfernoX",
@@ -1273,8 +1255,6 @@ Tabs.Main:AddToggle("FastAttackToggle",{
     getgenv().FastAttack=Value
 end)
 
--- FARM SETTING
-
 Tabs.FarmSetting:AddSection("Farm Position")
 
 local FarmModeDropdown=Tabs.FarmSetting:AddDropdown("FarmModeDropdown",{
@@ -1309,6 +1289,7 @@ Tabs.FarmSetting:AddToggle("HideNotificationToggle",{
 }):OnChanged(function(Value)
     SetNotification(Value)
 end)
+
 task.defer(function()
     SetNotification(HideNotification)
 end)
@@ -1362,8 +1343,6 @@ task.spawn(function()
         end
     end
 end)
-
--- STATS
 
 Tabs.FarmSetting:AddSection("Stats")
 
@@ -1442,8 +1421,6 @@ task.spawn(function()
     end
 end)
 
--- SHOP
-
 Tabs.Shop:AddSection("Haki")
 
 Tabs.Shop:AddButton({
@@ -1488,7 +1465,6 @@ Tabs.Shop:AddButton({
             26.027999877929688,
             4025.68701171875
         )
-
         local OldCFrame=HRP.CFrame
         Core.TweenTo(NPCPosition)
         task.wait(.3)
@@ -1519,8 +1495,6 @@ Tabs.Shop:AddButton({
         end)
     end
 })
-
--- SETTINGS
 
 Tabs.Settings:AddColorpicker("Colorpicker",{
     Title="UI Color",
