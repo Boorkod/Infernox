@@ -24,9 +24,18 @@ local function Alive()
     return Runtime.Running
 end
 
-local Fluent=loadstring(game:HttpGet("https://raw.githubusercontent.com/Boorkod/Infernox/refs/heads/main/Folders/UI/GuI-FLueNtUIiNFeRNoXHuB-VerSiOn001TeSt10%25100%25.lua"))()
-local SaveManager=loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager=loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+--// UI
+local Fluent=loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/Boorkod/Infernox/refs/heads/main/Folders/UI/GuI-FLueNtUIiNFeRNoXHuB-VerSiOn001TeSt10%25100%25.lua"
+))()
+
+local SaveManager=loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"
+))()
+
+local InterfaceManager=loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"
+))()
 
 local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
@@ -34,21 +43,26 @@ local TweenService=game:GetService("TweenService")
 local ReplicatedStorage=game:GetService("ReplicatedStorage")
 local UserInputService=game:GetService("UserInputService")
 local VirtualUser=game:GetService("VirtualUser")
+local VirtualInputManager=game:GetService("VirtualInputManager")
 
 local plr=Players.LocalPlayer
 local client=plr
 local PlayerGui=plr:WaitForChild("PlayerGui")
-local Enemies=workspace:WaitForChild("Enemies")
-local EnemySpawns=workspace._WorldOrigin:WaitForChild("EnemySpawns")
+local Workspace=workspace
+
+local Enemies=Workspace:WaitForChild("Enemies")
+local EnemySpawns=Workspace._WorldOrigin:WaitForChild("EnemySpawns")
 local Modules=ReplicatedStorage:WaitForChild("Modules")
 local Remotes=ReplicatedStorage:WaitForChild("Remotes")
 local CommF=Remotes:WaitForChild("CommF_")
 local CommE=Remotes:WaitForChild("CommE")
 local Net=Modules:WaitForChild("Net")
+
 local Q=require(ReplicatedStorage:WaitForChild("Quests"))
 local Guide=require(ReplicatedStorage:WaitForChild("GuideModule"))
 local Global=require(ReplicatedStorage:WaitForChild("Global"))
 
+--// SETTINGS
 local FarmMode="Upper"
 local FarmDistance=7
 local FarmHeight=5
@@ -66,34 +80,75 @@ getgenv().Allskill=false
 getgenv().SelectUpStats={"Melee","Defense"}
 getgenv().SaberQuest=false
 getgenv().AntiAFK=true
+getgenv().AutoElectro=false
 
 local HideNotification=true
 local NotificationConnection
 
+--// CORE
 local Core={}
-local HRP,FarmOffset=CFrame.new(),nil
-local CurrentTarget,CurrentTween,BodyClip,CharacterConnection
-local BringPosition,BringQuestMob
+
+local HRP
+local FarmOffset=CFrame.new()
+local CurrentTarget
+local CurrentTween
+local BodyClip
+local CharacterConnection
+
+local BringPosition
+local BringQuestMob
 local BringTargets={}
+
 local SpawnIndex=1
 local SpawnMob=""
 local SpawnPoints={}
+
 local UnderwaterState="None"
 local UnderwaterMoving=false
+
 local SaberQuestRunning=false
 local ActiveQuest=nil
+
 local TweenManual=false
 local SaberLocked=false
 local SaberLockPosition=nil
 
---// CLEANUP
+--// ELECTRO
+local ElectroRunning=false
+local ElectroQuestAccepted=false
+local ElectroBoltObtained=false
+local ElectroTurnedIn=false
+local ElectroBusy=false
+local ElectroCloudLocked=false
+
+local ElectroWatched={}
+local ElectroDarkState={}
+
+local LIGHTNING_BOLT_ID=1588
+
+local MAD_SCIENTIST_POSITION=Vector3.new(
+    -4628.8877,
+    12.1299,
+    -355.7178
+)
+
+local CLICK_DELAY=.08
+local BOLT_CHECK_DELAY=.2
+local DARK_THRESHOLD=.45
+
+--==================================================
+-- CLEANUP
+--==================================================
+
 local function Cleanup()
     Runtime.Running=false
+
     getgenv().AutoFarm=false
     getgenv().Noclip=false
     getgenv().bringmob=false
     getgenv().FastAttack=false
     getgenv().SaberQuest=false
+    getgenv().AutoElectro=false
 
     DisconnectAll()
 
@@ -107,22 +162,34 @@ local function Cleanup()
 
     pcall(function()
         local gui=PlayerGui:FindFirstChild("InfernoXToggleGui")
-        if gui then gui:Destroy() end
+        if gui then
+            gui:Destroy()
+        end
     end)
 end
 
 getgenv().InfernoXCleanup=Cleanup
 
+--==================================================
+-- FAST ATTACK STATE
+--==================================================
+
 local function SetFastAttack(state)
     getgenv().FastAttack=state==true
 end
+
+--==================================================
+-- EQUIP
+--==================================================
 
 local function EquipTool(Type)
     local char=plr.Character
     local hum=char and char:FindFirstChildOfClass("Humanoid")
     local backpack=plr:FindFirstChild("Backpack")
 
-    if not hum or not backpack then return false end
+    if not hum or not backpack then
+        return false
+    end
 
     for _,tool in ipairs(char:GetChildren()) do
         if tool:IsA("Tool") and tool:GetAttribute("WeaponType")==Type then
@@ -139,6 +206,7 @@ local function EquipTool(Type)
             task.wait(.15)
 
             local event=tool:FindFirstChild("EquipEvent")
+
             if event then
                 pcall(function()
                     event:FireServer(true)
@@ -151,6 +219,10 @@ local function EquipTool(Type)
 
     return false
 end
+
+--==================================================
+-- CHARACTER
+--==================================================
 
 function Core.UpdateCharacter()
     local Character=plr.Character
@@ -186,7 +258,12 @@ function Core.SetBodyClip(state)
             BodyClip=Existing
 
             if Existing:IsA("BodyVelocity") then
-                Existing.MaxForce=Vector3.new(math.huge,math.huge,math.huge)
+                Existing.MaxForce=Vector3.new(
+                    math.huge,
+                    math.huge,
+                    math.huge
+                )
+
                 Existing.Velocity=Vector3.zero
             end
 
@@ -195,10 +272,15 @@ function Core.SetBodyClip(state)
 
         BodyClip=Instance.new("BodyVelocity")
         BodyClip.Name="BodyClip"
-        BodyClip.MaxForce=Vector3.new(math.huge,math.huge,math.huge)
+        BodyClip.MaxForce=Vector3.new(
+            math.huge,
+            math.huge,
+            math.huge
+        )
         BodyClip.Velocity=Vector3.zero
         BodyClip.P=9e4
         BodyClip.Parent=HRP
+
     elseif Existing then
         Existing:Destroy()
         BodyClip=nil
@@ -207,29 +289,43 @@ function Core.SetBodyClip(state)
     end
 end
 
+--==================================================
+-- QUEST
+--==================================================
+
 function Core.GetQuest()
     local data=plr:FindFirstChild("Data")
     local level=data and data:FindFirstChild("Level")
 
-    if not level then return end
+    if not level then
+        return
+    end
 
     local lv=level.Value
-    local best,bestReq=nil,-1
+    local best
+    local bestReq=-1
 
     for name,list in pairs(Q) do
         if type(list)=="table" then
+
             for id,quest in ipairs(list) do
                 if type(quest)=="table" then
+
                     local mob,amount=next(quest.Task or {})
                     local req=tonumber(quest.LevelReq)
 
-                    if mob and amount and req and amount>1 and lv>=req and req>bestReq then
+                    if mob and amount and req
+                        and amount>1
+                        and lv>=req
+                        and req>bestReq then
+
                         best={
                             Name=name,
                             ID=id,
                             Mob=mob,
                             Amount=amount
                         }
+
                         bestReq=req
                     end
                 end
@@ -241,7 +337,9 @@ function Core.GetQuest()
 end
 
 function Core.GetQuestNPC(questName)
-    if not Guide or not Guide.Data or not Guide.Data.NPCList then
+    if not Guide
+        or not Guide.Data
+        or not Guide.Data.NPCList then
         return
     end
 
@@ -249,13 +347,17 @@ function Core.GetQuestNPC(questName)
         Core.UpdateCharacter()
     end
 
-    if not HRP then return end
+    if not HRP then
+        return
+    end
 
-    local nearestName,nearestPosition
+    local nearestName
+    local nearestPosition
     local nearestDistance=math.huge
 
     for _,npc in pairs(Guide.Data.NPCList) do
         if npc.InternalQuestName==questName then
+
             local pos=npc.Position
 
             if typeof(pos)=="CFrame" then
@@ -278,7 +380,11 @@ function Core.GetQuestNPC(questName)
 end
 
 local function NormalizeText(text)
-    return tostring(text or ""):lower():gsub("[%p]"," "):gsub("%s+"," "):match("^%s*(.-)%s*$") or ""
+    return tostring(text or "")
+        :lower()
+        :gsub("[%p]"," ")
+        :gsub("%s+"," ")
+        :match("^%s*(.-)%s*$") or ""
 end
 
 local function NormalizeMobName(name)
@@ -320,8 +426,11 @@ local function MobMatchesText(mob,text)
 
     for _,mobWord in ipairs(mobWords) do
         for _,textWord in ipairs(textWords) do
+
             if #textWord>=2 and
-                (textWord==mobWord or mobWord:sub(1,#textWord)==textWord) then
+                (textWord==mobWord
+                or mobWord:sub(1,#textWord)==textWord) then
+
                 matched+=1
                 break
             end
@@ -329,27 +438,35 @@ local function MobMatchesText(mob,text)
     end
 
     local score=(matched/#mobWords)*100
+
     return score>=50,score
 end
 
 local function FindMobFromText(text)
     text=NormalizeText(text)
 
-    if text=="" then return nil,0 end
+    if text=="" then
+        return nil,0
+    end
 
-    local bestMob,bestScore=nil,0
+    local bestMob
+    local bestScore=0
 
     for _,list in pairs(Q) do
         if type(list)=="table" then
+
             for _,quest in ipairs(list) do
                 if type(quest)=="table" then
+
                     local mob=next(quest.Task or {})
 
                     if mob then
-                        local matched,score=MobMatchesText(mob,text)
+                        local matched,score=
+                            MobMatchesText(mob,text)
 
                         if matched and score>bestScore then
-                            bestMob,bestScore=mob,score
+                            bestMob=mob
+                            bestScore=score
                         end
                     end
                 end
@@ -373,21 +490,32 @@ function Core.GetCurrentQuestMob()
     local tracked=PlayerGui:FindFirstChild("TrackedQuestFrame")
     local frame=tracked and tracked:FindFirstChild("Frame")
 
-    if not frame or frame:IsA("GuiObject") and not frame.Visible then
+    if not frame
+        or frame:IsA("GuiObject") and not frame.Visible then
         return
     end
 
     local header=frame:FindFirstChild("header")
     local headerLabel=header and header:FindFirstChild("textLabel")
-    local description=frame:FindFirstChild("description")
-    local bestMob,bestScore=nil,0
 
-    for _,obj in ipairs({headerLabel,description}) do
+    local description=frame:FindFirstChild("description")
+
+    local bestMob
+    local bestScore=0
+
+    for _,obj in ipairs({
+        headerLabel,
+        description
+    }) do
+
         if obj and obj:IsA("TextLabel") then
-            local mob,score=FindMobFromText(obj.Text)
+
+            local mob,score=
+                FindMobFromText(obj.Text)
 
             if mob and score>bestScore then
-                bestMob,bestScore=mob,score
+                bestMob=mob
+                bestScore=score
             end
         end
     end
@@ -399,8 +527,13 @@ function Core.HasQuest()
     return Core.IsQuestActive()
 end
 
+--==================================================
+-- TWEEN
+--==================================================
+
 function Core.TweenTo(position,extraHeight)
-    if typeof(position)~="Vector3" or not Core.UpdateCharacter() then
+    if typeof(position)~="Vector3"
+        or not Core.UpdateCharacter() then
         return false
     end
 
@@ -416,6 +549,7 @@ function Core.TweenTo(position,extraHeight)
         pcall(function()
             CurrentTween:Cancel()
         end)
+
         CurrentTween=nil
     end
 
@@ -423,10 +557,14 @@ function Core.TweenTo(position,extraHeight)
     local distance=(root.Position-position).Magnitude
 
     if distance<=3 then
+
         root.CFrame=CFrame.new(RealPosition)
+
         root.AssemblyLinearVelocity=Vector3.zero
         root.AssemblyAngularVelocity=Vector3.zero
+
         Core.SetBodyClip(false)
+
         return true
     end
 
@@ -439,19 +577,27 @@ function Core.TweenTo(position,extraHeight)
             Enum.EasingStyle.Linear,
             Enum.EasingDirection.InOut
         ),
-        {CFrame=CFrame.new(position)}
+        {
+            CFrame=CFrame.new(position)
+        }
     )
 
     CurrentTween=tween
     TweenManual=true
+
     tween:Play()
 
     local completed=false
+
     local connection=tween.Completed:Connect(function()
         completed=true
     end)
 
-    while not completed and TweenManual and root.Parent and Alive() do
+    while not completed
+        and TweenManual
+        and root.Parent
+        and Alive() do
+
         task.wait()
     end
 
@@ -480,22 +626,33 @@ function Core.TweenTo(position,extraHeight)
     local remain=(root.Position-RealPosition).Magnitude
 
     if remain>.5 then
+
         local FinalTween=TweenService:Create(
             root,
-            TweenInfo.new(math.clamp(remain/100,.08,.2),Enum.EasingStyle.Linear),
-            {CFrame=CFrame.new(RealPosition)}
+            TweenInfo.new(
+                math.clamp(remain/100,.08,.2),
+                Enum.EasingStyle.Linear
+            ),
+            {
+                CFrame=CFrame.new(RealPosition)
+            }
         )
 
         CurrentTween=FinalTween
 
         local done=false
-        local finalConnection=FinalTween.Completed:Connect(function()
-            done=true
-        end)
+
+        local finalConnection=
+            FinalTween.Completed:Connect(function()
+                done=true
+            end)
 
         FinalTween:Play()
 
-        while not done and root.Parent and Alive() do
+        while not done
+            and root.Parent
+            and Alive() do
+
             task.wait()
         end
 
@@ -513,14 +670,17 @@ function Core.TweenTo(position,extraHeight)
     end
 
     if root.Parent then
+
         root.CFrame=CFrame.new(RealPosition)
+
         root.AssemblyLinearVelocity=Vector3.zero
         root.AssemblyAngularVelocity=Vector3.zero
     end
 
     Core.SetBodyClip(false)
 
-    return root.Parent and (root.Position-RealPosition).Magnitude<=8
+    return root.Parent
+        and (root.Position-RealPosition).Magnitude<=8
 end
 
 function Core.TweenToTravel(position)
@@ -534,21 +694,40 @@ function Core.CancelTween()
         pcall(function()
             CurrentTween:Cancel()
         end)
+
         CurrentTween=nil
     end
 
     Core.SetBodyClip(false)
 end
 
+--==================================================
+-- FARM POSITION
+--==================================================
+
 function Core.UpdateFarmOffset()
     local height=tonumber(FarmHeight) or 5
 
     if FarmMode=="Behind" then
-        FarmOffset=CFrame.new(0,0,FarmDistance)
+
+        FarmOffset=CFrame.new(
+            0,
+            0,
+            FarmDistance
+        )
+
     elseif FarmMode=="Below" then
-        FarmOffset=CFrame.new(0,-height,0)*CFrame.Angles(math.rad(90),0,0)
+
+        FarmOffset=
+            CFrame.new(0,-height,0)
+            *CFrame.Angles(math.rad(90),0,0)
+
     elseif FarmMode=="Upper" then
-        FarmOffset=CFrame.new(0,height*4,0)*CFrame.Angles(0,math.rad(90),0)
+
+        FarmOffset=
+            CFrame.new(0,height*4,0)
+            *CFrame.Angles(0,math.rad(90),0)
+
     else
         FarmOffset=CFrame.new()
     end
@@ -558,6 +737,7 @@ end
 
 function Core.ModeFarm()
     if HRP and HRP.Parent then
+
         Core.UpdateFarmOffset()
 
         if getgenv().AutoFarm then
@@ -566,24 +746,35 @@ function Core.ModeFarm()
     end
 end
 
+--==================================================
+-- TARGET
+--==================================================
+
 function Core.GetTargetMob()
     local quest=ActiveQuest or Core.GetQuest()
 
-    if not quest or not quest.Mob then return end
+    if not quest or not quest.Mob then
+        return
+    end
 
-    local target,lowestHealth=nil,math.huge
+    local target
+    local lowestHealth=math.huge
 
     for _,mob in ipairs(Enemies:GetChildren()) do
+
         if mob.Name==quest.Mob then
+
             local Humanoid=mob:FindFirstChildOfClass("Humanoid")
             local Head=mob:FindFirstChild("Head")
 
-            if Humanoid and Head and
-                Humanoid.Health>0 and
-                Humanoid:GetState()~=Enum.HumanoidStateType.Dead and
-                Humanoid.Health<lowestHealth then
+            if Humanoid
+                and Head
+                and Humanoid.Health>0
+                and Humanoid:GetState()~=Enum.HumanoidStateType.Dead
+                and Humanoid.Health<lowestHealth then
 
-                target,lowestHealth=mob,Humanoid.Health
+                target=mob
+                lowestHealth=Humanoid.Health
             end
         end
     end
@@ -595,7 +786,10 @@ function Core.GetMobSpawns(mobName)
     local result={}
 
     for _,spawn in ipairs(EnemySpawns:GetChildren()) do
-        if spawn:IsA("BasePart") and spawn.Name:sub(1,#mobName)==mobName then
+
+        if spawn:IsA("BasePart")
+            and spawn.Name:sub(1,#mobName)==mobName then
+
             result[#result+1]=spawn
         end
     end
@@ -604,7 +798,9 @@ function Core.GetMobSpawns(mobName)
 end
 
 function Core.ScanMobSpawn(quest)
-    if not quest or not quest.Mob then return end
+    if not quest or not quest.Mob then
+        return
+    end
 
     if SpawnMob~=quest.Mob then
         SpawnMob=quest.Mob
@@ -613,23 +809,38 @@ function Core.ScanMobSpawn(quest)
     end
 
     local target=Core.GetTargetMob()
-    if target then return target end
-    if #SpawnPoints==0 then return end
+
+    if target then
+        return target
+    end
+
+    if #SpawnPoints==0 then
+        return
+    end
 
     for _=1,#SpawnPoints do
+
         target=Core.GetTargetMob()
-        if target then return target end
+
+        if target then
+            return target
+        end
 
         local spawn=SpawnPoints[SpawnIndex]
-        SpawnIndex=SpawnIndex%#SpawnPoints+1
+
+        SpawnIndex=
+            SpawnIndex%#SpawnPoints+1
 
         if spawn and spawn.Parent then
+
             SetFastAttack(false)
+
             Core.TweenToTravel(spawn.Position)
 
             local timeout=os.clock()+2
 
             while os.clock()<timeout and Alive() do
+
                 target=Core.GetTargetMob()
 
                 if target then
@@ -643,6 +854,10 @@ function Core.ScanMobSpawn(quest)
 
     return Core.GetTargetMob()
 end
+
+--==================================================
+-- FARM
+--==================================================
 
 function Core.FarmMob()
     if not Core.UpdateCharacter() then
@@ -674,55 +889,75 @@ function Core.FarmMob()
     local Head=target:FindFirstChild("Head")
     local Humanoid=target:FindFirstChildOfClass("Humanoid")
 
-    if not Head or not Humanoid or Humanoid.Health<=0 then
+    if not Head
+        or not Humanoid
+        or Humanoid.Health<=0 then
+
         CurrentTarget=nil
         SetFastAttack(false)
         return
     end
 
     if CurrentTarget~=target then
+
         EquipTool(SelectedWeaponType)
+
         SetFastAttack(false)
         CurrentTarget=target
 
         Core.UpdateFarmOffset()
-        Core.TweenTo((Head.CFrame*FarmOffset).Position)
 
-        if CurrentTarget==target and
-            target.Parent and
-            Humanoid.Health>0 then
+        Core.TweenTo(
+            (Head.CFrame*FarmOffset).Position
+        )
+
+        if CurrentTarget==target
+            and target.Parent
+            and Humanoid.Health>0 then
 
             Core.SetBodyClip(true)
             SetFastAttack(true)
         end
+
     else
         SetFastAttack(true)
     end
 
-    if CurrentTarget==target and
-        HRP and HRP.Parent and
-        Head.Parent and
-        Humanoid.Health>0 then
+    if CurrentTarget==target
+        and HRP
+        and HRP.Parent
+        and Head.Parent
+        and Humanoid.Health>0 then
 
         HRP.CFrame=Head.CFrame*FarmOffset
+
         HRP.AssemblyLinearVelocity=Vector3.zero
         HRP.AssemblyAngularVelocity=Vector3.zero
+
     else
         SetFastAttack(false)
     end
 end
 
+--==================================================
+-- BRING MOB
+--==================================================
+
 function Core.IsValidBringMob(mob,name)
-    if not mob or not mob.Parent or mob.Name~=name then
+    if not mob
+        or not mob.Parent
+        or mob.Name~=name then
+
         return false
     end
 
     local Humanoid=mob:FindFirstChildOfClass("Humanoid")
     local Root=mob:FindFirstChild("HumanoidRootPart")
 
-    return Humanoid and Root and
-        Humanoid.Health>0 and
-        Humanoid:GetState()~=Enum.HumanoidStateType.Dead
+    return Humanoid
+        and Root
+        and Humanoid.Health>0
+        and Humanoid:GetState()~=Enum.HumanoidStateType.Dead
 end
 
 function Core.ClearBring()
@@ -731,67 +966,73 @@ function Core.ClearBring()
     table.clear(BringTargets)
 end
 
-function Core.Cleanup()
-    getgenv().AutoFarm=false
-    getgenv().Noclip=false
-    getgenv().bringmob=false
-    SetFastAttack(false)
-    ActiveQuest=nil
-    Core.CancelTween()
-    Core.SetBodyClip(false)
-    CurrentTarget=nil
-    BodyClip=nil
-    UnderwaterState="None"
-    UnderwaterMoving=false
-    Core.ClearBring()
-end
-
 getgenv().InfernoXCore=Core
 
---// CHARACTER
-AddConnection(plr.CharacterAdded:Connect(function(Character)
-    SetFastAttack(false)
+--==================================================
+-- CHARACTER CONNECTION
+--==================================================
 
-    HRP=nil
-    BodyClip=nil
-    CurrentTarget=nil
-    ActiveQuest=nil
-    SaberLocked=false
-    SaberLockPosition=nil
-    UnderwaterState="None"
-    UnderwaterMoving=false
+AddConnection(
+    plr.CharacterAdded:Connect(function(Character)
 
-    Core.ClearBring()
-    Core.CancelTween()
+        SetFastAttack(false)
 
-    local Root=Character:WaitForChild("HumanoidRootPart",10)
+        HRP=nil
+        BodyClip=nil
+        CurrentTarget=nil
+        ActiveQuest=nil
 
-    if Root then
-        HRP=Root
+        SaberLocked=false
+        SaberLockPosition=nil
 
-        if getgenv().AutoFarm then
-            Core.SetBodyClip(true)
+        UnderwaterState="None"
+        UnderwaterMoving=false
+
+        Core.ClearBring()
+        Core.CancelTween()
+
+        local Root=
+            Character:WaitForChild(
+                "HumanoidRootPart",
+                10
+            )
+
+        if Root then
+            HRP=Root
+
+            if getgenv().AutoFarm then
+                Core.SetBodyClip(true)
+            end
         end
-    end
-end))
+    end)
+)
 
 Core.UpdateCharacter()
 
---// BRING MOB
-task.spawn(function()
-    while Alive() and task.wait(.08) do
-        if Fluent.Unloaded then break end
+--==================================================
+-- BRING LOOP
+--==================================================
 
-        if not getgenv().bringmob or
-            not Core.HasQuest() or
-            UnderwaterMoving then
+task.spawn(function()
+
+    while Alive() and task.wait(.08) do
+
+        if Fluent.Unloaded then
+            break
+        end
+
+        if not getgenv().bringmob
+            or not Core.HasQuest()
+            or UnderwaterMoving then
 
             Core.ClearBring()
             continue
         end
 
         pcall(function()
-            local quest=ActiveQuest or Core.GetQuest()
+
+            local quest=
+                ActiveQuest or Core.GetQuest()
 
             if not quest or not quest.Mob then
                 Core.ClearBring()
@@ -799,40 +1040,72 @@ task.spawn(function()
             end
 
             if BringQuestMob~=quest.Mob then
+
                 BringQuestMob=quest.Mob
                 BringPosition=nil
+
                 table.clear(BringTargets)
             end
 
             for i=#BringTargets,1,-1 do
-                if not Core.IsValidBringMob(BringTargets[i],quest.Mob) then
-                    table.remove(BringTargets,i)
+
+                if not Core.IsValidBringMob(
+                    BringTargets[i],
+                    quest.Mob
+                ) then
+
+                    table.remove(
+                        BringTargets,
+                        i
+                    )
                 end
             end
 
             if not BringTargets[1] then
-                local target=Core.GetTargetMob()
+
+                local target=
+                    Core.GetTargetMob()
 
                 if target then
+
                     BringTargets[1]=target
 
-                    local Root=target:FindFirstChild("HumanoidRootPart")
+                    local Root=
+                        target:FindFirstChild(
+                            "HumanoidRootPart"
+                        )
+
                     if Root then
                         BringPosition=Root.Position
                     end
                 end
             end
 
-            if not BringPosition then return end
+            if not BringPosition then
+                return
+            end
 
             if #BringTargets<2 then
-                for _,mob in ipairs(Enemies:GetChildren()) do
-                    if #BringTargets>=2 then break end
 
-                    if Core.IsValidBringMob(mob,quest.Mob) then
+                for _,mob in ipairs(
+                    Enemies:GetChildren()
+                ) do
+
+                    if #BringTargets>=2 then
+                        break
+                    end
+
+                    if Core.IsValidBringMob(
+                        mob,
+                        quest.Mob
+                    ) then
+
                         local exists=false
 
-                        for _,target in ipairs(BringTargets) do
+                        for _,target in ipairs(
+                            BringTargets
+                        ) do
+
                             if target==mob then
                                 exists=true
                                 break
@@ -846,20 +1119,46 @@ task.spawn(function()
                 end
             end
 
-            local targetCFrame=CFrame.new(BringPosition)
+            local targetCFrame=
+                CFrame.new(BringPosition)
 
-            for _,mob in ipairs(BringTargets) do
-                if Core.IsValidBringMob(mob,quest.Mob) then
-                    local Humanoid=mob:FindFirstChildOfClass("Humanoid")
-                    local Root=mob:FindFirstChild("HumanoidRootPart")
+            for _,mob in ipairs(
+                BringTargets
+            ) do
+
+                if Core.IsValidBringMob(
+                    mob,
+                    quest.Mob
+                ) then
+
+                    local Humanoid=
+                        mob:FindFirstChildOfClass(
+                            "Humanoid"
+                        )
+
+                    local Root=
+                        mob:FindFirstChild(
+                            "HumanoidRootPart"
+                        )
 
                     if Root and Humanoid then
+
                         Root.CFrame=targetCFrame
-                        Root.Size=Vector3.new(60,60,60)
+                        Root.Size=Vector3.new(
+                            60,
+                            60,
+                            60
+                        )
+
                         Root.Transparency=1
                         Root.CanCollide=false
-                        Root.AssemblyLinearVelocity=Vector3.zero
-                        Root.AssemblyAngularVelocity=Vector3.zero
+
+                        Root.AssemblyLinearVelocity=
+                            Vector3.zero
+
+                        Root.AssemblyAngularVelocity=
+                            Vector3.zero
+
                         Humanoid.WalkSpeed=0
                         Humanoid.JumpPower=0
                         Humanoid.AutoRotate=false
@@ -868,38 +1167,61 @@ task.spawn(function()
             end
 
             if sethiddenproperty then
+
                 pcall(function()
-                    sethiddenproperty(plr,"SimulationRadius",math.huge)
+                    sethiddenproperty(
+                        plr,
+                        "SimulationRadius",
+                        math.huge
+                    )
                 end)
             end
         end)
     end
 end)
 
---// FAST ATTACK
-local RegisterAttack=Net:WaitForChild("RE/RegisterAttack")
+--==================================================
+-- FAST ATTACK
+--==================================================
+
+local RegisterAttack=
+    Net:WaitForChild("RE/RegisterAttack")
 
 local FastAttack={
     Distance=30
 }
 
 function FastAttack:GetTargets()
+
     local target=CurrentTarget
 
-    if not target or not target.Parent then
+    if not target
+        or not target.Parent then
         return
     end
 
     local Character=client.Character
-    local Root=Character and Character:FindFirstChild("HumanoidRootPart")
-    local Humanoid=target:FindFirstChildOfClass("Humanoid")
+    local Root=
+        Character
+        and Character:FindFirstChild(
+            "HumanoidRootPart"
+        )
 
-    if not Root or not Humanoid or Humanoid.Health<=0 then
+    local Humanoid=
+        target:FindFirstChildOfClass(
+            "Humanoid"
+        )
+
+    if not Root
+        or not Humanoid
+        or Humanoid.Health<=0 then
         return
     end
 
     local HitPart=
-        target:FindFirstChild("HumanoidRootPart")
+        target:FindFirstChild(
+            "HumanoidRootPart"
+        )
         or target:FindFirstChild("UpperTorso")
         or target:FindFirstChild("Torso")
 
@@ -907,7 +1229,9 @@ function FastAttack:GetTargets()
         return
     end
 
-    if (Root.Position-HitPart.Position).Magnitude>self.Distance then
+    if (
+        Root.Position-HitPart.Position
+    ).Magnitude>self.Distance then
         return
     end
 
@@ -915,70 +1239,113 @@ function FastAttack:GetTargets()
 end
 
 function FastAttack:Attack()
-    local FirstHit,Hits=self:GetTargets()
+
+    local FirstHit,Hits=
+        self:GetTargets()
+
     if not FirstHit then
         return
     end
+
     pcall(function()
-        if type(Global.SendHitsToServer)=="function" then
-            Global.SendHitsToServer(FirstHit,Hits)
+
+        if type(
+            Global.SendHitsToServer
+        )=="function" then
+
+            Global.SendHitsToServer(
+                FirstHit,
+                Hits
+            )
         end
-        RegisterAttack:FireServer(0.5)
+
+        RegisterAttack:FireServer(.5)
     end)
 end
+
 task.spawn(function()
+
     while Alive() do
+
         task.wait(.05)
+
         if Fluent.Unloaded then
             break
         end
+
         if getgenv().FastAttack then
             FastAttack:Attack()
         end
     end
 end)
 
---// UNDERWATER
+--==================================================
+-- UNDERWATER
+--==================================================
+
 function Core.CheckUnderwater()
+
     local data=plr:FindFirstChild("Data")
     local level=data and data:FindFirstChild("Level")
 
-    if not level or not Core.UpdateCharacter() then
+    if not level
+        or not Core.UpdateCharacter() then
         return false
     end
 
     local lv=level.Value
-    local Map=workspace:FindFirstChild("Map")
-    local TeleportSpawn=Map and Map:FindFirstChild("TeleportSpawn")
+
+    local Map=Workspace:FindFirstChild("Map")
+
+    local TeleportSpawn=
+        Map and Map:FindFirstChild(
+            "TeleportSpawn"
+        )
 
     if not TeleportSpawn then
         return false
     end
 
-    local Entrance=TeleportSpawn:FindFirstChild("Entrance")
-    local Exit=TeleportSpawn:FindFirstChild("Exit")
+    local Entrance=
+        TeleportSpawn:FindFirstChild(
+            "Entrance"
+        )
+
+    local Exit=
+        TeleportSpawn:FindFirstChild(
+            "Exit"
+        )
 
     if lv>=375 and lv<450 then
-        if UnderwaterState~="Entered" and
-            Entrance and
-            not UnderwaterMoving then
+
+        if UnderwaterState~="Entered"
+            and Entrance
+            and not UnderwaterMoving then
 
             UnderwaterMoving=true
+
             SetFastAttack(false)
             CurrentTarget=nil
             Core.ClearBring()
 
-            local destination=Entrance.Position+Vector3.new(0,2,0)
+            local destination=
+                Entrance.Position
+                +Vector3.new(0,2,0)
 
-            if Core.TweenTo(destination) and
-                HRP and HRP.Parent and
-                (HRP.Position-destination).Magnitude<=8 then
+            if Core.TweenTo(destination)
+                and HRP
+                and HRP.Parent
+                and (
+                    HRP.Position-destination
+                ).Magnitude<=8 then
 
                 UnderwaterState="Entered"
             end
 
             task.wait(3)
+
             UnderwaterMoving=false
+
             return true
         end
 
@@ -986,26 +1353,35 @@ function Core.CheckUnderwater()
     end
 
     if lv==450 then
-        if UnderwaterState~="Exited" and
-            Exit and
-            not UnderwaterMoving then
+
+        if UnderwaterState~="Exited"
+            and Exit
+            and not UnderwaterMoving then
 
             UnderwaterMoving=true
+
             SetFastAttack(false)
             CurrentTarget=nil
             Core.ClearBring()
 
-            local destination=Exit.Position+Vector3.new(0,2,0)
+            local destination=
+                Exit.Position
+                +Vector3.new(0,2,0)
 
-            if Core.TweenTo(destination) and
-                HRP and HRP.Parent and
-                (HRP.Position-destination).Magnitude<=8 then
+            if Core.TweenTo(destination)
+                and HRP
+                and HRP.Parent
+                and (
+                    HRP.Position-destination
+                ).Magnitude<=8 then
 
                 UnderwaterState="Exited"
             end
 
             task.wait(3)
+
             UnderwaterMoving=false
+
             return true
         end
 
@@ -1018,14 +1394,23 @@ function Core.CheckUnderwater()
     return false
 end
 
---// MAIN FARM
+--==================================================
+-- MAIN FARM LOOP
+--==================================================
+
 task.spawn(function()
+
     while Alive() and task.wait(.2) do
-        if Fluent.Unloaded then break end
+
+        if Fluent.Unloaded then
+            break
+        end
 
         if not getgenv().AutoFarm then
+
             SetFastAttack(false)
             ActiveQuest=nil
+
             continue
         end
 
@@ -1035,31 +1420,46 @@ task.spawn(function()
 
         Core.SetBodyClip(true)
 
-        if Core.CheckUnderwater() or UnderwaterMoving then
+        if Core.CheckUnderwater()
+            or UnderwaterMoving then
+
             SetFastAttack(false)
             CurrentTarget=nil
             Core.ClearBring()
+
             continue
         end
 
         if not Core.IsQuestActive() then
+
             ActiveQuest=nil
+
             SetFastAttack(false)
             CurrentTarget=nil
+
             Core.ClearBring()
 
             local quest=Core.GetQuest()
 
-            if not quest then continue end
+            if not quest then
+                continue
+            end
 
-            local _,position=Core.GetQuestNPC(quest.Name)
+            local _,position=
+                Core.GetQuestNPC(
+                    quest.Name
+                )
 
             if position then
+
                 Core.TweenToTravel(position)
+
                 task.wait(.25)
 
                 if not Core.IsQuestActive() then
+
                     pcall(function()
+
                         CommF:InvokeServer(
                             "StartQuest",
                             quest.Name,
@@ -1067,7 +1467,7 @@ task.spawn(function()
                         )
                     end)
 
-                    task.wait(0.5)
+                    task.wait(.5)
 
                     if Core.IsQuestActive() then
                         ActiveQuest=quest
@@ -1083,6 +1483,7 @@ task.spawn(function()
         end
 
         if ActiveQuest then
+
             pcall(function()
                 Core.FarmMob()
             end)
@@ -1090,60 +1491,702 @@ task.spawn(function()
     end
 end)
 
---------------------------------------------------
--- SABER QUEST
---------------------------------------------------
+--==================================================
+-- ELECTRO
+--==================================================
+
+local function GetLightningBolt()
+
+    local success,result=pcall(function()
+
+        local ItemReplicationService=
+            require(
+                ReplicatedStorage:
+                    WaitForChild(
+                        "ItemReplicationService"
+                    )
+            )
+
+        local ItemKeys=
+            require(
+                ReplicatedStorage
+                    .ItemReplicationService
+                    :WaitForChild("KEYS")
+            )
+
+        while not ItemReplicationService.IsInitialized do
+            task.wait(.1)
+
+            if not Alive()
+                or not getgenv().AutoElectro then
+                return 0
+            end
+        end
+
+        local Items=
+            ItemReplicationService:GetItems(
+                ItemKeys.QUANTITY
+            )
+
+        if type(Items)~="table" then
+            return 0
+        end
+
+        local Total=0
+
+        for _,v in pairs(Items) do
+
+            if type(v)=="table"
+                and tonumber(v.ItemId)
+                    ==LIGHTNING_BOLT_ID then
+
+                Total+=tonumber(v.Value) or 0
+            end
+        end
+
+        return Total
+    end)
+
+    if success then
+        return tonumber(result) or 0
+    end
+
+    return 0
+end
+
+local function ElectroTweenTo(position)
+    if not getgenv().AutoElectro then
+        return false
+    end
+
+    return Core.TweenTo(position)
+end
+
+local function ElectroGoMadScientist()
+
+    if not getgenv().AutoElectro then
+        return false
+    end
+
+    print("[ELECTRO] Mad Scientist")
+
+    return ElectroTweenTo(
+        MAD_SCIENTIST_POSITION
+    )
+end
+
+local function ElectroAcceptQuest()
+
+    if ElectroQuestAccepted then
+        return true
+    end
+
+    if not getgenv().AutoElectro then
+        return false
+    end
+
+    pcall(function()
+
+        local state=
+            CommF:InvokeServer(
+                "ElectroQuestState"
+            )
+
+        print(
+            "[ELECTRO QUEST STATE]",
+            state
+        )
+    end)
+
+    task.wait(.3)
+
+    if not getgenv().AutoElectro then
+        return false
+    end
+
+    local success,result=pcall(function()
+
+        return CommF:InvokeServer(
+            "AcceptElectroQuest"
+        )
+    end)
+
+    print(
+        "[ELECTRO QUEST]",
+        success,
+        result
+    )
+
+    if success then
+        ElectroQuestAccepted=true
+    end
+
+    task.wait(.5)
+
+    return success
+end
+
+local function ElectroClickCloud(Cloud)
+
+    if not getgenv().AutoElectro
+        or not Cloud
+        or not Cloud.Parent then
+
+        return false
+    end
+
+    local Camera=Workspace.CurrentCamera
+
+    if not Camera then
+        return false
+    end
+
+    local Pos,OnScreen=
+        Camera:WorldToViewportPoint(
+            Cloud.Position
+        )
+
+    if not OnScreen or Pos.Z<=0 then
+        return false
+    end
+
+    pcall(function()
+
+        VirtualInputManager:
+            SendMouseButtonEvent(
+                Pos.X,
+                Pos.Y,
+                0,
+                true,
+                game,
+                0
+            )
+
+        task.wait(.02)
+
+        VirtualInputManager:
+            SendMouseButtonEvent(
+                Pos.X,
+                Pos.Y,
+                0,
+                false,
+                game,
+                0
+            )
+    end)
+
+    return true
+end
+
+local function IsElectroCloud(Object)
+
+    if not Object:IsA("BasePart") then
+        return false
+    end
+
+    local Name=
+        Object.Name:lower()
+
+    local ParentName=
+        Object.Parent
+        and Object.Parent.Name:lower()
+        or ""
+
+    return Name:find(
+        "cloud",
+        1,
+        true
+    )~=nil
+    or ParentName:find(
+        "cloud",
+        1,
+        true
+    )~=nil
+end
+
+local function IsDarkElectroCloud(Cloud)
+
+    if not Cloud
+        or not Cloud.Parent then
+        return false
+    end
+
+    local C=Cloud.Color
+
+    return (
+        C.R+
+        C.G+
+        C.B
+    )/3<=DARK_THRESHOLD
+end
+
+local function ElectroTurnIn()
+
+    if ElectroTurnedIn then
+        return true
+    end
+
+    if not getgenv().AutoElectro then
+        return false
+    end
+
+    if GetLightningBolt()<=0 then
+        return false
+    end
+
+    local success=pcall(function()
+
+        CommF:InvokeServer(
+            "ElectroQuestState"
+        )
+
+        task.wait(.15)
+
+        CommF:InvokeServer(
+            "BuyElectro",
+            true
+        )
+
+        task.wait(.15)
+
+        CommF:InvokeServer(
+            "BuyElectro"
+        )
+    end)
+
+    if success then
+
+        ElectroTurnedIn=true
+        ElectroBoltObtained=true
+
+        print("[ELECTRO] Bought")
+    end
+
+    return success
+end
+
+local function HandleElectroCloud(Cloud)
+
+    if ElectroBusy
+        or ElectroCloudLocked
+        or not getgenv().AutoElectro then
+
+        return
+    end
+
+    if GetLightningBolt()>0 then
+
+        ElectroBoltObtained=true
+
+        ElectroBusy=true
+
+        if ElectroGoMadScientist() then
+
+            task.wait(.3)
+            ElectroTurnIn()
+        end
+
+        ElectroBusy=false
+
+        return
+    end
+
+    ElectroBusy=true
+    ElectroCloudLocked=true
+
+    task.spawn(function()
+
+        print(
+            "[ELECTRO CLOUD]",
+            Cloud:GetFullName(),
+            Cloud.Position
+        )
+
+        if not getgenv().AutoElectro then
+            ElectroBusy=false
+            ElectroCloudLocked=false
+            return
+        end
+
+        if not ElectroTweenTo(
+            Cloud.Position
+        ) then
+
+            ElectroBusy=false
+            ElectroCloudLocked=false
+            return
+        end
+
+        task.wait(.3)
+
+        local LastCheck=0
+
+        while Alive()
+            and getgenv().AutoElectro
+            and not ElectroBoltObtained do
+
+            local Now=os.clock()
+
+            if Now-LastCheck>=
+                BOLT_CHECK_DELAY then
+
+                LastCheck=Now
+
+                if GetLightningBolt()>0 then
+
+                    ElectroBoltObtained=true
+
+                    print(
+                        "[ELECTRO] Lightning Bolt Obtained"
+                    )
+
+                    break
+                end
+            end
+
+            if Cloud.Parent then
+                ElectroClickCloud(Cloud)
+            end
+
+            task.wait(CLICK_DELAY)
+        end
+
+        if ElectroBoltObtained
+            and getgenv().AutoElectro then
+
+            task.wait(.3)
+
+            if ElectroGoMadScientist() then
+
+                task.wait(.3)
+
+                ElectroTurnIn()
+            end
+        end
+
+        ElectroBusy=false
+        ElectroCloudLocked=false
+    end)
+end
+
+local function WatchElectroCloud(Cloud)
+
+    if not IsElectroCloud(Cloud)
+        or ElectroWatched[Cloud] then
+
+        return
+    end
+
+    ElectroWatched[Cloud]=true
+    ElectroDarkState[Cloud]=false
+
+    AddConnection(
+        Cloud:GetPropertyChangedSignal(
+            "Color"
+        ):Connect(function()
+
+            if not Cloud.Parent
+                or not getgenv().AutoElectro then
+                return
+            end
+
+            local Dark=
+                IsDarkElectroCloud(
+                    Cloud
+                )
+
+            if Dark
+                and not ElectroDarkState[Cloud] then
+
+                ElectroDarkState[Cloud]=true
+
+                HandleElectroCloud(Cloud)
+
+            elseif not Dark then
+
+                ElectroDarkState[Cloud]=false
+            end
+        end)
+    )
+
+    if IsDarkElectroCloud(Cloud) then
+
+        ElectroDarkState[Cloud]=true
+
+        HandleElectroCloud(Cloud)
+    end
+end
+
+local function StopElectro()
+
+    ElectroRunning=false
+    ElectroBusy=false
+    ElectroCloudLocked=false
+    ElectroQuestAccepted=false
+    ElectroBoltObtained=false
+    ElectroTurnedIn=false
+
+    table.clear(ElectroWatched)
+    table.clear(ElectroDarkState)
+
+    SetFastAttack(false)
+
+    if not getgenv().AutoFarm then
+        CurrentTarget=nil
+        Core.CancelTween()
+        Core.SetBodyClip(false)
+    end
+end
+
+local function RunElectro()
+
+    if ElectroRunning then
+        return
+    end
+
+    ElectroRunning=true
+
+    task.spawn(function()
+
+        print("=== AUTO ELECTRO ===")
+
+        if not getgenv().AutoElectro
+            or not Alive() then
+
+            ElectroRunning=false
+            return
+        end
+
+        -- ไปหา Mad Scientist
+        if not ElectroGoMadScientist() then
+            ElectroRunning=false
+            return
+        end
+
+        task.wait(.3)
+
+        -- รับเควสต์
+        if not ElectroAcceptQuest() then
+
+            warn(
+                "[ELECTRO] Quest failed"
+            )
+
+            ElectroRunning=false
+            return
+        end
+
+        -- ถ้ามี Bolt อยู่แล้ว
+        if GetLightningBolt()>0 then
+
+            ElectroBoltObtained=true
+
+            if ElectroGoMadScientist() then
+
+                task.wait(.3)
+                ElectroTurnIn()
+            end
+
+            ElectroRunning=false
+            return
+        end
+
+        -- Scan Cloud ที่มีอยู่แล้ว
+        for _,Object in ipairs(
+            Workspace:GetDescendants()
+        ) do
+
+            if not getgenv().AutoElectro then
+                break
+            end
+
+            WatchElectroCloud(Object)
+        end
+
+        -- Cloud ใหม่
+        AddConnection(
+            Workspace.DescendantAdded:Connect(
+                function(Object)
+
+                    if not getgenv().AutoElectro
+                        or not Alive() then
+                        return
+                    end
+
+                    task.defer(function()
+
+                        if getgenv().AutoElectro
+                            and Alive() then
+
+                            WatchElectroCloud(
+                                Object
+                            )
+                        end
+                    end)
+                end
+            )
+        )
+
+        print(
+            "[ELECTRO] Waiting for charged cloud..."
+        )
+
+        -- รอจนซื้อ Electro หรือปิด Toggle
+        while Alive()
+            and getgenv().AutoElectro
+            and not ElectroTurnedIn do
+
+            if GetLightningBolt()>0
+                and not ElectroBusy then
+
+                ElectroBoltObtained=true
+                ElectroBusy=true
+
+                if ElectroGoMadScientist() then
+
+                    task.wait(.3)
+                    ElectroTurnIn()
+                end
+
+                ElectroBusy=false
+            end
+
+            task.wait(.25)
+        end
+
+        if ElectroTurnedIn then
+
+            print(
+                "[ELECTRO] Completed"
+            )
+
+            getgenv().AutoElectro=false
+        end
+
+        ElectroRunning=false
+    end)
+end
+
+--==================================================
+-- SABER
+--==================================================
 
 local SaberData={
-    TorchPos=Vector3.new(-1679.2634,20.4901,170.7659),
-    BurnPos=Vector3.new(1122,0,4389),
-    SnowPos=Vector3.new(1348,24,-1266),
-    SickManPos=Vector3.new(1503.40405,77.3909988,-1297.55103),
-    RichManPos=Vector3.new(-939.338989,26.0279999,4114.77002),
-    MobLeaderPos=Vector3.new(-2834,4,5325),
-    SaberPos=Vector3.new(-1463,42,47)
+    TorchPos=Vector3.new(
+        -1679.2634,
+        20.4901,
+        170.7659
+    ),
+
+    BurnPos=Vector3.new(
+        1122,
+        0,
+        4389
+    ),
+
+    SnowPos=Vector3.new(
+        1348,
+        24,
+        -1266
+    ),
+
+    SickManPos=Vector3.new(
+        1503.40405,
+        77.3909988,
+        -1297.55103
+    ),
+
+    RichManPos=Vector3.new(
+        -939.338989,
+        26.0279999,
+        4114.77002
+    ),
+
+    MobLeaderPos=Vector3.new(
+        -2834,
+        4,
+        5325
+    ),
+
+    SaberPos=Vector3.new(
+        -1463,
+        42,
+        47
+    )
 }
 
 local function SaberProgress()
+
     local OK,Data=pcall(function()
-        return CommF:InvokeServer("ProQuestProgress")
+
+        return CommF:InvokeServer(
+            "ProQuestProgress"
+        )
     end)
 
-    return OK and type(Data)=="table" and Data or {}
+    return OK
+        and type(Data)=="table"
+        and Data
+        or {}
 end
 
 local function SaberGetTool(Name)
-    local Character=plr.Character
-    local Backpack=plr:FindFirstChild("Backpack")
 
-    return (Character and Character:FindFirstChild(Name))
-        or (Backpack and Backpack:FindFirstChild(Name))
+    local Character=plr.Character
+    local Backpack=plr:FindFirstChild(
+        "Backpack"
+    )
+
+    return
+        (Character and Character:FindFirstChild(Name))
+        or
+        (Backpack and Backpack:FindFirstChild(Name))
 end
 
 local function SaberWaitTool(Name,Timeout)
+
     local Start=os.clock()
 
     repeat
-        if not Alive() or not getgenv().SaberQuest then return end
+
+        if not Alive()
+            or not getgenv().SaberQuest then
+            return
+        end
 
         local Tool=SaberGetTool(Name)
-        if Tool then return Tool end
+
+        if Tool then
+            return Tool
+        end
 
         task.wait(.15)
-    until Timeout and os.clock()-Start>=Timeout
+
+    until Timeout
+        and os.clock()-Start>=Timeout
 end
 
 local function SaberEquipTool(Name)
+
     local Tool=SaberGetTool(Name)
 
-    if not Tool then return false end
+    if not Tool then
+        return false
+    end
 
     local Character=plr.Character
-    local Humanoid=Character and Character:FindFirstChildOfClass("Humanoid")
+    local Humanoid=
+        Character
+        and Character:FindFirstChildOfClass(
+            "Humanoid"
+        )
 
-    if not Humanoid then return false end
+    if not Humanoid then
+        return false
+    end
 
     if Tool.Parent==plr.Backpack then
+
         pcall(function()
             Humanoid:EquipTool(Tool)
         end)
@@ -1155,124 +2198,204 @@ local function SaberEquipTool(Name)
 end
 
 local function SaberTween(Position)
-    if not getgenv().SaberQuest or not Position then
+
+    if not getgenv().SaberQuest
+        or not Position then
+
         return false
     end
 
     SaberLocked=false
     SaberLockPosition=nil
+
     Core.SetBodyClip(false)
 
-    local Result=Core.TweenToTravel(Position)
+    local Result=
+        Core.TweenToTravel(
+            Position
+        )
 
-    if not Result or not HRP or not HRP.Parent then
+    if not Result
+        or not HRP
+        or not HRP.Parent then
+
         return false
     end
 
     SaberLockPosition=Position
     SaberLocked=true
+
     Core.SetBodyClip(true)
 
     HRP.CFrame=CFrame.new(Position)
-    HRP.AssemblyLinearVelocity=Vector3.zero
-    HRP.AssemblyAngularVelocity=Vector3.zero
+
+    HRP.AssemblyLinearVelocity=
+        Vector3.zero
+
+    HRP.AssemblyAngularVelocity=
+        Vector3.zero
 
     task.wait(.1)
 
     return true
 end
 
---// SABER LOCK
+--==================================================
+-- SABER LOCK
+--==================================================
+
 task.spawn(function()
+
     while Alive() and task.wait(.05) do
-        if Fluent.Unloaded then break end
+
+        if Fluent.Unloaded then
+            break
+        end
 
         if not getgenv().SaberQuest then
+
             SaberLocked=false
             SaberLockPosition=nil
+
             continue
         end
 
-        if SaberLocked and SaberLockPosition and
-            HRP and HRP.Parent then
+        if SaberLocked
+            and SaberLockPosition
+            and HRP
+            and HRP.Parent then
 
-            HRP.CFrame=CFrame.new(SaberLockPosition)
-            HRP.AssemblyLinearVelocity=Vector3.zero
-            HRP.AssemblyAngularVelocity=Vector3.zero
+            HRP.CFrame=
+                CFrame.new(
+                    SaberLockPosition
+                )
+
+            HRP.AssemblyLinearVelocity=
+                Vector3.zero
+
+            HRP.AssemblyAngularVelocity=
+                Vector3.zero
         end
     end
 end)
 
 local function SaberWaitMob(Name)
+
     local Start=os.clock()
 
     repeat
-        if not Alive() or not getgenv().SaberQuest then return end
 
-        local Mob=Enemies:FindFirstChild(Name)
-        if Mob then return Mob end
+        if not Alive()
+            or not getgenv().SaberQuest then
+            return
+        end
+
+        local Mob=
+            Enemies:FindFirstChild(Name)
+
+        if Mob then
+            return Mob
+        end
 
         task.wait(.15)
+
     until os.clock()-Start>=15
 end
 
 local function SaberKillMob(Name,Position)
+
     SaberLocked=false
     SaberLockPosition=nil
+
     Core.SetBodyClip(false)
+
     SetFastAttack(false)
     CurrentTarget=nil
 
-    if not Core.UpdateCharacter() then return false end
-
-    local Mob=SaberWaitMob(Name)
-
-    if not Mob then
-        if not Position then return false end
-        if not Core.TweenToTravel(Position) then return false end
-
-        Mob=SaberWaitMob(Name)
-        if not Mob then return false end
+    if not Core.UpdateCharacter() then
+        return false
     end
 
-    local Humanoid=Mob:FindFirstChildOfClass("Humanoid")
-    local Head=Mob:FindFirstChild("Head")
+    local Mob=
+        SaberWaitMob(Name)
 
-    if not Humanoid or not Head then return false end
-    if Humanoid.Health<=0 then return true end
+    if not Mob then
+
+        if not Position then
+            return false
+        end
+
+        if not Core.TweenToTravel(
+            Position
+        ) then
+            return false
+        end
+
+        Mob=SaberWaitMob(Name)
+
+        if not Mob then
+            return false
+        end
+    end
+
+    local Humanoid=
+        Mob:FindFirstChildOfClass(
+            "Humanoid"
+        )
+
+    local Head=
+        Mob:FindFirstChild("Head")
+
+    if not Humanoid or not Head then
+        return false
+    end
+
+    if Humanoid.Health<=0 then
+        return true
+    end
 
     EquipTool(SelectedWeaponType)
+
     Core.UpdateFarmOffset()
 
     CurrentTarget=Mob
+
     SetFastAttack(false)
 
-    if not Core.TweenTo((Head.CFrame*FarmOffset).Position) then
+    if not Core.TweenTo(
+        (Head.CFrame*FarmOffset).Position
+    ) then
+
         CurrentTarget=nil
         SetFastAttack(false)
         Core.SetBodyClip(false)
+
         return false
     end
 
     if not getgenv().SaberQuest then
+
         CurrentTarget=nil
         SetFastAttack(false)
         Core.SetBodyClip(false)
+
         return false
     end
 
     Core.SetBodyClip(true)
     SetFastAttack(true)
 
-    while Alive() and
-        getgenv().SaberQuest and
-        Mob.Parent and
-        Humanoid.Parent and
-        Humanoid.Health>0 do
+    while Alive()
+        and getgenv().SaberQuest
+        and Mob.Parent
+        and Humanoid.Parent
+        and Humanoid.Health>0 do
 
         if not Core.UpdateCharacter() then
+
             SetFastAttack(false)
             CurrentTarget=nil
+
             break
         end
 
@@ -1285,22 +2408,38 @@ local function SaberKillMob(Name,Position)
 
         Core.UpdateFarmOffset()
 
-        local TargetPosition=(Head.CFrame*FarmOffset).Position
+        local TargetPosition=
+            (Head.CFrame*FarmOffset).Position
 
-        if (HRP.Position-TargetPosition).Magnitude>12 then
+        if (
+            HRP.Position-TargetPosition
+        ).Magnitude>12 then
+
             SetFastAttack(false)
 
-            if not Core.TweenTo(TargetPosition) then
+            if not Core.TweenTo(
+                TargetPosition
+            ) then
+
                 CurrentTarget=nil
                 SetFastAttack(false)
+
                 break
             end
         end
 
-        if HRP and HRP.Parent and Head.Parent then
-            HRP.CFrame=Head.CFrame*FarmOffset
-            HRP.AssemblyLinearVelocity=Vector3.zero
-            HRP.AssemblyAngularVelocity=Vector3.zero
+        if HRP
+            and HRP.Parent
+            and Head.Parent then
+
+            HRP.CFrame=
+                Head.CFrame*FarmOffset
+
+            HRP.AssemblyLinearVelocity=
+                Vector3.zero
+
+            HRP.AssemblyAngularVelocity=
+                Vector3.zero
         end
 
         CurrentTarget=Mob
@@ -1313,34 +2452,59 @@ local function SaberKillMob(Name,Position)
     CurrentTarget=nil
     Core.SetBodyClip(false)
 
-    return Humanoid.Health<=0 or not Mob.Parent
+    return Humanoid.Health<=0
+        or not Mob.Parent
 end
 
 local function SaberPlates()
+
     local Data=SaberProgress()
 
-    if type(Data.Plates)~="table" then return false end
+    if type(Data.Plates)~="table" then
+        return false
+    end
 
     for i=1,5 do
+
         if not Data.Plates[i] then
-            local Plate=workspace.Map.Jungle.QuestPlates:FindFirstChild("Plate"..i)
-            local Button=Plate and Plate:FindFirstChild("Button")
+
+            local Plate=
+                Workspace.Map.Jungle.QuestPlates:
+                FindFirstChild(
+                    "Plate"..i
+                )
+
+            local Button=
+                Plate
+                and Plate:FindFirstChild(
+                    "Button"
+                )
 
             if Button then
+
                 local Position
 
                 if Button:IsA("BasePart") then
+
                     Position=Button.Position
+
                 elseif Button:IsA("Model") then
-                    Position=Button:GetPivot().Position
+
+                    Position=
+                        Button:GetPivot().Position
                 end
 
                 if Position then
-                    if not SaberTween(Position+Vector3.new(0,2,0)) then
+
+                    if not SaberTween(
+                        Position+
+                        Vector3.new(0,2,0)
+                    ) then
                         return false
                     end
 
                     pcall(function()
+
                         CommF:InvokeServer(
                             "ProQuestProgress",
                             "Plate",
@@ -1358,138 +2522,275 @@ local function SaberPlates()
 end
 
 local function SaberTorch()
+
     local Data=SaberProgress()
 
-    if Data.UsedTorch then return true end
-    if not SaberTween(SaberData.TorchPos) then return false end
+    if Data.UsedTorch then
+        return true
+    end
+
+    if not SaberTween(
+        SaberData.TorchPos
+    ) then
+        return false
+    end
 
     pcall(function()
-        CommF:InvokeServer("ProQuestProgress","GetTorch")
+
+        CommF:InvokeServer(
+            "ProQuestProgress",
+            "GetTorch"
+        )
     end)
 
-    local Torch=SaberWaitTool("Torch",10)
+    local Torch=
+        SaberWaitTool(
+            "Torch",
+            10
+        )
 
-    if not Torch then return false end
-    if not SaberEquipTool("Torch") then return false end
-    if not SaberTween(SaberData.BurnPos) then return false end
+    if not Torch then
+        return false
+    end
+
+    if not SaberEquipTool("Torch") then
+        return false
+    end
+
+    if not SaberTween(
+        SaberData.BurnPos
+    ) then
+        return false
+    end
 
     task.wait(.5)
 
     pcall(function()
-        CommF:InvokeServer("ProQuestProgress","DestroyTorch")
+
+        CommF:InvokeServer(
+            "ProQuestProgress",
+            "DestroyTorch"
+        )
     end)
 
     local Start=os.clock()
 
     repeat
+
         task.wait(.2)
+
         Data=SaberProgress()
 
         if Data.UsedTorch then
             return true
         end
-    until not getgenv().SaberQuest or os.clock()-Start>=8
+
+    until not getgenv().SaberQuest
+        or os.clock()-Start>=8
 
     return false
 end
 
 local function SaberCup()
+
     local Data=SaberProgress()
 
-    if Data.UsedCup then return true end
-
-    local Cup=SaberGetTool("Cup")
-
-    if not Cup then
-        if not SaberTween(SaberData.BurnPos) then return false end
-
-        pcall(function()
-            CommF:InvokeServer("ProQuestProgress","GetCup")
-        end)
-
-        Cup=SaberWaitTool("Cup",10)
+    if Data.UsedCup then
+        return true
     end
 
-    if not Cup or not SaberEquipTool("Cup") then return false end
+    local Cup=
+        SaberGetTool("Cup")
+
+    if not Cup then
+
+        if not SaberTween(
+            SaberData.BurnPos
+        ) then
+            return false
+        end
+
+        pcall(function()
+
+            CommF:InvokeServer(
+                "ProQuestProgress",
+                "GetCup"
+            )
+        end)
+
+        Cup=
+            SaberWaitTool(
+                "Cup",
+                10
+            )
+    end
+
+    if not Cup
+        or not SaberEquipTool("Cup") then
+        return false
+    end
 
     Cup=SaberGetTool("Cup")
 
-    if not Cup or Cup.Parent~=plr.Character then return false end
+    if not Cup
+        or Cup.Parent~=plr.Character then
+        return false
+    end
 
-    local Handle=Cup:WaitForChild("Handle",5)
-    if not Handle then return false end
+    local Handle=
+        Cup:WaitForChild(
+            "Handle",
+            5
+        )
 
-    local Drop1=Handle:FindFirstChild("Drop1")
-    local Drop2=Handle:FindFirstChild("Drop2")
+    if not Handle then
+        return false
+    end
 
-    if not Drop1 and not Drop2 then return false end
-    if not SaberTween(SaberData.SnowPos) then return false end
+    local Drop1=
+        Handle:FindFirstChild("Drop1")
 
-    local Map=workspace:WaitForChild("Map")
-    local Ice=Map:WaitForChild("Ice",10)
-    if not Ice then return false end
+    local Drop2=
+        Handle:FindFirstChild("Drop2")
 
-    local ParticleDrop=Ice:WaitForChild("ParticleDrop",10)
-    if not ParticleDrop then return false end
+    if not Drop1 and not Drop2 then
+        return false
+    end
 
-    local Water=ParticleDrop:WaitForChild("Water",10)
-    if not Water then return false end
+    if not SaberTween(
+        SaberData.SnowPos
+    ) then
+        return false
+    end
 
-    if not SaberTween(Water.Position+Vector3.new(0,2,0)) then
+    local Map=
+        Workspace:WaitForChild("Map")
+
+    local Ice=
+        Map:WaitForChild(
+            "Ice",
+            10
+        )
+
+    if not Ice then
+        return false
+    end
+
+    local ParticleDrop=
+        Ice:WaitForChild(
+            "ParticleDrop",
+            10
+        )
+
+    if not ParticleDrop then
+        return false
+    end
+
+    local Water=
+        ParticleDrop:WaitForChild(
+            "Water",
+            10
+        )
+
+    if not Water then
+        return false
+    end
+
+    if not SaberTween(
+        Water.Position+
+        Vector3.new(0,2,0)
+    ) then
         return false
     end
 
     local Start=os.clock()
 
     repeat
+
         task.wait(.1)
 
-        if Drop1 and Drop1.Parent and Drop1.Transparency~=1 then
+        if Drop1
+            and Drop1.Parent
+            and Drop1.Transparency~=1 then
+
             return true
         end
 
-        if Drop2 and Drop2.Parent and Drop2.Transparency~=1 then
+        if Drop2
+            and Drop2.Parent
+            and Drop2.Transparency~=1 then
+
             return true
         end
-    until not getgenv().SaberQuest or os.clock()-Start>=15
+
+    until not getgenv().SaberQuest
+        or os.clock()-Start>=15
 
     return false
 end
 
 local function SaberTalkSickMan()
-    if not SaberTween(SaberData.SickManPos) then return false end
+
+    if not SaberTween(
+        SaberData.SickManPos
+    ) then
+        return false
+    end
 
     task.wait(.3)
 
     pcall(function()
-        CommF:InvokeServer("ProQuestProgress","SickMan")
+
+        CommF:InvokeServer(
+            "ProQuestProgress",
+            "SickMan"
+        )
     end)
 
     return true
 end
 
 local function SaberRichMan()
-    if not SaberTween(SaberData.RichManPos) then return false end
+
+    if not SaberTween(
+        SaberData.RichManPos
+    ) then
+        return false
+    end
 
     task.wait(.3)
 
     pcall(function()
-        CommF:InvokeServer("ProQuestProgress","RichSon")
+
+        CommF:InvokeServer(
+            "ProQuestProgress",
+            "RichSon"
+        )
     end)
 
     return true
 end
 
 local function SaberRelic()
-    while Alive() and getgenv().SaberQuest do
+
+    while Alive()
+        and getgenv().SaberQuest do
+
         local Data=SaberProgress()
 
-        if Data.UsedRelic then return true end
+        if Data.UsedRelic then
+            return true
+        end
 
-        local Relic=SaberGetTool("Relic")
+        local Relic=
+            SaberGetTool("Relic")
 
         if not Relic then
-            if not SaberTween(SaberData.RichManPos) then
+
+            if not SaberTween(
+                SaberData.RichManPos
+            ) then
+
                 task.wait(1)
                 continue
             end
@@ -1497,10 +2798,18 @@ local function SaberRelic()
             task.wait(.4)
 
             pcall(function()
-                CommF:InvokeServer("ProQuestProgress","RichSon")
+
+                CommF:InvokeServer(
+                    "ProQuestProgress",
+                    "RichSon"
+                )
             end)
 
-            Relic=SaberWaitTool("Relic",8)
+            Relic=
+                SaberWaitTool(
+                    "Relic",
+                    8
+                )
 
             if not Relic then
                 task.wait(1)
@@ -1508,7 +2817,10 @@ local function SaberRelic()
             end
         end
 
-        if not SaberTween(SaberData.SaberPos) then
+        if not SaberTween(
+            SaberData.SaberPos
+        ) then
+
             task.wait(1)
             continue
         end
@@ -1520,6 +2832,7 @@ local function SaberRelic()
         end
 
         if not SaberEquipTool("Relic") then
+
             task.wait(.5)
             continue
         end
@@ -1527,7 +2840,11 @@ local function SaberRelic()
         task.wait(.4)
 
         pcall(function()
-            CommF:InvokeServer("ProQuestProgress","PlaceRelic")
+
+            CommF:InvokeServer(
+                "ProQuestProgress",
+                "PlaceRelic"
+            )
         end)
 
         task.wait(1)
@@ -1545,26 +2862,36 @@ local function SaberRelic()
 end
 
 local function RunSaberQuest()
-    if SaberQuestRunning then return end
+
+    if SaberQuestRunning then
+        return
+    end
 
     SaberQuestRunning=true
 
     task.spawn(function()
+
         local Success=true
 
         if getgenv().SaberQuest then
             Success=SaberPlates()
         end
 
-        if Success and getgenv().SaberQuest then
+        if Success
+            and getgenv().SaberQuest then
+
             Success=SaberTorch()
         end
 
-        if Success and getgenv().SaberQuest then
+        if Success
+            and getgenv().SaberQuest then
+
             Success=SaberCup()
         end
 
-        if Success and getgenv().SaberQuest then
+        if Success
+            and getgenv().SaberQuest then
+
             local Data=SaberProgress()
 
             if not Data.TalkedSon then
@@ -1572,7 +2899,9 @@ local function RunSaberQuest()
             end
         end
 
-        if Success and getgenv().SaberQuest then
+        if Success
+            and getgenv().SaberQuest then
+
             local Data=SaberProgress()
 
             if not Data.TalkedSon then
@@ -1580,10 +2909,13 @@ local function RunSaberQuest()
             end
         end
 
-        if Success and getgenv().SaberQuest then
+        if Success
+            and getgenv().SaberQuest then
+
             local Data=SaberProgress()
 
             if not Data.KilledMob then
+
                 Success=SaberKillMob(
                     "Mob Leader",
                     SaberData.MobLeaderPos
@@ -1591,7 +2923,9 @@ local function RunSaberQuest()
             end
         end
 
-        if Success and getgenv().SaberQuest then
+        if Success
+            and getgenv().SaberQuest then
+
             local Data=SaberProgress()
 
             if not Data.UsedRelic then
@@ -1599,14 +2933,19 @@ local function RunSaberQuest()
             end
         end
 
-        if Success and getgenv().SaberQuest then
+        if Success
+            and getgenv().SaberQuest then
+
             Success=SaberRelic()
         end
 
-        if Success and getgenv().SaberQuest then
+        if Success
+            and getgenv().SaberQuest then
+
             local Data=SaberProgress()
 
             if not Data.KilledShanks then
+
                 Success=SaberKillMob(
                     "Saber Expert",
                     SaberData.SaberPos
@@ -1616,67 +2955,108 @@ local function RunSaberQuest()
 
         SaberLocked=false
         SaberLockPosition=nil
+
         SetFastAttack(false)
         CurrentTarget=nil
+
         Core.SetBodyClip(false)
+
         SaberQuestRunning=false
     end)
 end
 
---------------------------------------------------
+--==================================================
 -- NOTIFICATION
---------------------------------------------------
+--==================================================
 
-local function HideNotificationObjects(Notifications)
-    if not Notifications then return end
+local function HideNotificationObjects(
+    Notifications
+)
 
-    for _,obj in ipairs(Notifications:GetDescendants()) do
-        if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+    if not Notifications then
+        return
+    end
+
+    for _,obj in ipairs(
+        Notifications:GetDescendants()
+    ) do
+
+        if obj:IsA("TextLabel")
+            or obj:IsA("TextButton") then
+
             obj.Visible=not HideNotification
-        elseif obj:IsA("GuiObject") and obj.Name=="NotificationStack" then
+
+        elseif obj:IsA("GuiObject")
+            and obj.Name=="NotificationStack" then
+
             obj.Visible=not HideNotification
         end
     end
 end
 
 local function SetNotification(state)
+
     HideNotification=state==true
 
-    local Notifications=PlayerGui:FindFirstChild("Notifications")
+    local Notifications=
+        PlayerGui:FindFirstChild(
+            "Notifications"
+        )
 
-    if not Notifications or not Notifications:IsA("ScreenGui") then
+    if not Notifications
+        or not Notifications:IsA("ScreenGui") then
         return
     end
 
     Notifications.Enabled=true
-    HideNotificationObjects(Notifications)
+
+    HideNotificationObjects(
+        Notifications
+    )
 
     if NotificationConnection then
+
         pcall(function()
             NotificationConnection:Disconnect()
         end)
     end
 
-    NotificationConnection=Notifications.DescendantAdded:Connect(function(obj)
-        if not HideNotification then return end
+    NotificationConnection=
+        Notifications.DescendantAdded:
+        Connect(function(obj)
 
-        task.defer(function()
-            if not obj or not obj.Parent then return end
-
-            if obj:IsA("TextLabel") or obj:IsA("TextButton") then
-                obj.Visible=false
-            elseif obj:IsA("GuiObject") and obj.Name=="NotificationStack" then
-                obj.Visible=false
+            if not HideNotification then
+                return
             end
-        end)
-    end)
 
-    AddConnection(NotificationConnection)
+            task.defer(function()
+
+                if not obj
+                    or not obj.Parent then
+                    return
+                end
+
+                if obj:IsA("TextLabel")
+                    or obj:IsA("TextButton") then
+
+                    obj.Visible=false
+
+                elseif obj:IsA("GuiObject")
+                    and obj.Name=="NotificationStack" then
+
+                    obj.Visible=false
+                end
+            end)
+        end)
+
+    AddConnection(
+        NotificationConnection
+    )
 end
 
---------------------------------------------------
--- UI
---------------------------------------------------
+--==================================================
+-- WINDOW
+--==================================================
 
 local Window=Fluent:CreateWindow({
     Title="InfernoX HUB "..Fluent.Version,
@@ -1689,104 +3069,186 @@ local Window=Fluent:CreateWindow({
 })
 
 local Tabs={
-    Main=Window:AddTab({Title="Main",Icon=""}),
-    FarmSetting=Window:AddTab({Title="FarmSetting",Icon=""}),
-    Shop=Window:AddTab({Title="Shop",Icon=""}),
-    Settings=Window:AddTab({Title="Settings",Icon="settings"})
+    Main=Window:AddTab({
+        Title="Main",
+        Icon=""
+    }),
+
+    FarmSetting=Window:AddTab({
+        Title="FarmSetting",
+        Icon=""
+    }),
+
+    Shop=Window:AddTab({
+        Title="Shop",
+        Icon=""
+    }),
+
+    Settings=Window:AddTab({
+        Title="Settings",
+        Icon="settings"
+    })
 }
 
 local Options=Fluent.Options
 
-if PlayerGui:FindFirstChild("InfernoXToggleGui") then
+--==================================================
+-- MOBILE TOGGLE
+--==================================================
+
+if PlayerGui:FindFirstChild(
+    "InfernoXToggleGui"
+) then
+
     PlayerGui.InfernoXToggleGui:Destroy()
 end
 
-local ToggleGui=Instance.new("ScreenGui")
+local ToggleGui=
+    Instance.new("ScreenGui")
+
 ToggleGui.Name="InfernoXToggleGui"
 ToggleGui.ResetOnSpawn=false
 ToggleGui.IgnoreGuiInset=true
 ToggleGui.DisplayOrder=10
-ToggleGui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+ToggleGui.ZIndexBehavior=
+    Enum.ZIndexBehavior.Sibling
+
 ToggleGui.Parent=PlayerGui
 
-local ToggleButton=Instance.new("ImageButton")
+local ToggleButton=
+    Instance.new("ImageButton")
+
 ToggleButton.Name="ToggleButton"
 ToggleButton.Parent=ToggleGui
-ToggleButton.BackgroundColor3=Color3.fromRGB(0,0,0)
+
+ToggleButton.BackgroundColor3=
+    Color3.fromRGB(0,0,0)
+
 ToggleButton.BackgroundTransparency=.15
 ToggleButton.BorderSizePixel=0
-ToggleButton.Position=UDim2.new(.12,-37,.055,62)
-ToggleButton.Size=UDim2.fromOffset(45,45)
-ToggleButton.Image="rbxassetid://133128937209520"
+
+ToggleButton.Position=
+    UDim2.new(
+        .12,
+        -37,
+        .055,
+        62
+    )
+
+ToggleButton.Size=
+    UDim2.fromOffset(45,45)
+
+ToggleButton.Image=
+    "rbxassetid://133128937209520"
+
 ToggleButton.Active=true
 ToggleButton.AutoButtonColor=true
 ToggleButton.ZIndex=10
 
 local Corner=Instance.new("UICorner")
 Corner.Parent=ToggleButton
-Corner.CornerRadius=UDim.new(0,10)
+Corner.CornerRadius=
+    UDim.new(0,10)
 
 local Stroke=Instance.new("UIStroke")
 Stroke.Parent=ToggleButton
 Stroke.Thickness=1
 
 local dragging=false
-local dragStart,startPos,hasMoved
+local dragStart
+local startPos
+local hasMoved
 
 local function UpdatePosition(input)
-    local delta=input.Position-dragStart
 
-    if math.abs(delta.X)>5 or math.abs(delta.Y)>5 then
+    local delta=
+        input.Position-dragStart
+
+    if math.abs(delta.X)>5
+        or math.abs(delta.Y)>5 then
+
         hasMoved=true
     end
 
-    ToggleButton.Position=UDim2.new(
-        startPos.X.Scale,
-        startPos.X.Offset+delta.X,
-        startPos.Y.Scale,
-        startPos.Y.Offset+delta.Y
-    )
+    ToggleButton.Position=
+        UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset+delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset+delta.Y
+        )
 end
 
-AddConnection(ToggleButton.InputBegan:Connect(function(input)
-    if input.UserInputType==Enum.UserInputType.MouseButton1 or
-        input.UserInputType==Enum.UserInputType.Touch then
+AddConnection(
+    ToggleButton.InputBegan:Connect(
+        function(input)
 
-        dragging=true
-        hasMoved=false
-        dragStart=input.Position
-        startPos=ToggleButton.Position
-    end
-end))
+            if input.UserInputType==
+                Enum.UserInputType.MouseButton1
+                or input.UserInputType==
+                Enum.UserInputType.Touch then
 
-AddConnection(ToggleButton.InputEnded:Connect(function(input)
-    if input.UserInputType==Enum.UserInputType.MouseButton1 or
-        input.UserInputType==Enum.UserInputType.Touch then
+                dragging=true
+                hasMoved=false
 
-        dragging=false
-    end
-end))
+                dragStart=input.Position
+                startPos=ToggleButton.Position
+            end
+        end
+    )
+)
 
-AddConnection(UserInputService.InputChanged:Connect(function(input)
-    if not dragging then return end
+AddConnection(
+    ToggleButton.InputEnded:Connect(
+        function(input)
 
-    if input.UserInputType==Enum.UserInputType.MouseMovement or
-        input.UserInputType==Enum.UserInputType.Touch then
+            if input.UserInputType==
+                Enum.UserInputType.MouseButton1
+                or input.UserInputType==
+                Enum.UserInputType.Touch then
 
-        UpdatePosition(input)
-    end
-end))
+                dragging=false
+            end
+        end
+    )
+)
 
-AddConnection(ToggleButton.Activated:Connect(function()
-    if hasMoved then
-        hasMoved=false
-        return
-    end
+AddConnection(
+    UserInputService.InputChanged:
+    Connect(function(input)
 
-    pcall(function()
-        Window:Minimize()
+        if not dragging then
+            return
+        end
+
+        if input.UserInputType==
+            Enum.UserInputType.MouseMovement
+            or input.UserInputType==
+            Enum.UserInputType.Touch then
+
+            UpdatePosition(input)
+        end
     end)
-end))
+)
+
+AddConnection(
+    ToggleButton.Activated:
+    Connect(function()
+
+        if hasMoved then
+            hasMoved=false
+            return
+        end
+
+        pcall(function()
+            Window:Minimize()
+        end)
+    end)
+)
+
+--==================================================
+-- MAIN UI
+--==================================================
 
 Tabs.Main:AddParagraph({
     Title="InfernoX Farm",
@@ -1795,73 +3257,132 @@ Tabs.Main:AddParagraph({
 
 Tabs.Main:AddSection("Farm")
 
-local WeaponDropdown=Tabs.Main:AddDropdown("WeaponDropdown",{
-    Title="เลือกอาวุธ",
-    Values={
-        "Melee",
-        "Sword",
-        "Gun",
-        "Demon Fruit"
-    },
-    Default="Melee"
-})
+local WeaponDropdown=
+    Tabs.Main:AddDropdown(
+        "WeaponDropdown",
+        {
+            Title="เลือกอาวุธ",
 
-WeaponDropdown:OnChanged(function(Value)
-    SelectedWeaponType=Value
+            Values={
+                "Melee",
+                "Sword",
+                "Gun",
+                "Demon Fruit"
+            },
 
-    if getgenv().AutoFarm then
-        task.spawn(function()
-            EquipTool(Value)
-        end)
+            Default="Melee"
+        }
+    )
+
+WeaponDropdown:OnChanged(
+    function(Value)
+
+        SelectedWeaponType=Value
+
+        if getgenv().AutoFarm then
+
+            task.spawn(function()
+                EquipTool(Value)
+            end)
+        end
     end
-end)
+)
 
-Tabs.Main:AddToggle("AutoFarmToggle",{
-    Title="Auto Farm",
-    Default=false
-}):OnChanged(function(Value)
+Tabs.Main:AddToggle(
+    "AutoFarmToggle",
+    {
+        Title="Auto Farm",
+        Default=false
+    }
+):OnChanged(function(Value)
+
     getgenv().AutoFarm=Value
     getgenv().Noclip=Value
 
     if not Value then
+
         SetFastAttack(false)
         CurrentTarget=nil
         ActiveQuest=nil
+
         UnderwaterMoving=false
+
         Core.CancelTween()
         Core.SetBodyClip(false)
+
     else
+
         Core.SetBodyClip(true)
 
         task.spawn(function()
-            EquipTool(SelectedWeaponType)
+            EquipTool(
+                SelectedWeaponType
+            )
         end)
     end
 end)
 
-Tabs.Main:AddToggle("SaberQuestToggle",{
-    Title="Auto Saber Quest",
-    Description="ทำ Saber Quest อัตโนมัติ",
-    Default=false
-}):OnChanged(function(Value)
+--==================================================
+-- AUTO ELECTRO UI
+--==================================================
+
+Tabs.Main:AddToggle(
+    "AutoElectroToggle",
+    {
+        Title="Auto Electro",
+        Description="หา Lightning Bolt และซื้อ Electro อัตโนมัติ",
+        Default=false
+    }
+):OnChanged(function(Value)
+
+    getgenv().AutoElectro=Value
+
+    if Value then
+
+        RunElectro()
+
+    else
+
+        StopElectro()
+    end
+end)
+
+Tabs.Main:AddToggle(
+    "SaberQuestToggle",
+    {
+        Title="Auto Saber Quest",
+        Description="ทำ Saber Quest อัตโนมัติ",
+        Default=false
+    }
+):OnChanged(function(Value)
+
     getgenv().SaberQuest=Value
 
     if Value then
+
         RunSaberQuest()
+
     else
+
         SetFastAttack(false)
         CurrentTarget=nil
+
         SaberLocked=false
         SaberLockPosition=nil
+
         Core.CancelTween()
         Core.SetBodyClip(false)
     end
 end)
 
-Tabs.Main:AddToggle("BringmobToggle",{
-    Title="BringMob",
-    Default=false
-}):OnChanged(function(Value)
+Tabs.Main:AddToggle(
+    "BringmobToggle",
+    {
+        Title="BringMob",
+        Default=false
+    }
+):OnChanged(function(Value)
+
     getgenv().bringmob=Value
 
     if not Value then
@@ -1869,53 +3390,72 @@ Tabs.Main:AddToggle("BringmobToggle",{
     end
 end)
 
-Tabs.Main:AddToggle("FastAttackToggle",{
-    Title="Fast Attack",
-    Default=false
-}):OnChanged(function(Value)
+Tabs.Main:AddToggle(
+    "FastAttackToggle",
+    {
+        Title="Fast Attack",
+        Default=false
+    }
+):OnChanged(function(Value)
+
     getgenv().FastAttack=Value
 end)
 
---------------------------------------------------
+--==================================================
 -- FARM SETTINGS
---------------------------------------------------
+--==================================================
 
-Tabs.FarmSetting:AddSection("Farm Position")
-
-local FarmModeDropdown=Tabs.FarmSetting:AddDropdown(
-    "FarmModeDropdown",
-    {
-        Title="Farm Mode",
-        Values={
-            "Upper",
-            "Behind",
-            "Below"
-        },
-        Default="Upper"
-    }
+Tabs.FarmSetting:AddSection(
+    "Farm Position"
 )
 
-FarmModeDropdown:OnChanged(function(Value)
-    FarmMode=Value
-    Core.UpdateFarmOffset()
-end)
+local FarmModeDropdown=
+    Tabs.FarmSetting:AddDropdown(
+        "FarmModeDropdown",
+        {
+            Title="Farm Mode",
 
-local FarmHeightSlider=Tabs.FarmSetting:AddSlider(
-    "FarmHeightSlider",
-    {
-        Title="Farm Height",
-        Description="ปรับความสูงของตำแหน่ง Farm",
-        Default=5,
-        Min=1,
-        Max=10,
-        Rounding=0
-    }
+            Values={
+                "Upper",
+                "Behind",
+                "Below"
+            },
+
+            Default="Upper"
+        }
+    )
+
+FarmModeDropdown:OnChanged(
+    function(Value)
+
+        FarmMode=Value
+
+        Core.UpdateFarmOffset()
+    end
 )
 
-FarmHeightSlider:OnChanged(function(Value)
-    FarmHeight=tonumber(Value) or 5
-    Core.UpdateFarmOffset()
-end)
+local FarmHeightSlider=
+    Tabs.FarmSetting:AddSlider(
+        "FarmHeightSlider",
+        {
+            Title="Farm Height",
+            Description="ปรับความสูงของตำแหน่ง Farm",
+            Default=5,
+            Min=1,
+            Max=10,
+            Rounding=0
+        }
+    )
+
+FarmHeightSlider:OnChanged(
+    function(Value)
+
+        FarmHeight=
+            tonumber(Value) or 5
+
+        Core.UpdateFarmOffset()
+    end
+)
 
 Tabs.FarmSetting:AddToggle(
     "HideNotificationToggle",
@@ -1925,6 +3465,7 @@ Tabs.FarmSetting:AddToggle(
         Default=true
     }
 ):OnChanged(function(Value)
+
     SetNotification(Value)
 end)
 
@@ -1939,53 +3480,81 @@ Tabs.FarmSetting:AddParagraph({
 
 Tabs.FarmSetting:AddSection("Haki")
 
-local BusoToggle=Tabs.FarmSetting:AddToggle(
-    "BusoToggle",
-    {
-        Title="Buso/Haki",
-        Default=true
-    }
+local BusoToggle=
+    Tabs.FarmSetting:AddToggle(
+        "BusoToggle",
+        {
+            Title="Buso/Haki",
+            Default=true
+        }
+    )
+
+BusoToggle:OnChanged(
+    function(Value)
+        getgenv().AutoBuso=Value
+    end
 )
 
-BusoToggle:OnChanged(function(Value)
-    getgenv().AutoBuso=Value
-end)
+local KenToggle=
+    Tabs.FarmSetting:AddToggle(
+        "KenToggle",
+        {
+            Title="Ken Always On",
+            Default=true
+        }
+    )
 
-local KenToggle=Tabs.FarmSetting:AddToggle(
-    "KenToggle",
-    {
-        Title="Ken Always On",
-        Default=true
-    }
+KenToggle:OnChanged(
+    function(Value)
+        getgenv().AutoKen=Value
+    end
 )
 
-KenToggle:OnChanged(function(Value)
-    getgenv().AutoKen=Value
-end)
-
---------------------------------------------------
+--==================================================
 -- HAKI LOOP
---------------------------------------------------
+--==================================================
 
 task.spawn(function()
+
     while Alive() and task.wait(.8) do
-        if Fluent.Unloaded then break end
+
+        if Fluent.Unloaded then
+            break
+        end
 
         local char=plr.Character
 
         if char then
-            if getgenv().AutoBuso and not char:FindFirstChild("HasBuso") then
+
+            if getgenv().AutoBuso
+                and not char:FindFirstChild(
+                    "HasBuso"
+                ) then
+
                 pcall(function()
-                    CommF:InvokeServer("Buso")
+
+                    CommF:InvokeServer(
+                        "Buso"
+                    )
                 end)
             end
 
             if getgenv().AutoKen then
-                local ken=char:FindFirstChild("Ken")
 
-                if not ken or ken.Value==false then
+                local ken=
+                    char:FindFirstChild(
+                        "Ken"
+                    )
+
+                if not ken
+                    or ken.Value==false then
+
                     pcall(function()
-                        CommE:FireServer("Ken",true)
+
+                        CommE:FireServer(
+                            "Ken",
+                            true
+                        )
                     end)
                 end
             end
@@ -1993,89 +3562,127 @@ task.spawn(function()
     end
 end)
 
---------------------------------------------------
+--==================================================
 -- STATS
---------------------------------------------------
+--==================================================
 
-Tabs.FarmSetting:AddSection("Stats")
+Tabs.FarmSetting:AddSection(
+    "Stats"
+)
 
 local pointValue=5
 local updating=false
 
-local Slider=Tabs.FarmSetting:AddSlider(
-    "PointSlider",
-    {
-        Title="Point Value",
-        Default=5,
-        Min=1,
-        Max=100,
-        Rounding=0
-    }
-)
-
-local InputBox=Tabs.FarmSetting:AddInput(
-    "PointInput",
-    {
-        Title="Input Value",
-        Default="5",
-        Numeric=true
-    }
-)
-
-Slider:OnChanged(function(Value)
-    pointValue=tonumber(Value) or 1
-
-    if not updating then
-        updating=true
-        InputBox:SetValue(tostring(pointValue))
-        updating=false
-    end
-end)
-
-InputBox:OnChanged(function(Value)
-    if updating then return end
-
-    updating=true
-
-    local n=math.floor(tonumber(Value) or 1)
-    n=math.clamp(n,1,100)
-    pointValue=n
-
-    Slider:SetValue(n)
-
-    updating=false
-end)
-
-local MultiDropdown=Tabs.FarmSetting:AddDropdown(
-    "MultiDropdown",
-    {
-        Title="Select Stats",
-        Values={
-            "Melee",
-            "Defense",
-            "Sword",
-            "Gun",
-            "Demon Fruit"
-        },
-        Multi=true,
-        Default={
-            Melee=true,
-            Defense=true
+local Slider=
+    Tabs.FarmSetting:AddSlider(
+        "PointSlider",
+        {
+            Title="Point Value",
+            Default=5,
+            Min=1,
+            Max=100,
+            Rounding=0
         }
-    }
-)
+    )
 
-MultiDropdown:OnChanged(function(Value)
-    local SelectedStats={}
+local InputBox=
+    Tabs.FarmSetting:AddInput(
+        "PointInput",
+        {
+            Title="Input Value",
+            Default="5",
+            Numeric=true
+        }
+    )
 
-    for Stat,State in pairs(Value) do
-        if State then
-            SelectedStats[#SelectedStats+1]=Stat
+Slider:OnChanged(
+    function(Value)
+
+        pointValue=
+            tonumber(Value) or 1
+
+        if not updating then
+
+            updating=true
+
+            InputBox:SetValue(
+                tostring(pointValue)
+            )
+
+            updating=false
         end
     end
+)
 
-    getgenv().SelectUpStats=SelectedStats
-end)
+InputBox:OnChanged(
+    function(Value)
+
+        if updating then
+            return
+        end
+
+        updating=true
+
+        local n=
+            math.floor(
+                tonumber(Value) or 1
+            )
+
+        n=math.clamp(
+            n,
+            1,
+            100
+        )
+
+        pointValue=n
+
+        Slider:SetValue(n)
+
+        updating=false
+    end
+)
+
+local MultiDropdown=
+    Tabs.FarmSetting:AddDropdown(
+        "MultiDropdown",
+        {
+            Title="Select Stats",
+
+            Values={
+                "Melee",
+                "Defense",
+                "Sword",
+                "Gun",
+                "Demon Fruit"
+            },
+
+            Multi=true,
+
+            Default={
+                Melee=true,
+                Defense=true
+            }
+        }
+    )
+
+MultiDropdown:OnChanged(
+    function(Value)
+
+        local SelectedStats={}
+
+        for Stat,State in pairs(Value) do
+
+            if State then
+                SelectedStats[
+                    #SelectedStats+1
+                ]=Stat
+            end
+        end
+
+        getgenv().SelectUpStats=
+            SelectedStats
+    end
+)
 
 Tabs.FarmSetting:AddToggle(
     "AllSkillToggle",
@@ -2084,16 +3691,26 @@ Tabs.FarmSetting:AddToggle(
         Default=false
     }
 ):OnChanged(function(Value)
+
     getgenv().Allskill=Value
 end)
 
 task.spawn(function()
+
     while Alive() and task.wait(1) do
-        if Fluent.Unloaded then break end
+
+        if Fluent.Unloaded then
+            break
+        end
 
         if getgenv().Allskill then
+
             pcall(function()
-                for _,stat in ipairs(getgenv().SelectUpStats) do
+
+                for _,stat in ipairs(
+                    getgenv().SelectUpStats
+                ) do
+
                     CommF:InvokeServer(
                         "AddPoint",
                         stat,
@@ -2105,18 +3722,24 @@ task.spawn(function()
     end
 end)
 
---------------------------------------------------
+--==================================================
 -- SHOP
---------------------------------------------------
+--==================================================
 
 Tabs.Shop:AddSection("Haki")
 
 Tabs.Shop:AddButton({
     Title="Buy Soru",
     Description="ซื้อ Soru",
+
     Callback=function()
+
         pcall(function()
-            CommF:InvokeServer("BuyHaki","Soru")
+
+            CommF:InvokeServer(
+                "BuyHaki",
+                "Soru"
+            )
         end)
     end
 })
@@ -2124,9 +3747,15 @@ Tabs.Shop:AddButton({
 Tabs.Shop:AddButton({
     Title="Buy Buso Haki",
     Description="ซื้อ Buso Haki",
+
     Callback=function()
+
         pcall(function()
-            CommF:InvokeServer("BuyHaki","Buso")
+
+            CommF:InvokeServer(
+                "BuyHaki",
+                "Buso"
+            )
         end)
     end
 })
@@ -2134,9 +3763,15 @@ Tabs.Shop:AddButton({
 Tabs.Shop:AddButton({
     Title="Buy Geppo",
     Description="ซื้อ Geppo",
+
     Callback=function()
+
         pcall(function()
-            CommF:InvokeServer("BuyHaki","Geppo")
+
+            CommF:InvokeServer(
+                "BuyHaki",
+                "Geppo"
+            )
         end)
     end
 })
@@ -2146,23 +3781,37 @@ Tabs.Shop:AddSection("Melee")
 Tabs.Shop:AddButton({
     Title="Buy Black Leg",
     Description="ซื้อ Black Leg / Dark Step",
-    Callback=function()
-        if not Core.UpdateCharacter() then return end
 
-        local NPCPosition=Vector3.new(
-            -990.7269897460938,
-            26.027999877929688,
-            4025.68701171875
-        )
+    Callback=function()
+
+        if not Core.UpdateCharacter() then
+            return
+        end
+
+        local NPCPosition=
+            Vector3.new(
+                -990.7269897460938,
+                26.027999877929688,
+                4025.68701171875
+            )
 
         SetFastAttack(false)
 
-        if Core.TweenTo(NPCPosition) then
+        if Core.TweenTo(
+            NPCPosition
+        ) then
+
             task.wait(.3)
 
-            local Result=CommF:InvokeServer("BuyBlackLeg")
+            local Result=
+                CommF:InvokeServer(
+                    "BuyBlackLeg"
+                )
 
-            print("BuyBlackLeg:",Result)
+            print(
+                "BuyBlackLeg:",
+                Result
+            )
         end
     end
 })
@@ -2170,9 +3819,14 @@ Tabs.Shop:AddButton({
 Tabs.Shop:AddButton({
     Title="Buy Electro",
     Description="ซื้อ Electro",
+
     Callback=function()
+
         pcall(function()
-            CommF:InvokeServer("BuyElectro")
+
+            CommF:InvokeServer(
+                "BuyElectro"
+            )
         end)
     end
 })
@@ -2180,43 +3834,66 @@ Tabs.Shop:AddButton({
 Tabs.Shop:AddButton({
     Title="Buy Fishman Karate",
     Description="ซื้อ Fishman Karate",
+
     Callback=function()
+
         pcall(function()
-            CommF:InvokeServer("BuyFishmanKarate")
+
+            CommF:InvokeServer(
+                "BuyFishmanKarate"
+            )
         end)
     end
 })
 
---------------------------------------------------
+--==================================================
 -- SETTINGS
---------------------------------------------------
+--==================================================
 
-Tabs.Settings:AddSection("System")
+Tabs.Settings:AddSection(
+    "System"
+)
 
-Tabs.Settings:AddToggle("AntiAFKToggle",{
-    Title="Anti AFK",
-    Description="ป้องกัน Roblox เตะออกเมื่อไม่ได้ใช้งาน",
-    Default=true
-}):OnChanged(function(Value)
+Tabs.Settings:AddToggle(
+    "AntiAFKToggle",
+    {
+        Title="Anti AFK",
+        Description="ป้องกัน Roblox เตะออกเมื่อไม่ได้ใช้งาน",
+        Default=true
+    }
+):OnChanged(function(Value)
+
     getgenv().AntiAFK=Value
 end)
 
-AddConnection(plr.Idled:Connect(function()
-    if not Alive() or not getgenv().AntiAFK then
-        return
-    end
+AddConnection(
+    plr.Idled:Connect(function()
 
-    pcall(function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
+        if not Alive()
+            or not getgenv().AntiAFK then
+            return
+        end
+
+        pcall(function()
+
+            VirtualUser:CaptureController()
+
+            VirtualUser:ClickButton2(
+                Vector2.new()
+            )
+        end)
     end)
-end))
+)
 
 Tabs.Settings:AddColorpicker(
     "Colorpicker",
     {
         Title="UI Color",
-        Default=Color3.fromRGB(0,255,140)
+        Default=Color3.fromRGB(
+            0,
+            255,
+            140
+        )
     }
 )
 
@@ -2225,23 +3902,42 @@ Tabs.Settings:AddColorpicker(
     {
         Title="Transparency",
         Transparency=0,
-        Default=Color3.fromRGB(96,205,255)
+        Default=Color3.fromRGB(
+            96,
+            205,
+            255
+        )
     }
 )
 
---------------------------------------------------
+--==================================================
 -- SAVE MANAGER
---------------------------------------------------
+--==================================================
 
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
+
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("InfernoXHub")
-SaveManager:SetFolder("InfernoXHub/specific-game")
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
+
+InterfaceManager:SetFolder(
+    "InfernoXHub"
+)
+
+SaveManager:SetFolder(
+    "InfernoXHub/specific-game"
+)
+
+InterfaceManager:BuildInterfaceSection(
+    Tabs.Settings
+)
+
+SaveManager:BuildConfigSection(
+    Tabs.Settings
+)
+
 Window:SelectTab(1)
+
 Fluent:Notify({
     Title="InfernoX Hub",
     Content="Script loaded.",
