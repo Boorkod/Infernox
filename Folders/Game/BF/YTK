@@ -879,7 +879,9 @@ end)
 --// FAST ATTACK
 local RegisterAttack=Net:WaitForChild("RE/RegisterAttack")
 
-local FastAttack={Distance=20}
+local FastAttack={
+    Distance=30
+}
 
 function FastAttack:GetTargets()
     local target=CurrentTarget
@@ -896,41 +898,42 @@ function FastAttack:GetTargets()
         return
     end
 
-    local HitPart=target:FindFirstChild("HumanoidRootPart")
+    local HitPart=
+        target:FindFirstChild("HumanoidRootPart")
         or target:FindFirstChild("UpperTorso")
         or target:FindFirstChild("Torso")
 
-    if not HitPart then return end
-    if (Root.Position-HitPart.Position).Magnitude>self.Distance then return end
+    if not HitPart then
+        return
+    end
+
+    if (Root.Position-HitPart.Position).Magnitude>self.Distance then
+        return
+    end
 
     return HitPart,{}
 end
 
 function FastAttack:Attack()
     local FirstHit,Hits=self:GetTargets()
-
     if not FirstHit then
-        SetFastAttack(false)
         return
     end
-
-    if type(Global.SendHitsToServer)=="function" then
-        Global.SendHitsToServer(FirstHit,Hits)
-    end
-
     pcall(function()
-        RegisterAttack:FireServer(.5)
+        if type(Global.SendHitsToServer)=="function" then
+            Global.SendHitsToServer(FirstHit,Hits)
+        end
+        RegisterAttack:FireServer(0.5)
     end)
 end
-
 task.spawn(function()
-    while Alive() and task.wait(.05) do
-        if Fluent.Unloaded then break end
-
+    while Alive() do
+        task.wait(.05)
+        if Fluent.Unloaded then
+            break
+        end
         if getgenv().FastAttack then
-            pcall(function()
-                FastAttack:Attack()
-            end)
+            FastAttack:Attack()
         end
     end
 end)
