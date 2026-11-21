@@ -1,6 +1,6 @@
 --[[
 
-Rayfield Interface Suite
+Infernox UI Library
 Original by Sirius (shlex and iRay)
 DevBoom Hub custom Cyan edition
 
@@ -23,8 +23,46 @@ local Theme = {
 }
 
 
+local IconModuleURL = "https://raw.githubusercontent.com/Boorkod/Infernox/refs/heads/main/Folders/UI/IconModule.lua"
 
-local RayfieldLibrary = {}
+local IconModule = {
+    Lucide = nil,
+    Material = {}
+}
+
+pcall(function()
+    local Source = game:HttpGet(IconModuleURL)
+    local Loader = loadstring(Source)
+    assert(Loader, "Unable to compile IconModule")
+    local RemoteIconModule = Loader()
+    if type(RemoteIconModule) == "table"
+        and type(RemoteIconModule.Material) == "table" then
+        IconModule = RemoteIconModule
+    end
+end)
+
+local function ResolveIcon(Image)
+    if Image == nil then
+        return nil
+    end
+
+    if type(Image) == "string" then
+        local MaterialIcon = IconModule.Material[Image]
+        if MaterialIcon then
+            return MaterialIcon
+        end
+
+        if Image:match("^https?://") or Image:match("^rbxassetid://") then
+            return Image
+        end
+    end
+
+    return "rbxassetid://" .. tostring(Image)
+end
+
+
+
+local InfernoxLibrary = {}
 
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -33,45 +71,46 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
-local Rayfield = game:GetObjects("rbxassetid://10804731440")[1]
+local Infernox = game:GetObjects("rbxassetid://10804731440")[1]
+Infernox.Name = "Infernox"
 
 
 if gethui then
-	Rayfield.Parent = gethui()
+	Infernox.Parent = gethui()
 elseif syn.protect_gui then
-	syn.protect_gui(Rayfield)
-	Rayfield.Parent = CoreGui
+	syn.protect_gui(Infernox)
+	Infernox.Parent = CoreGui
 elseif CoreGui:FindFirstChild("RobloxGui") then
-	Rayfield.Parent = CoreGui:FindFirstChild("RobloxGui")
+	Infernox.Parent = CoreGui:FindFirstChild("RobloxGui")
 else
-	Rayfield.Parent = CoreGui
+	Infernox.Parent = CoreGui
 end
 
 if gethui then
 	for _, Interface in ipairs(gethui():GetChildren()) do
-		if Interface.Name == Rayfield.Name and Interface ~= Rayfield then
+		if Interface.Name == Infernox.Name and Interface ~= Infernox then
 			Interface.Enabled = false
-			Interface.Name = "Rayfield-Old"
+			Interface.Name = "Infernox-Old"
 		end
 	end
 else
 	for _, Interface in ipairs(CoreGui:GetChildren()) do
-		if Interface.Name == Rayfield.Name and Interface ~= Rayfield then
+		if Interface.Name == Infernox.Name and Interface ~= Infernox then
 			Interface.Enabled = false
-			Interface.Name = "Rayfield-Old"
+			Interface.Name = "Infernox-Old"
 		end
 	end
 end
 
 
 local Camera = workspace.CurrentCamera
-local Main = Rayfield.Main
+local Main = Infernox.Main
 local Topbar = Main.Topbar
 local Elements = Main.Elements
 local LoadingFrame = Main.LoadingFrame
 local TabList = Main.TabList
 
-Rayfield.DisplayOrder = 100
+Infernox.DisplayOrder = 100
 LoadingFrame.Version.Text = Release
 
 local CFileName = nil
@@ -81,7 +120,7 @@ local Hidden = false
 local Debounce = false
 local Flags = {}
 local NotificationStack = {}
-local Notifications = Rayfield.Notifications
+local Notifications = Infernox.Notifications
 
 
 local function AddDraggingFunctionality(DragPoint, Main)
@@ -134,7 +173,7 @@ local function LoadConfiguration(Configuration)
 				end    
 			end)
 		else
-			RayfieldLibrary:Notify("Flag Error","Rayfield was unable to find '"..FlagName.. "'' in the current script")
+			InfernoxLibrary:Notify("Flag Error","Infernox was unable to find '"..FlagName.. "'' in the current script")
 		end
 	end)
 end
@@ -395,7 +434,7 @@ local neon = (function() -- Open sourced neon module
 end)()
 --end
 
-function RayfieldLibrary:Notify(Title,Content,Image)
+function InfernoxLibrary:Notify(Title,Content,Image)
 	spawn(function()
 		local Notification = Notifications.Template:Clone()
 		Notification.Parent = Notifications
@@ -421,7 +460,7 @@ function RayfieldLibrary:Notify(Title,Content,Image)
 		Notification.Description.TextTransparency = 1
 		Notification.Description.TextColor3 = Color3.fromRGB(240,240,240)
 		if Image then
-			Notification.Icon.Image = "rbxassetid://"..tostring(Image) 
+			Notification.Icon.Image = ResolveIcon(Image) 
 		else
 			Notification.Icon.Image = "rbxassetid://3944680095"
 		end
@@ -461,7 +500,7 @@ function RayfieldLibrary:Notify(Title,Content,Image)
 			end
 		end
 
-		if Rayfield.Name == "Rayfield" then
+		if Infernox.Name == "Infernox" then
 			neon:BindFrame(Notification.BlurModule, {
 				Transparency = 0.98;
 				BrickColor = BrickColor.new("Institutional white");
@@ -500,7 +539,7 @@ end
 
 function Hide()
 	Debounce = true
-	RayfieldLibrary:Notify("Interface Hidden","The interface has been hidden, you can unhide the interface by tapping RightShift")
+	InfernoxLibrary:Notify("Interface Hidden","The interface has been hidden, you can unhide the interface by tapping RightShift")
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 400)}):Play()
 	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 45)}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
@@ -554,8 +593,8 @@ function Unhide()
 	Debounce = true
 	Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 	Main.Visible = true
-	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 650, 0, 475)}):Play()
-	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 650, 0, 48)}):Play()
+	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
+	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 45)}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
@@ -621,8 +660,8 @@ function Maximise()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Topbar.Divider, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 650, 0, 475)}):Play()
-	TweenService:Create(Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 650, 0, 48)}):Play()
+	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
+	TweenService:Create(Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 45)}):Play()
 	TabList.Visible = true
 	wait(0.2)
 
@@ -715,8 +754,8 @@ function Minimise()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
 	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
 	TweenService:Create(Topbar.Divider, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 650, 0, 48)}):Play()
-	TweenService:Create(Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 650, 0, 48)}):Play()
+	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 495, 0, 45)}):Play()
+	TweenService:Create(Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 495, 0, 45)}):Play()
 
 	wait(0.3)
 
@@ -727,47 +766,10 @@ function Minimise()
 	Debounce = false
 end
 
-function RayfieldLibrary:CreateWindow(Settings)
+function InfernoxLibrary:CreateWindow(Settings)
 	local Passthrough = false
 	Topbar.Title.Text = Settings.Name
-	Main.AnchorPoint = Vector2.new(0.5, 0.5)
-	Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Main.Size = UDim2.new(0, 650, 0, 475)
-	Main.BackgroundColor3 = Color3.fromRGB(13, 19, 27)
-	Main.BorderSizePixel = 0
-	Topbar.Size = UDim2.new(1, 0, 0, 48)
-	Topbar.BackgroundColor3 = Color3.fromRGB(17, 27, 37)
-	Topbar.Position = UDim2.new(0, 0, 0, 0)
-	Topbar.Title.TextColor3 = Color3.fromRGB(230, 247, 252)
-	Topbar.Title.Font = Enum.Font.GothamSemibold
-	pcall(function()
-		Main.UIStroke.Color = Theme.Accent
-		Main.UIStroke.Thickness = 1
-		Main.UIStroke.Transparency = 0.55
-		TabList.UIStroke.Color = Theme.AccentDark
-		TabList.UIStroke.Transparency = 0.65
-	end)
-	TabList.Position = UDim2.new(0, 12, 0, 60)
-	TabList.Size = UDim2.new(0, 145, 1, -74)
-	TabList.BackgroundColor3 = Color3.fromRGB(17, 27, 37)
-	TabList.BackgroundTransparency = 0
-	Elements.Position = UDim2.new(0, 169, 0, 60)
-	Elements.Size = UDim2.new(1, -181, 1, -74)
-	Elements.BackgroundTransparency = 1
-	pcall(function()
-		local ListLayout = TabList:FindFirstChildOfClass("UIListLayout")
-		if ListLayout then
-			ListLayout.FillDirection = Enum.FillDirection.Vertical
-			ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-			ListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-			ListLayout.Padding = UDim.new(0, 7)
-		end
-		local Padding = TabList:FindFirstChildOfClass("UIPadding") or Instance.new("UIPadding")
-		Padding.PaddingTop = UDim.new(0, 10)
-		Padding.PaddingLeft = UDim.new(0, 7)
-		Padding.PaddingRight = UDim.new(0, 7)
-		Padding.Parent = TabList
-	end)
+	Main.Size = UDim2.new(0, 450, 0, 260)
 	Main.Visible = true
 	Main.BackgroundTransparency = 1
 	LoadingFrame.Title.TextTransparency = 1
@@ -807,37 +809,35 @@ function RayfieldLibrary:CreateWindow(Settings)
 	for _, TabButton in ipairs(TabList:GetChildren()) do
 		if TabButton.ClassName == "Frame" and TabButton.Name ~= "Placeholder" then
 			TabButton.BackgroundTransparency = 1
-		TabButton.BackgroundColor3 = Color3.fromRGB(24, 38, 50)
-		TabButton.Size = UDim2.new(1, -14, 0, 36)
 			TabButton.Title.TextTransparency = 1
 			TabButton.UIStroke.Transparency = 1
 		end
 	end
 
 	if Settings.KeySystem then
-		if not isfolder("Rayfield Key System") then
-			makefolder("Rayfield Key System")
+		if not isfolder("Infernox Key System") then
+			makefolder("Infernox Key System")
 		end
 		
 		if not Settings.KeySettings.FileName then
 			Settings.KeySettings.FileName = "No file name specified"
 		end
 
-		if isfile("Rayfield Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension) then
-			if readfile("Rayfield Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension) == Settings.KeySettings.Key then
+		if isfile("Infernox Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension) then
+			if readfile("Infernox Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension) == Settings.KeySettings.Key then
 				Passthrough = true
 			end
 		end
 		
 		if not Passthrough then
 			local AttemptsRemaining = math.random(2,6)
-			Rayfield.Enabled = false
+			Infernox.Enabled = false
 			local KeyUI = game:GetObjects("rbxassetid://11380036235")[1]
 
 			if gethui then
 				KeyUI.Parent = gethui()
 			elseif syn.protect_gui then
-				syn.protect_gui(Rayfield)
+				syn.protect_gui(Infernox)
 				KeyUI.Parent = CoreGui
 			else
 				KeyUI.Parent = CoreGui
@@ -913,9 +913,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 					Passthrough = true
 					if Settings.KeySettings.SaveKey then
 						if writefile then
-							writefile("Rayfield Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension, Settings.KeySettings.Key)
+							writefile("Infernox Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension, Settings.KeySettings.Key)
 						end
-						RayfieldLibrary:Notify("Key System","The key for this script has been saved successfully")
+						InfernoxLibrary:Notify("Key System","The key for this script has been saved successfully")
 					end
 				else
 					if AttemptsRemaining == 0 then
@@ -961,7 +961,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				TweenService:Create(KeyMain.NoteMessage, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 				TweenService:Create(KeyMain.Hide, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
 				wait(0.51)
-				RayfieldLibrary:Destroy()
+				InfernoxLibrary:Destroy()
 				KeyUI:Destroy()
 			end)
 		else
@@ -974,7 +974,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 	
 	Notifications.Template.Visible = false
 	Notifications.Visible = true
-	Rayfield.Enabled = true
+	Infernox.Enabled = true
 	wait(0.5)
 	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.55}):Play()
@@ -1001,15 +1001,15 @@ function RayfieldLibrary:CreateWindow(Settings)
 		TabButton.Title.Text = Name
 		TabButton.Parent = TabList
 		TabButton.Title.TextWrapped = false
-		TabButton.Size = UDim2.new(1, -14, 0, 36)
+		TabButton.Size = UDim2.new(0, TabButton.Title.TextBounds.X + 30, 0, 30)
 		
 		if Image then
 			TabButton.Title.AnchorPoint = Vector2.new(0, 0.5)
 			TabButton.Title.Position = UDim2.new(0, 37, 0.5, 0)
-			TabButton.Image.Image = "rbxassetid://"..Image
+			TabButton.Image.Image = ResolveIcon(Image)
 			TabButton.Image.Visible = true
 			TabButton.Title.TextXAlignment = Enum.TextXAlignment.Left
-			TabButton.Size = UDim2.new(1, -14, 0, 36)
+			TabButton.Size = UDim2.new(0, TabButton.Title.TextBounds.X + 46, 0, 30)
 		end
 
 		TabButton.BackgroundTransparency = 1
@@ -1025,9 +1025,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 		TabPage.Visible = true
 
 		TabPage.LayoutOrder = #Elements:GetChildren()
-		TabPage.Position = UDim2.new(0, 0, 0, 0)
-		TabPage.Size = UDim2.new(1, 0, 1, 0)
-		TabPage.BackgroundTransparency = 1
 
 		for _, TemplateElement in ipairs(TabPage:GetChildren()) do
 			if TemplateElement.ClassName == "Frame" and TemplateElement.Name ~= "Placeholder" then
@@ -1053,8 +1050,8 @@ function RayfieldLibrary:CreateWindow(Settings)
 		else
 			FirstTab = Name
 			TabButton.BackgroundColor3 = Theme.Accent
-			TabButton.Image.ImageColor3 = Theme.AccentText
-			TabButton.Title.TextColor3 = Theme.AccentText
+			TabButton.Image.ImageColor3 = Color3.fromRGB(50, 50, 50)
+			TabButton.Title.TextColor3 = Color3.fromRGB(50, 50, 50)
 			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
 			TweenService:Create(TabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 			TweenService:Create(TabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
@@ -1067,8 +1064,8 @@ function RayfieldLibrary:CreateWindow(Settings)
 			TweenService:Create(TabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
 			TweenService:Create(TabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundColor3 = Theme.Accent}):Play()
-			TweenService:Create(TabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextColor3 = Theme.AccentText}):Play()
-			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageColor3 = Theme.AccentText}):Play()
+			TweenService:Create(TabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextColor3 = Color3.fromRGB(50, 50, 50)}):Play()
+			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageColor3 = Color3.fromRGB(50, 50, 50)}):Play()
 
 			for _, OtherTabButton in ipairs(TabList:GetChildren()) do
 				if OtherTabButton.Name ~= "Template" and OtherTabButton.ClassName == "Frame" and OtherTabButton ~= TabButton and OtherTabButton.Name ~= "Placeholder" then
@@ -1082,10 +1079,10 @@ function RayfieldLibrary:CreateWindow(Settings)
 				end
 			end
 			if Elements.UIPageLayout.CurrentPage ~= TabPage then
-				TweenService:Create(Elements, TweenInfo.new(1, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 475, 0, 390)}):Play()
+				TweenService:Create(Elements, TweenInfo.new(1, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 460,0, 330)}):Play()
 				Elements.UIPageLayout:JumpTo(TabPage)
 				wait(0.2)
-				TweenService:Create(Elements, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 475, 0, 390)}):Play()
+				TweenService:Create(Elements, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 475,0, 366)}):Play()
 			end
 
 		end)
@@ -1869,49 +1866,44 @@ function RayfieldLibrary:CreateWindow(Settings)
 	Elements.Visible = true
 
 	wait(1.2)
-	TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-	TweenService:Create(LoadingFrame.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-	TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-	wait(0.2)
-	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 650, 0, 475)}):Play()
-	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
-
-	Topbar.BackgroundTransparency = 1
-	Topbar.Divider.Size = UDim2.new(0, 0, 0, 1)
-	Topbar.CornerRepair.BackgroundTransparency = 1
-	Topbar.Title.TextTransparency = 1
-	local ThemeButton = Topbar:FindFirstChild("Theme")
-	if ThemeButton and ThemeButton:IsA("ImageButton") then
-		ThemeButton.ImageTransparency = 1
-	end
-	Topbar.ChangeSize.ImageTransparency = 1
-	Topbar.Hide.ImageTransparency = 1
-
-	wait(0.8)
-	Topbar.Visible = true
-	TweenService:Create(Topbar, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	wait(0.1)
-	TweenService:Create(Topbar.Divider, TweenInfo.new(1, Enum.EasingStyle.Quint), {Size = UDim2.new(1, 0, 0, 1)}):Play()
-	wait(0.1)
-	TweenService:Create(Topbar.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-	wait(0.1)
-	if ThemeButton and ThemeButton:IsA("ImageButton") then
-		TweenService:Create(ThemeButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
-	end
-	wait(0.1)
-	TweenService:Create(Topbar.ChangeSize, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
-	wait(0.1)
-	TweenService:Create(Topbar.Hide, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
-	wait(0.3)
-
-	return Window
+TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+TweenService:Create(LoadingFrame.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+wait(0.2)
+TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
+TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
+Topbar.BackgroundTransparency = 1
+Topbar.Divider.Size = UDim2.new(0, 0, 0, 1)
+Topbar.CornerRepair.BackgroundTransparency = 1
+Topbar.Title.TextTransparency = 1
+local ThemeButton = Topbar:FindFirstChild("Theme")
+if ThemeButton then
+    ThemeButton.ImageTransparency = 1
+end
+Topbar.ChangeSize.ImageTransparency = 1
+Topbar.Hide.ImageTransparency = 1
+wait(0.8)
+Topbar.Visible = true
+TweenService:Create(Topbar, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+wait(0.1)
+TweenService:Create(Topbar.Divider, TweenInfo.new(1, Enum.EasingStyle.Quint), {Size = UDim2.new(1, 0, 0, 1)}):Play()
+wait(0.1)
+TweenService:Create(Topbar.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+wait(0.1)
+if ThemeButton then
+    TweenService:Create(ThemeButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
+end
+wait(0.1)
+TweenService:Create(Topbar.ChangeSize, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
+wait(0.1)
+TweenService:Create(Topbar.Hide, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
+wait(0.3)
+return Window
 end
 
-
-
-function RayfieldLibrary:Destroy()
-	Rayfield:Destroy()
+function InfernoxLibrary:Destroy()
+	Infernox:Destroy()
 end
 
 Topbar.ChangeSize.MouseButton1Click:Connect(function()
@@ -1967,15 +1959,15 @@ for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 end
 
 
-function RayfieldLibrary:LoadConfiguration()
+function InfernoxLibrary:LoadConfiguration()
 	if CEnabled then
 		pcall(function()
 			if isfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension) then
 				LoadConfiguration(readfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension))
-				RayfieldLibrary:Notify("Configuration Loaded","The configuration file for this game has been loaded from a previous session")
+				InfernoxLibrary:Notify("Configuration Loaded","The configuration file for this game has been loaded from a previous session")
 			end
 		end)
 	end
 end
 
-return RayfieldLibrary
+return InfernoxLibrary
