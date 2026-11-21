@@ -71,13 +71,20 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
-local Infernox = game:GetObjects("rbxassetid://10804731440")[1]
+local SecureMode = false
+pcall(function()
+    SecureMode = getgenv().SecureMode == true
+end)
+
+local LoadedObjects = game:GetObjects("rbxassetid://10804731440")
+local Infernox = LoadedObjects and LoadedObjects[1]
+assert(Infernox, "Infernox UI asset could not be loaded")
 Infernox.Name = "Infernox"
 
 
 if gethui then
 	Infernox.Parent = gethui()
-elseif syn.protect_gui then
+elseif syn and syn.protect_gui then
 	syn.protect_gui(Infernox)
 	Infernox.Parent = CoreGui
 elseif CoreGui:FindFirstChild("RobloxGui") then
@@ -163,32 +170,44 @@ end
 
 local function LoadConfiguration(Configuration)
 	local Data = HttpService:JSONDecode(Configuration)
-	table.foreach(Data, function(FlagName, FlagValue)
-		if Flags[FlagName] then
-			spawn(function() 
-				if Flags[FlagName].Type == "Colorpicker" then
-					Flags[FlagName]:Set(UnpackColor(FlagValue))
-				else
-					if Flags[FlagName].CurrentValue or Flags[FlagName].CurrentKeybind or Flags[FlagName].CurrentOption ~= FlagValue then Flags[FlagName]:Set(FlagValue) end
-				end    
-			end)
-		else
-			InfernoxLibrary:Notify("Flag Error","Infernox was unable to find '"..FlagName.. "'' in the current script")
-		end
-	end)
+    for FlagName, FlagValue in pairs(Data) do
+        if Flags[FlagName] then
+            (task and task.spawn or spawn)(function()
+                if Flags[FlagName].Type == "Colorpicker" and type(FlagValue) == "table"
+                    and FlagValue.R ~= nil and FlagValue.G ~= nil and FlagValue.B ~= nil then
+                    Flags[FlagName]:Set(UnpackColor(FlagValue))
+                elseif Flags[FlagName].CurrentValue ~= FlagValue
+                    and Flags[FlagName].CurrentKeybind ~= FlagValue
+                    and Flags[FlagName].CurrentOption ~= FlagValue then
+                    Flags[FlagName]:Set(FlagValue)
+                end
+            end)
+        else
+            InfernoxLibrary:Notify("Flag Error", "Infernox was unable to find '" .. tostring(FlagName) .. "' in the current script")
+        end
+    end
 end
 
 local function SaveConfiguration()
-	if not CEnabled then return end
-	local Data = {}
-	for i,v in pairs(Flags) do
-		if v.Type == "Colorpicker" then
-			Data[i] = PackColor(v.CurrentValue)
-		else
-			Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption
-		end
-	end	
-	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+    if not CEnabled or not CFileName or type(writefile) ~= "function" then
+        return
+    end
+
+    local Data = {}
+    for i, v in pairs(Flags) do
+        if v.Type == "Colorpicker" then
+            Data[i] = PackColor(v.CurrentValue)
+        else
+            Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption
+        end
+    end
+
+    local Success, Encoded = pcall(function()
+        return HttpService:JSONEncode(Data)
+    end)
+    if Success then
+        pcall(writefile, ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, Encoded)
+    end
 end
 
 function FigureNotifications()
@@ -226,15 +245,11 @@ local neon = (function() -- Open sourced neon module
 		end
 	end
 	local RootParent = Camera
-	if getgenv().SecureMode == nil then
-		RootParent = Camera
-	else
-		if not getgenv().SecureMode then
-			RootParent = Camera
-		else 
-			RootParent = nil
-		end
-	end
+	if not SecureMode then
+        RootParent = Camera
+    else
+        RootParent = nil
+    end
 
 
 	local binds = {}
@@ -442,7 +457,7 @@ function InfernoxLibrary:Notify(Title,Content,Image)
 		Notification.Visible = true
 
 		local blurlight = nil
-		if not getgenv().SecureMode then
+		if not SecureMode then
 			blurlight = Instance.new("DepthOfFieldEffect",game:GetService("Lighting"))
 			blurlight.Enabled = true
 			blurlight.FarIntensity = 0
@@ -490,15 +505,11 @@ function InfernoxLibrary:Notify(Title,Content,Image)
 
 
 		-- Requires Graphics Level 8-10
-		if getgenv().SecureMode == nil then
-			TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.3}):Play()
-		else
-			if not getgenv().SecureMode then
-				TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.3}):Play()
-			else 
-				TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-			end
-		end
+		if not SecureMode then
+            TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.3}):Play()
+        else
+            TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+        end
 
 		if Infernox.Name == "Infernox" then
 			neon:BindFrame(Notification.BlurModule, {
@@ -528,7 +539,7 @@ function InfernoxLibrary:Notify(Title,Content,Image)
 			end
 		end
 		wait(1.35)
-		if not getgenv().SecureMode then
+		if not SecureMode then
 			neon:UnbindFrame(Notification.BlurModule)
 			blurlight:Destroy()
 		end
@@ -767,8 +778,12 @@ function Minimise()
 end
 
 function InfernoxLibrary:CreateWindow(Settings)
+    Settings = type(Settings) == "table" and Settings or {}
+    Settings.ConfigurationSaving = type(Settings.ConfigurationSaving) == "table" and Settings.ConfigurationSaving or {Enabled = false}
+    Settings.KeySettings = type(Settings.KeySettings) == "table" and Settings.KeySettings or {}
+
 	local Passthrough = false
-	Topbar.Title.Text = Settings.Name
+	Topbar.Title.Text = Settings.Name or "Infernox"
 	Main.Size = UDim2.new(0, 450, 0, 260)
 	Main.Visible = true
 	Main.BackgroundTransparency = 1
@@ -786,23 +801,24 @@ function InfernoxLibrary:CreateWindow(Settings)
 	LoadingFrame.Visible = true
 	
 	
-	pcall(function()
-		if not Settings.ConfigurationSaving.FileName then
-			Settings.ConfigurationSaving.FileName = tostring(game.PlaceId)
-		end
-		if Settings.ConfigurationSaving.Enabled == nil then
-			Settings.ConfigurationSaving.Enabled = false
-		end
-		CFileName = Settings.ConfigurationSaving.FileName
-		ConfigurationFolder = Settings.ConfigurationSaving.FolderName or ConfigurationFolder
-		CEnabled = Settings.ConfigurationSaving.Enabled
+    local SavingSettings = Settings.ConfigurationSaving
+    if not SavingSettings.FileName then
+        SavingSettings.FileName = tostring(game.PlaceId)
+    end
+    if SavingSettings.Enabled == nil then
+        SavingSettings.Enabled = false
+    end
+    CFileName = tostring(SavingSettings.FileName)
+    ConfigurationFolder = SavingSettings.FolderName or ConfigurationFolder
+    CEnabled = SavingSettings.Enabled == true
 
-		if Settings.ConfigurationSaving.Enabled then
-			if not isfolder(ConfigurationFolder) then
-				makefolder(ConfigurationFolder)
-			end	
-		end
-	end)
+    if CEnabled and type(isfolder) == "function" and type(makefolder) == "function" then
+        pcall(function()
+            if not isfolder(ConfigurationFolder) then
+                makefolder(ConfigurationFolder)
+            end
+        end)
+    end
 
 	AddDraggingFunctionality(Topbar,Main)
 
@@ -815,19 +831,25 @@ function InfernoxLibrary:CreateWindow(Settings)
 	end
 
 	if Settings.KeySystem then
-		if not isfolder("Infernox Key System") then
-			makefolder("Infernox Key System")
-		end
-		
-		if not Settings.KeySettings.FileName then
-			Settings.KeySettings.FileName = "No file name specified"
-		end
+        if not Settings.KeySettings.FileName then
+            Settings.KeySettings.FileName = "No file name specified"
+        end
 
-		if isfile("Infernox Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension) then
-			if readfile("Infernox Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension) == Settings.KeySettings.Key then
-				Passthrough = true
-			end
-		end
+        local KeyFile = "Infernox Key System/" .. tostring(Settings.KeySettings.FileName) .. ConfigurationExtension
+        if type(isfolder) == "function" and type(makefolder) == "function" then
+            pcall(function()
+                if not isfolder("Infernox Key System") then
+                    makefolder("Infernox Key System")
+                end
+            end)
+        end
+        if type(isfile) == "function" and type(readfile) == "function" then
+            pcall(function()
+                if isfile(KeyFile) and readfile(KeyFile) == Settings.KeySettings.Key then
+                    Passthrough = true
+                end
+            end)
+        end
 		
 		if not Passthrough then
 			local AttemptsRemaining = math.random(2,6)
@@ -836,8 +858,8 @@ function InfernoxLibrary:CreateWindow(Settings)
 
 			if gethui then
 				KeyUI.Parent = gethui()
-			elseif syn.protect_gui then
-				syn.protect_gui(Infernox)
+			elseif syn and syn.protect_gui then
+				syn.protect_gui(KeyUI)
 				KeyUI.Parent = CoreGui
 			else
 				KeyUI.Parent = CoreGui
@@ -912,9 +934,9 @@ function InfernoxLibrary:CreateWindow(Settings)
 					wait(0.51)
 					Passthrough = true
 					if Settings.KeySettings.SaveKey then
-						if writefile then
-							writefile("Infernox Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension, Settings.KeySettings.Key)
-						end
+                        if type(writefile) == "function" then
+                            pcall(writefile, "Infernox Key System/" .. tostring(Settings.KeySettings.FileName) .. ConfigurationExtension, tostring(Settings.KeySettings.Key or ""))
+                        end
 						InfernoxLibrary:Notify("Key System","The key for this script has been saved successfully")
 					end
 				else
@@ -1877,7 +1899,7 @@ Topbar.Divider.Size = UDim2.new(0, 0, 0, 1)
 Topbar.CornerRepair.BackgroundTransparency = 1
 Topbar.Title.TextTransparency = 1
 local ThemeButton = Topbar:FindFirstChild("Theme")
-if ThemeButton then
+if ThemeButton and ThemeButton:IsA("ImageButton") then
     ThemeButton.ImageTransparency = 1
 end
 Topbar.ChangeSize.ImageTransparency = 1
@@ -1891,7 +1913,7 @@ TweenService:Create(Topbar.Divider, TweenInfo.new(1, Enum.EasingStyle.Quint), {S
 wait(0.1)
 TweenService:Create(Topbar.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 wait(0.1)
-if ThemeButton then
+if ThemeButton and ThemeButton:IsA("ImageButton") then
     TweenService:Create(ThemeButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
 end
 wait(0.1)
@@ -1960,14 +1982,17 @@ end
 
 
 function InfernoxLibrary:LoadConfiguration()
-	if CEnabled then
-		pcall(function()
-			if isfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension) then
-				LoadConfiguration(readfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension))
-				InfernoxLibrary:Notify("Configuration Loaded","The configuration file for this game has been loaded from a previous session")
-			end
-		end)
-	end
+    if not CEnabled or not CFileName or type(isfile) ~= "function" or type(readfile) ~= "function" then
+        return
+    end
+
+    pcall(function()
+        local Path = ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension
+        if isfile(Path) then
+            LoadConfiguration(readfile(Path))
+            InfernoxLibrary:Notify("Configuration Loaded", "The configuration file for this game has been loaded from a previous session")
+        end
+    end)
 end
 
 return InfernoxLibrary
