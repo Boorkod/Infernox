@@ -3,7 +3,7 @@ local Release = "Prerelease Beta 6.1"
 local InfernoX = { 
 	Folder = "InfernoX", 
 	Options = {}, 
-	ThemeGradient = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(117, 164, 206)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(123, 201, 201)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(224, 138, 175))} 
+	ThemeGradient = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 72, 72)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(220, 45, 55)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(150, 24, 38))} 
 }
 
 local UserInputService = game:GetService("UserInputService")
@@ -30,6 +30,7 @@ local IconModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/Bo
 local request = (syn and syn.request) or (http and http.request) or http_request or nil
 local tweeninfo = TweenInfo.new(0.3, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
 local PresetGradients = {
+	["Inferno Red"] = {Color3.fromRGB(255, 72, 72), Color3.fromRGB(220, 45, 55), Color3.fromRGB(150, 24, 38)},
 	["Nightlight (Classic)"] = {Color3.fromRGB(147, 255, 239), Color3.fromRGB(201,211,233), Color3.fromRGB(255, 167, 227)},
 	["Nightlight (Neo)"] = {Color3.fromRGB(117, 164, 206), Color3.fromRGB(123, 201, 201), Color3.fromRGB(224, 138, 175)},
 	Starlight = {Color3.fromRGB(147, 255, 239), Color3.fromRGB(181, 206, 241), Color3.fromRGB(214, 158, 243)},
@@ -689,7 +690,7 @@ end
 local MainSize
 local MinSize 
 if Camera.ViewportSize.X > 774 and Camera.ViewportSize.Y > 503 then
-	MainSize = UDim2.fromOffset(675, 424)
+	MainSize = UDim2.fromOffset(720, 460)
 	MinSize = UDim2.fromOffset(500, 42)
 else
 	MainSize = UDim2.fromOffset(Camera.ViewportSize.X - 100, Camera.ViewportSize.Y - 100)
@@ -5219,3 +5220,4 @@ end
 
 
 return InfernoX
+ 
