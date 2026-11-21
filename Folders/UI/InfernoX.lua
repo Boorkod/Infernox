@@ -420,58 +420,72 @@ local Tabs = Navigation.Tabs
 local Notifications = InterfaceUI.Notifications
 local KeySystem : Frame = Main.KeySystem
 
--- Rayfield-inspired visual theme
+-- Rayfield-style charcoal interface theme
 local InfernoPalette = {
-	Background = Color3.fromRGB(12, 14, 19),
-	Panel = Color3.fromRGB(17, 20, 27),
-	Surface = Color3.fromRGB(24, 29, 39),
-	SurfaceHover = Color3.fromRGB(34, 40, 52),
-	Border = Color3.fromRGB(43, 49, 62),
-	Text = Color3.fromRGB(238, 240, 245),
-	Muted = Color3.fromRGB(151, 158, 172),
-	Accent = Color3.fromRGB(218, 45, 64),
-	AccentDark = Color3.fromRGB(126, 24, 42),
+    Background = Color3.fromRGB(27, 27, 28),
+    Panel = Color3.fromRGB(31, 31, 32),
+    Surface = Color3.fromRGB(43, 43, 44),
+    SurfaceHover = Color3.fromRGB(55, 55, 57),
+    Border = Color3.fromRGB(61, 61, 63),
+    Text = Color3.fromRGB(239, 239, 240),
+    Muted = Color3.fromRGB(151, 151, 154),
+    Accent = Color3.fromRGB(65, 132, 190),
+    AccentDark = Color3.fromRGB(38, 91, 139),
 }
 
+local function AddCorner(object, radius)
+    if not object or not object:IsA("GuiObject") then return end
+    local corner = object:FindFirstChildOfClass("UICorner")
+    if not corner then
+        corner = Instance.new("UICorner")
+        corner.Parent = object
+    end
+    corner.CornerRadius = UDim.new(0, radius or 9)
+end
+
 local function ApplyInfernoVisuals(root)
-	for _, object in ipairs(root:GetDescendants()) do
-		if object:IsA("UIStroke") then
-			object.Color = InfernoPalette.Border
-		elseif object:IsA("UIGradient") then
-			object.Color = InfernoX.ThemeGradient
-		elseif object:IsA("TextLabel") or object:IsA("TextButton") or object:IsA("TextBox") then
-			if object.TextTransparency < 1 then
-				local name = string.lower(object.Name)
-				if string.find(name, "subtitle") or string.find(name, "description") or string.find(name, "version") then
-					object.TextColor3 = InfernoPalette.Muted
-				else
-					object.TextColor3 = InfernoPalette.Text
-				end
-			end
-		elseif object:IsA("Frame") or object:IsA("ScrollingFrame") then
-			local name = string.lower(object.Name)
-			if object == Main then
-				object.BackgroundColor3 = InfernoPalette.Background
-			elseif object == Navigation or string.find(name, "navigation") or string.find(name, "sidebar") then
-				object.BackgroundColor3 = InfernoPalette.Panel
-			elseif string.find(name, "template") or string.find(name, "interaction") or string.find(name, "dropdown") or string.find(name, "toggle") or string.find(name, "slider") or string.find(name, "button") then
-				object.BackgroundColor3 = InfernoPalette.Surface
-			end
-		end
-	end
-	Main.BackgroundColor3 = InfernoPalette.Background
-	Navigation.BackgroundColor3 = InfernoPalette.Panel
-	Main.Elements.BackgroundColor3 = InfernoPalette.Background
+    for _, object in ipairs(root:GetDescendants()) do
+        local name = string.lower(object.Name)
+        if object:IsA("UIStroke") then
+            object.Color = InfernoPalette.Border
+            object.Thickness = 1
+        elseif object:IsA("UIGradient") then
+            object.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, InfernoPalette.Accent),
+                ColorSequenceKeypoint.new(1, InfernoPalette.AccentDark)
+            })
+        elseif object:IsA("TextLabel") or object:IsA("TextButton") or object:IsA("TextBox") then
+            if object.TextTransparency < 1 then
+                if string.find(name, "subtitle") or string.find(name, "description") or string.find(name, "version") or string.find(name, "note") then
+                    object.TextColor3 = InfernoPalette.Muted
+                else
+                    object.TextColor3 = InfernoPalette.Text
+                end
+            end
+            if object:IsA("TextButton") then
+                object.AutoButtonColor = false
+            end
+        elseif object:IsA("Frame") or object:IsA("ScrollingFrame") then
+            if string.find(name, "template") or string.find(name, "button") or string.find(name, "toggle") or string.find(name, "slider") or string.find(name, "dropdown") or string.find(name, "input") or string.find(name, "keybind") or string.find(name, "interaction") then
+                object.BackgroundColor3 = InfernoPalette.Surface
+                if object.BackgroundTransparency < 1 then AddCorner(object, 9) end
+            elseif string.find(name, "navigation") or string.find(name, "sidebar") or string.find(name, "tabs") then
+                object.BackgroundColor3 = InfernoPalette.Panel
+            end
+        end
+    end
 
-	local mainCorner = Main:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
-	mainCorner.CornerRadius = UDim.new(0, 10)
-	mainCorner.Parent = Main
+    Main.BackgroundColor3 = InfernoPalette.Background
+    Navigation.BackgroundColor3 = InfernoPalette.Panel
+    Main.Elements.BackgroundColor3 = InfernoPalette.Background
+    AddCorner(Main, 16)
+    AddCorner(Navigation, 12)
 
-	local mainStroke = Main:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke")
-	mainStroke.Color = InfernoPalette.Border
-	mainStroke.Thickness = 1
-	mainStroke.Transparency = 0.15
-	mainStroke.Parent = Main
+    local mainStroke = Main:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke")
+    mainStroke.Color = InfernoPalette.Border
+    mainStroke.Thickness = 1
+    mainStroke.Transparency = 0.12
+    mainStroke.Parent = Main
 end
 
 ApplyInfernoVisuals(InterfaceUI)
