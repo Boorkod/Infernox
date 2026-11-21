@@ -24,7 +24,7 @@ if RunService:IsStudio() then
 end
 
 -- Credits To Latte Softworks And qweery for Lucide And Material Icons Respectively.
-local IconModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/Boorkod/Infernox/main/Folders/UI/IconModule.lua"))()
+local IconModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/Boorkod/Infernox/refs/heads/main/Folders/UI/IconModule.lua"))()
 
 -- Other Variables
 local request = (syn and syn.request) or (http and http.request) or http_request or nil
@@ -328,7 +328,7 @@ local function unpackt(array : table)
 end
 
 -- Interface Management
-local LunaUI = isStudio and script.Parent:WaitForChild("Luna UI") or game:GetObjects("rbxassetid://86467455075715")[1]
+local InterfaceUI = isStudio and script.Parent:WaitForChild("Infernox UI") or game:GetObjects("rbxassetid://86467455075715")[1]
 
 local SizeBleh = nil
 
@@ -374,19 +374,19 @@ end
 
 
 if gethui then
-	LunaUI.Parent = gethui()
+	InterfaceUI.Parent = gethui()
 elseif syn and syn.protect_gui then 
-	syn.protect_gui(LunaUI)
-	LunaUI.Parent = CoreGui
+	syn.protect_gui(InterfaceUI)
+	InterfaceUI.Parent = CoreGui
 elseif not isStudio and CoreGui:FindFirstChild("RobloxGui") then
-	LunaUI.Parent = CoreGui:FindFirstChild("RobloxGui")
+	InterfaceUI.Parent = CoreGui:FindFirstChild("RobloxGui")
 elseif not isStudio then
-	LunaUI.Parent = CoreGui
+	InterfaceUI.Parent = CoreGui
 end
 
 if gethui then
 	for _, Interface in ipairs(gethui():GetChildren()) do
-		if Interface.Name == LunaUI.Name and Interface ~= LunaUI then
+		if Interface.Name == InterfaceUI.Name and Interface ~= InterfaceUI then
 			Hide(Interface.SmartWindow)
 			Interface.Enabled = false
 			Interface.Name = "InfernoX-Old"
@@ -394,7 +394,7 @@ if gethui then
 	end
 elseif not isStudio then
 	for _, Interface in ipairs(CoreGui:GetChildren()) do
-		if Interface.Name == LunaUI.Name and Interface ~= LunaUI then
+		if Interface.Name == InterfaceUI.Name and Interface ~= InterfaceUI then
 			Hide(Interface.SmartWindow)
 			Interface.Enabled = false
 			Interface.Name = "InfernoX-Old"
@@ -402,21 +402,21 @@ elseif not isStudio then
 	end
 end
 
-LunaUI.Enabled = false
-LunaUI.SmartWindow.Visible = false
-LunaUI.Notifications.Template.Visible = false
-LunaUI.DisplayOrder = 1000000000
+InterfaceUI.Enabled = false
+InterfaceUI.SmartWindow.Visible = false
+InterfaceUI.Notifications.Template.Visible = false
+InterfaceUI.DisplayOrder = 1000000000
 
-local Main : Frame = LunaUI.SmartWindow
+local Main : Frame = InterfaceUI.SmartWindow
 local Dragger = Main.Drag
-local dragBar = LunaUI.Drag
+local dragBar = InterfaceUI.Drag
 local dragInteract = dragBar and dragBar.Interact or nil
 local dragBarCosmetic = dragBar and dragBar.Drag or nil
 local Elements = Main.Elements.Interactions
 local LoadingFrame = Main.LoadingFrame
 local Navigation = Main.Navigation
 local Tabs = Navigation.Tabs
-local Notifications = LunaUI.Notifications
+local Notifications = InterfaceUI.Notifications
 local KeySystem : Frame = Main.KeySystem
 
 -- local function LoadConfiguration(Configuration, autoload)
@@ -714,12 +714,12 @@ end
 function InfernoX:CreateWindow(WindowSettings)
 
 	WindowSettings = Kwargify({
-		Name = "InfernoX UI Example Window",
+		Name = "InfernoX Hub",
 		Subtitle = "",
 		LogoID = "6031097225",
 		LoadingEnabled = true,
-		LoadingTitle = "InfernoX Interface Suite",
-		LoadingSubtitle = "by Nebula Softworks",
+		LoadingTitle = "InfernoX Hub",
+		LoadingSubtitle = "by InfernoX",
 
 		ConfigSettings = {},
 
@@ -809,7 +809,7 @@ function InfernoX:CreateWindow(WindowSettings)
 	-- 	LoadAutoLoad(WindowSettings.ConfigSettings.ConfigFolder, WindowSettings.ConfigSettings.RootFolder)
 	-- end)
 
-	LunaUI.Enabled = true
+	InterfaceUI.Enabled = true
 
 	BlurModule(Main)
 
@@ -817,7 +817,7 @@ function InfernoX:CreateWindow(WindowSettings)
 		local KeySettings = WindowSettings.KeySettings
 		
 		Draggable(Dragger, Main)
-		Draggable(LunaUI.MobileSupport, LunaUI.MobileSupport)
+		Draggable(InterfaceUI.MobileSupport, InterfaceUI.MobileSupport)
 		if dragBar then Draggable(dragInteract, Main, true, 255) end
 
 		if not WindowSettings.KeySettings then
@@ -831,9 +831,9 @@ function InfernoX:CreateWindow(WindowSettings)
 
 		local direc = WindowSettings.KeySettings.SaveInRoot and "InfernoX/Configurations/" .. WindowSettings.ConfigSettings.RootFolder .. "/" .. WindowSettings.ConfigSettings.ConfigFolder .. "/Key System/" or "InfernoX/Configurations/" ..  WindowSettings.ConfigSettings.ConfigFolder .. "/Key System/"
 
-		if isfile and isfile(direc .. WindowSettings.KeySettings.FileName .. ".luna") then
+		if isfile and isfile(direc .. WindowSettings.KeySettings.FileName .. ".Infernox") then
 			for i, Key in ipairs(WindowSettings.KeySettings.Key) do
-				if string.find(readfile(direc .. WindowSettings.KeySettings.FileName .. ".luna"), Key) then
+				if string.find(readfile(direc .. WindowSettings.KeySettings.FileName .. ".Infernox"), Key) then
 					Passthrough = true
 					break
 				end
@@ -917,7 +917,7 @@ function InfernoX:CreateWindow(WindowSettings)
 					KeySystem.Visible = false
 					if WindowSettings.KeySettings.SaveKey then
 						if writefile then
-							writefile(direc .. WindowSettings.KeySettings.FileName .. ".luna", FoundKey)
+							writefile(direc .. WindowSettings.KeySettings.FileName .. ".Infernox", FoundKey)
 						end
 						InfernoX:Notification({Title = "Key System", Content = "The key for this script has been saved successfully.", Icon = "lock_open"})
 					end
@@ -978,7 +978,7 @@ function InfernoX:CreateWindow(WindowSettings)
 	LoadingFrame.Visible = false
 
 	Draggable(Dragger, Main)
-	Draggable(LunaUI.MobileSupport, LunaUI.MobileSupport)
+	Draggable(InterfaceUI.MobileSupport, InterfaceUI.MobileSupport)
 	if dragBar then Draggable(dragInteract, Main, true, 255) end
 
 	Elements.Template.LayoutOrder = 1000000000
@@ -1041,7 +1041,7 @@ function InfernoX:CreateWindow(WindowSettings)
 
 		HomeTabPage.detailsholder.dashboard.Client.Title.Text = (isStudio and "Debugging (Studio)" or identifyexecutor()) or "Your Executor Does Not Support identifyexecutor."
 		for i,v in pairs(HomeTabSettings.SupportedExecutors) do
-			if isStudio then HomeTabPage.detailsholder.dashboard.Client.Subtitle.Text = "InfernoX Interface Suite - Debugging Mode" break end
+			if isStudio then HomeTabPage.detailsholder.dashboard.Client.Subtitle.Text = "InfernoX Hub - Debugging Mode" break end
 			if v == identifyexecutor() then
 				HomeTabPage.detailsholder.dashboard.Client.Subtitle.Text = "Your Executor Supports This Script."
 				break
@@ -1674,7 +1674,7 @@ function InfernoX:CreateWindow(WindowSettings)
 					InfernoX.Options[Flag] = SliderV
 				end
 
-				LunaUI.ThemeRemote:GetPropertyChangedSignal("Value"):Connect(function()
+				InterfaceUI.ThemeRemote:GetPropertyChangedSignal("Value"):Connect(function()
 					Slider.Main.color.Color = InfernoX.ThemeGradient
 					Slider.Main.UIStroke.color.Color = InfernoX.ThemeGradient
 				end)
@@ -1847,7 +1847,7 @@ function InfernoX:CreateWindow(WindowSettings)
 					Toggle:Destroy()
 				end
 
-				LunaUI.ThemeRemote:GetPropertyChangedSignal("Value"):Connect(function()
+				InterfaceUI.ThemeRemote:GetPropertyChangedSignal("Value"):Connect(function()
 					Toggle.toggle.color.Color = InfernoX.ThemeGradient
 					Toggle.toggle.UIStroke.color.Color = InfernoX.ThemeGradient
 				end)
@@ -3263,7 +3263,7 @@ function InfernoX:CreateWindow(WindowSettings)
 				InfernoX.Options[Flag] = SliderV
 			end
 
-			LunaUI.ThemeRemote:GetPropertyChangedSignal("Value"):Connect(function()
+			InterfaceUI.ThemeRemote:GetPropertyChangedSignal("Value"):Connect(function()
 				Slider.Main.color.Color = InfernoX.ThemeGradient
 				Slider.Main.UIStroke.color.Color = InfernoX.ThemeGradient
 			end)
@@ -3435,7 +3435,7 @@ function InfernoX:CreateWindow(WindowSettings)
 				Toggle:Destroy()
 			end
 
-			LunaUI.ThemeRemote:GetPropertyChangedSignal("Value"):Connect(function()
+			InterfaceUI.ThemeRemote:GetPropertyChangedSignal("Value"):Connect(function()
 				Toggle.toggle.color.Color = InfernoX.ThemeGradient
 				Toggle.toggle.UIStroke.color.Color = InfernoX.ThemeGradient
 			end)
@@ -4913,17 +4913,17 @@ function InfernoX:CreateWindow(WindowSettings)
 			local c1cp = Tab:CreateColorPicker({
 				Name = "Color 1",
 				Color = Color3.fromRGB(117, 164, 206),
-			}, "LunaInterfaceSuitePrebuiltCPC1") -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+			}, "InfernoxInterfaceSuitePrebuiltCPC1") -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 
 			local c2cp = Tab:CreateColorPicker({
 				Name = "Color 2",
 				Color = Color3.fromRGB(123, 201, 201),
-			}, "LunaInterfaceSuitePrebuiltCPC2")
+			}, "InfernoxInterfaceSuitePrebuiltCPC2")
 
 			local c3cp = Tab:CreateColorPicker({
 				Name = "Color 3",
 				Color = Color3.fromRGB(224, 138, 184),
-			}, "LunaInterfaceSuitePrebuiltCPC3") 
+			}, "InfernoxInterfaceSuitePrebuiltCPC3") 
 
 			task.wait(1)
 
@@ -4931,7 +4931,7 @@ function InfernoX:CreateWindow(WindowSettings)
 				Callback = function(Value)
 					if c2cp and c3cp then
 						InfernoX.ThemeGradient = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Value or Color3.fromRGB(255,255,255)), ColorSequenceKeypoint.new(0.50, c2cp.Color or Color3.fromRGB(255,255,255)), ColorSequenceKeypoint.new(1.00, c3cp.Color or Color3.fromRGB(255,255,255))}
-						LunaUI.ThemeRemote.Value = not LunaUI.ThemeRemote.Value
+						InterfaceUI.ThemeRemote.Value = not InterfaceUI.ThemeRemote.Value
 					end
 				end
 			})
@@ -4940,7 +4940,7 @@ function InfernoX:CreateWindow(WindowSettings)
 				Callback = function(Value)
 					if c1cp and c3cp then
 						InfernoX.ThemeGradient = ColorSequence.new{ColorSequenceKeypoint.new(0.00, c1cp.Color or Color3.fromRGB(255,255,255)), ColorSequenceKeypoint.new(0.50, Value or Color3.fromRGB(255,255,255)), ColorSequenceKeypoint.new(1.00, c3cp.Color or Color3.fromRGB(255,255,255))}
-						LunaUI.ThemeRemote.Value = not LunaUI.ThemeRemote.Value
+						InterfaceUI.ThemeRemote.Value = not InterfaceUI.ThemeRemote.Value
 					end
 				end
 			})
@@ -4949,7 +4949,7 @@ function InfernoX:CreateWindow(WindowSettings)
 				Callback = function(Valuex)
 					if c2cp and c1cp then
 						InfernoX.ThemeGradient = ColorSequence.new{ColorSequenceKeypoint.new(0.00, c1cp.Color or Color3.fromRGB(255,255,255)), ColorSequenceKeypoint.new(0.50, c2cp.Color or Color3.fromRGB(255,255,255)), ColorSequenceKeypoint.new(1.00, Valuex or Color3.fromRGB(255,255,255))}
-						LunaUI.ThemeRemote.Value = not LunaUI.ThemeRemote.Value
+						InterfaceUI.ThemeRemote.Value = not InterfaceUI.ThemeRemote.Value
 					end
 				end
 			})
@@ -5007,7 +5007,7 @@ function InfernoX:CreateWindow(WindowSettings)
 				return false, "Please select a config file."
 			end
 
-			local fullPath = InfernoX.Folder .. "/settings/" .. Path .. ".luna"
+			local fullPath = InfernoX.Folder .. "/settings/" .. Path .. ".Infernox"
 
 			local data = {
 				objects = {}
@@ -5036,7 +5036,7 @@ function InfernoX:CreateWindow(WindowSettings)
 				return false, "Please select a config file."
 			end
 
-			local file = InfernoX.Folder .. "/settings/" .. Path .. ".luna"
+			local file = InfernoX.Folder .. "/settings/" .. Path .. ".Infernox"
 			if not isfile(file) then return false, "Invalid file" end
 
 			local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(file))
@@ -5088,8 +5088,8 @@ function InfernoX:CreateWindow(WindowSettings)
 			local out = {}
 			for i = 1, #list do
 				local file = list[i]
-				if file:sub(-5) == ".luna" then
-					local pos = file:find(".luna", 1, true)
+				if file:sub(-5) == ".Infernox" then
+					local pos = file:find(".Infernox", 1, true)
 					local start = pos
 
 					local char = file:sub(pos, pos)
@@ -5132,7 +5132,7 @@ function InfernoX:CreateWindow(WindowSettings)
 		dragBar.Visible = false
 		Window.State = false
 		if UserInputService.KeyboardEnabled == false then
-			LunaUI.MobileSupport.Visible = true
+			InterfaceUI.MobileSupport.Visible = true
 		end
 	end)
 	Main.Controls.Close["MouseEnter"]:Connect(function()
@@ -5147,7 +5147,7 @@ function InfernoX:CreateWindow(WindowSettings)
 		if Window.State then return end
 		if input.KeyCode == Window.Bind then
 			Unhide(Main, Window.CurrentTab)
-			LunaUI.MobileSupport.Visible = false
+			InterfaceUI.MobileSupport.Visible = false
 			dragBar.Visible = true
 			Window.State = true
 		end
@@ -5194,11 +5194,11 @@ function InfernoX:CreateWindow(WindowSettings)
 	end)	
 
 
-	LunaUI.MobileSupport.Interact.MouseButton1Click:Connect(function()
+	InterfaceUI.MobileSupport.Interact.MouseButton1Click:Connect(function()
 		Unhide(Main, Window.CurrentTab)
 		dragBar.Visible = true
 		Window.State = true
-		LunaUI.MobileSupport.Visible = false
+		InterfaceUI.MobileSupport.Visible = false
 	end)
 
 	return Window
@@ -5212,228 +5212,10 @@ function InfernoX:Destroy()
 			Notification:Destroy()
 		end
 	end
-	LunaUI:Destroy()
+	InterfaceUI:Destroy()
 end
 
-if (getgenv and not getgenv().ConfirmLuna) or (not getgenv) then
-	InfernoX:Notification({ 
-    	Title = "InfernoX Is Deprecated",
-    	Icon = "warning",
-    	ImageSource = "Material",
-    	Content = "If you are not the script developer, ignore this message. \n\n The InfernoX Interface Library Is Deprecated And Not Recommended to Use. A New Library Is Available at nebulasoftworks.xyz/starlight. If you insist on using InfernoX, set the getgenv().ConfirmLuna variable to true. "
-	})
-end
-
-if isStudio then
-	local Window = InfernoX:CreateWindow({
-		Name = "Nebula Client - InfernoX Hub | Blade Ball",
-		Subtitle = "by Nebula Softworks",
-		LogoID = "123795201100198",
-		LoadingEnabled = true,
-		LoadingTitle = "Nebula Client (InfernoX Hub)",
-		LoadingSubtitle = "Loading script for Blade Ball",
-		KeySystem = true,
-		KeySettings = {
-			Title = "Nebula Client | Key System",
-			Subtitle = "Blade Ball",
-			Note = "Please Enter Your Key To Use Nebula Client",
-			FileName = "Key", -- the name of the key file. this will be saved in ur RootFolder. However, if you don't have one, it'll save in ur config folder instead
-			SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-			Key = {"Example Key"}, -- List of keys that will be accepted by the system, please use a system like Pelican or Luarmor that provide key strings based on your HWID since putting a simple string is very easy to bypass
-			SecondAction = {
-				Enabled = true,
-				Type = "Link", -- Link/Discord
-				Parameter = "" -- for discord, add the invite link like home tab. for link, type the link of ur key sys
-			}
-		}
-	})
-	
-	--[[local Window = InfernoX:CreateWindow({
-		Name = "InfernoX Example Window",
-		Subtitle = "Test",
-		LogoID = "6031097225",
-		LoadingEnabled = true,
-		LoadingTitle = "InfernoX Interface Suite",
-		LoadingSubtitle = "by Nebula Softworks",
-		KeySystem = true,
-		KeySettings = {
-			Title = "InfernoX Example Key",
-			Subtitle = "Key System",
-			Note = "Please Enter Your Key To Use Example Hub",
-			FileName = "Key", -- the name of the key file. this will be saved in ur RootFolder. However, if you don't have one, it'll save in ur config folder instead
-			SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-			Key = {"Example Key"} -- List of keys that will be accepted by the system, please use a system like Pelican or Luarmor that provide key strings based on your HWID since putting a simple string is very easy to bypass
-		}
-	})
-
-	InfernoX:Notification({ 
-		Title = "Welcome to InfernoX",
-		Icon = "sparkle",
-		ImageSource = "Material",
-		Content = "Welcome to the InfernoX Interface Suite. This Is an Amazing Quality Freemium UI Library For Roblox Exploiting Made By Nebula Softworks. InfernoX was Created in hopes of improving the standard of UI Library designs by being the golden standard for it. InfernoX Has Amazing Features like a key system, notification and perfection in aesthetics and design. So, What Are You Waiting For? Start Using InfernoX Today at " .. website
-	})
-
-	local Tabs = {
-		Main = Window:CreateTab({
-			Name = "Tab Example 1",
-			Icon = "view_in_ar",
-			ImageSource = "Material",
-			ShowTitle = true
-		}),
-		Main2 = Window:CreateTab({
-			Name = "Tab Example 2",
-			Icon = "location_searching",
-			ImageSource = "Material",
-			ShowTitle = false
-		}),
-		Premium = Window:CreateTab({
-			Name = "Premium Tab",
-			Icon = "sparkle",
-			ImageSource = "Material",
-			ShowTitle = true
-		}),
-		Debug = Window:CreateTab({
-			Name = "Debug",
-			Icon = "settings"
-		})
-	}
 
 
-	Window:CreateHomeTab()
-	local bleh =Tabs.Debug:CreateColorPicker()
-	Tabs.Debug:CreateButton({
-		Callback = function()
-			bleh:Set({
-				Color = Color3.fromRGB(0,0,0)
-			})
-		end,
-	})
-
-	Tabs.Main:CreateSection("Section Example")
-	Tabs.Main:CreateButton({
-		Name = "Button Example!",
-		Description = "Every Element Except For Sliders Can Have a description like this"
-	})
-	Tabs.Main:CreateLabel({
-		Text = "Label Example",
-		Style = 1
-	})
-	Tabs.Main:CreateLabel({
-		Text = "Information Example",
-		Style = 2
-	})
-	Tabs.Main:CreateLabel({
-		Text = "Warning Example",
-		Style = 3
-	})
-	Tabs.Main:CreateParagraph({
-		Title = "Paragraph Example ",
-		Text = "This Is A Paragraph. You Can Type Very Long Strings Here And They'll Automatically Fit! This Counts As A Description Right? Right? Right? Right? Right? Right? Right? Right? Right? Right? Right? Right? Right? Right? Right? Also Did I Mention This Has Rich Text? Also Did I Mention This Has Rich Text? Also Did I Mention This Has Rich Text? Also Did I Mention This Has Rich Text? Also Did I Mention This Has Rich Text? Also Did I Mention This Has Rich Text?"
-	})
-	Tabs.Main:CreateSlider({
-		Name = "Slider Example",
-		Range = {0, 200},
-		Increment = 0.1,
-		CurrentValue = 100,
-		Flag = "Slider",
-	})
-	Tabs.Main:CreateToggle({
-		Name = "Toggle Example",
-		Description = "This Is A Toggle. See I Was Right? Sliders Don't Have Descriptions!",
-		CurrentValue = false,
-	})
-
-	Tabs.Main:CreateBind({
-		Name = "Bind Example",
-		Description = "Btw Using CreateKeybind is deprecated, use CreateBind For Future Binds :)",
-		CurrentKeybind = "Q",
-		HoldToInteract = false,
-	})
-	Tabs.Main:CreateInput({
-		Name = "Dynamic Input Example",
-		Description = "Every Element has :Set(). Sadly this one is broken;the text wont update :(",
-		PlaceholderText = "Input Placeholder",
-		CurrentValue = "",
-		Numeric = false,
-		MaxCharacters = nil,
-		Enter = false
-	})
-	Tabs.Main:CreateDropdown({
-		Name = "Dropdown Example",
-		Description = "U can access a element's values using .Settings!",
-		Options = {"Option 1","Option 2","Option 3","Option 4","Option 5","Option 6"},
-		CurrentOption = "Option 1",
-		MultipleOptions = false,
-		SpecialType = nil
-	})
-
-	Tabs.Main:CreateColorPicker({
-		Name = "Color Picker Example",
-		Color = Color3.fromRGB(86, 171, 128),
-		Flag = "ColorPicker1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-		Callback = function(Value)
-			-- The function that takes place every time the color picker is moved/changed
-			-- The variable (Value) is a Color3fromRGB value based on which color is selected
-		end
-	})
-
-	Tabs.Main2:CreateSection("The Elements Here Are To Show Unique Features")
-	Tabs.Main2:CreateToggle({
-		Name = "Toggle - Default On",
-		Description = "Toggles Can be Onned By Default!",
-		CurrentValue = true
-	})
-	Tabs.Main2:CreateBind({
-		Name = "Hold To Interact - Walkspeed Example",
-		Description = "Binds Can Be Made to only Callback when held",
-		HoldToInteract = true,
-		CurrentBind = "E",
-		Callback = function(v)
-			if v then 
-				Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
-			else
-				Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-			end
-		end,
-	})
-	Tabs.Main2:CreateInput({
-		Name = "Numeric And 12 Max Characters",
-		Description = "You Can Limit The Max Characters or Allow Only Numbers",
-		Numeric = true,
-		MaxCharacters = 12
-	})
-	Tabs.Main2:CreateInput({
-		Name = "Require Enter",
-		Description = "You Can Only make the callback happen after user hits enter",
-		Enter = true
-	})
-	Tabs.Main2:CreateLabel({
-		Text = "Every Element Can be Destroyed as well!"
-	})
-	Tabs.Main2:CreateDropdown({
-		Name = "Dropdown - Multi Options",
-		Description = "Multiple Special Features can be used on the same element!",
-		Options = {"Option 1","Option 2","Option 3","Option 4","Option 5","Option 6"},
-		CurrentOption = {"Option 1","Option 3","Option 6"},
-		MultipleOptions = true
-	})
-	Tabs.Main2:CreateDropdown({
-		Name = "Dropdown - Players",
-		Description = "InfernoX's Dropdowns Has a built in Player Dropdown!",
-		Options = {"u can put anything here, it wont be shown anyway"},
-		CurrentOption = {"same here, itll be the first option"},
-		MultipleOptions = false,
-		SpecialType = "Player"
-	})
-
-	local s = Tabs.Premium:CreateSection("You can add elements inside section too")
-	s:CreateButton()
-	s:CreateLabel()
-	s:CreateDivider()
-	s:CreateDropdown()
-
-	Tabs.Premium:BuildConfigSection()
-	Tabs.Premium:BuildThemeSection()]]
-end
 
 return InfernoX
