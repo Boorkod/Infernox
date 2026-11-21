@@ -129,6 +129,16 @@ local Flags = {}
 local NotificationStack = {}
 local Notifications = Infernox.Notifications
 
+local WindowWidth = 850
+local WindowHeight = 450
+
+local function ApplyWindowDimensions()
+    Main.Size = UDim2.fromOffset(WindowWidth, WindowHeight)
+    Topbar.Size = UDim2.new(0, WindowWidth, Topbar.Size.Y.Scale, Topbar.Size.Y.Offset)
+    Elements.Size = UDim2.fromOffset(math.max(200, WindowWidth - 25), math.max(120, WindowHeight - 109))
+    TabList.Size = UDim2.new(0, math.max(200, WindowWidth - 25), TabList.Size.Y.Scale, TabList.Size.Y.Offset)
+end
+
 
 local function AddDraggingFunctionality(DragPoint, Main)
 	pcall(function()
@@ -604,8 +614,8 @@ function Unhide()
 	Debounce = true
 	Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 	Main.Visible = true
-	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
-	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 45)}):Play()
+	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.fromOffset(WindowWidth, WindowHeight)}):Play()
+	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, WindowWidth, 0, 45)}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
@@ -671,8 +681,8 @@ function Maximise()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Topbar.Divider, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
-	TweenService:Create(Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 45)}):Play()
+	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.fromOffset(WindowWidth, WindowHeight)}):Play()
+	TweenService:Create(Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, WindowWidth, 0, 45)}):Play()
 	TabList.Visible = true
 	wait(0.2)
 
@@ -783,6 +793,23 @@ function InfernoxLibrary:CreateWindow(Settings)
     Settings.KeySettings = type(Settings.KeySettings) == "table" and Settings.KeySettings or {}
 
 	local Passthrough = false
+    local RequestedSize = Settings.Size
+    if typeof(RequestedSize) == "UDim2" then
+        local Viewport = Camera and Camera.ViewportSize or Vector2.new(1280, 720)
+        WindowWidth = math.floor(Viewport.X * RequestedSize.X.Scale + RequestedSize.X.Offset)
+        WindowHeight = math.floor(Viewport.Y * RequestedSize.Y.Scale + RequestedSize.Y.Offset)
+    elseif typeof(RequestedSize) == "Vector2" then
+        WindowWidth = math.floor(RequestedSize.X)
+        WindowHeight = math.floor(RequestedSize.Y)
+    elseif type(RequestedSize) == "table" then
+        WindowWidth = tonumber(RequestedSize.Width or RequestedSize[1]) or 850
+        WindowHeight = tonumber(RequestedSize.Height or RequestedSize[2]) or 450
+    else
+        WindowWidth, WindowHeight = 850, 450
+    end
+    WindowWidth = math.clamp(WindowWidth, 400, 1600)
+    WindowHeight = math.clamp(WindowHeight, 300, 1000)
+
 	Topbar.Title.Text = Settings.Name or "Infernox"
 	Main.Size = UDim2.new(0, 450, 0, 260)
 	Main.Visible = true
@@ -1011,6 +1038,7 @@ function InfernoxLibrary:CreateWindow(Settings)
 	Elements.Template.Visible = false
 
 	Elements.UIPageLayout.FillDirection = Enum.FillDirection.Horizontal
+    ApplyWindowDimensions()
 	TabList.Template.Visible = false
 
 	-- Tab
@@ -1101,10 +1129,10 @@ function InfernoxLibrary:CreateWindow(Settings)
 				end
 			end
 			if Elements.UIPageLayout.CurrentPage ~= TabPage then
-				TweenService:Create(Elements, TweenInfo.new(1, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 460,0, 330)}):Play()
+				TweenService:Create(Elements, TweenInfo.new(1, Enum.EasingStyle.Quint), {Size = UDim2.fromOffset(math.max(180, WindowWidth - 40), math.max(100, WindowHeight - 145))}):Play()
 				Elements.UIPageLayout:JumpTo(TabPage)
 				wait(0.2)
-				TweenService:Create(Elements, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 475,0, 366)}):Play()
+				TweenService:Create(Elements, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Size = UDim2.fromOffset(math.max(200, WindowWidth - 25), math.max(120, WindowHeight - 109))}):Play()
 			end
 
 		end)
@@ -1892,7 +1920,7 @@ TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quin
 TweenService:Create(LoadingFrame.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 TweenService:Create(LoadingFrame.Version, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 wait(0.2)
-TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
+TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.fromOffset(WindowWidth, WindowHeight)}):Play()
 TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
 Topbar.BackgroundTransparency = 1
 Topbar.Divider.Size = UDim2.new(0, 0, 0, 1)
