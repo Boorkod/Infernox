@@ -786,7 +786,10 @@ function InfernoX:CreateWindow(WindowSettings)
 
 	WindowSettings.ConfigSettings = Kwargify({
 		RootFolder = nil,
-		ConfigFolder = "Big Hub"
+		ConfigFolder = "Big Hub",
+		AutoSave = true,
+		AutoSaveInterval = 15,
+		AutoSaveName = "AutoSave"
 	}, WindowSettings.ConfigSettings or {})
 
 	WindowSettings.KeySettings = Kwargify({
@@ -4823,6 +4826,30 @@ function InfernoX:CreateWindow(WindowSettings)
 				end,
 			})
 
+			Tab:CreateButton({
+				Name = "Delete Selected Config",
+				Description = "Permanently delete the selected config file.",
+				Callback = function()
+					if type(selectedConfig) ~= "string" or selectedConfig == "" then
+						InfernoX:Notification({Title = "Config", Content = "Please select a config first.", Icon = "warning", ImageSource = "Material"})
+						return
+					end
+					local file = InfernoX.Folder .. "/settings/" .. selectedConfig .. ".Infernox"
+					if isfile(file) then
+						local ok = pcall(delfile, file)
+						if ok then
+							InfernoX:Notification({Title = "Config", Content = "Deleted " .. selectedConfig, Icon = "check", ImageSource = "Material"})
+							selectedConfig = nil
+							configSelection:Set({Options = InfernoX:RefreshConfigList(), CurrentOption = {}})
+						else
+							InfernoX:Notification({Title = "Config", Content = "Could not delete config.", Icon = "error", ImageSource = "Material"})
+						end
+					else
+						InfernoX:Notification({Title = "Config", Content = "Config file was not found.", Icon = "error", ImageSource = "Material"})
+					end
+				end,
+			})
+
 			local loadlabel
 			Tab:CreateButton({
 				Name = "Set as autoload",
@@ -5165,6 +5192,22 @@ function InfernoX:CreateWindow(WindowSettings)
 			end
 
 			return out
+		end
+
+		if WindowSettings.ConfigSettings.AutoSave and not Window.AutoSaveStarted and not isStudio then
+			Window.AutoSaveStarted = true
+			task.spawn(function()
+				local interval = math.max(5, tonumber(WindowSettings.ConfigSettings.AutoSaveInterval) or 15)
+				local configName = tostring(WindowSettings.ConfigSettings.AutoSaveName or "AutoSave")
+				while InterfaceUI and InterfaceUI.Parent do
+					task.wait(interval)
+					if not Window.AutoSavePaused then
+						pcall(function()
+							InfernoX:SaveConfig(configName)
+						end)
+					end
+				end
+			end)
 		end
 		return Tab
 	end
