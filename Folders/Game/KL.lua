@@ -10,6 +10,7 @@ local Chest = RS:WaitForChild("Chest")
 local Remotes = Chest.Remotes.Functions
 local QuestRemote = Remotes.Quest
 local EtcRemote = Remotes.EtcFunction
+local ProxyFolder = RS.Chest.Assets.Modules.EntityClient.Proxy
 local SkillRemote = Remotes.SkillAction
 local HakiRemote = Chest.Remotes.Events.Armament
 local QuestData = require(Chest.Modules.QuestManager)
@@ -400,6 +401,14 @@ local function FindMonster()
     LockedMob = Targets[1]
     return LockedMob
 end
+local function GetMonsterSpawn()
+    local Data = QuestData[CurrentQuest.Value]
+    if not Data then return nil end
+    local Model = ProxyFolder:FindFirstChild(Data.Mob)
+    if not Model then return nil end
+    local Root = Model:FindFirstChild("HumanoidRootPart")
+    return Root and Root.CFrame
+end
 
 local function ChangeQuest(Target, NPC)
     if SwitchingQuest or not Target then return end
@@ -502,12 +511,16 @@ local function UpdateFarm()
 
     ModeFarm()
     if CurrentQuest.Value == "" or SwitchingQuest then return end
-
     local Mob = FindMonster()
     local TargetRoot = Mob and Mob:FindFirstChild("HumanoidRootPart")
-
-    if not IsAlive(Mob) or not TargetRoot then return end
-    Root.CFrame = TargetRoot.CFrame * st
+    if not IsAlive(Mob) or not TargetRoot then
+    local SpawnCFrame = GetMonsterSpawn()
+    if SpawnCFrame then
+        Root.CFrame = SpawnCFrame * CFrame.new(0, 5, 0)
+    end
+    return
+end
+Root.CFrame = TargetRoot.CFrame * st
 end
 
 local function AutoM1Action()
