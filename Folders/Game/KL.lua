@@ -407,10 +407,11 @@ local function AutoM1Action()
     local SwordName = Stats:FindFirstChild("SwordName")
     local FightingStyle = Stats:FindFirstChild("FightingStyle")
     local SkillName
-    if SwordName and Tool.Name == SwordName.Value then
-        SkillName = "SW_" .. SwordName.Value .. "_M1"
+    local Sword = SwordName and tostring(SwordName.Value)
+    local Style = FightingStyle and tostring(FightingStyle.Value)
+    if Sword and Sword ~= "None" and Tool.Name == Sword then
+        SkillName = "SW_" .. Sword .. "_M1"
     else
-        local Style = FightingStyle and FightingStyle.Value
         if not Style then return end
         SkillName = "FS_" .. Style .. "_M1"
     end
