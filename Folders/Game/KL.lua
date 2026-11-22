@@ -45,6 +45,7 @@ local MyConfig = ConfigManager:CreateConfig(MapName .. "/" .. LP.UserId)
 _G.Farm = false
 _G.Haki = false
 _G.AutoStats = false
+_G.HidePopupEnabled = false
 _G.AutoSkillEnabled = true
 _G.SkillAimEnabled = true
 _G.FarmMode = "Above"
@@ -110,32 +111,31 @@ local function GetDropdown(Value)
 end
 
 -- POPUP
-
 local function HidePopup()
+    if not _G.HidePopupEnabled then return end
     local Popup = LP.PlayerGui:FindFirstChild("Popup")
-
-    if Popup and Popup:IsA("ScreenGui") and Popup.Enabled then
+    if Popup and Popup:IsA("ScreenGui") then
         Popup.Enabled = false
     end
 end
-
 local function WatchPopup(Popup)
     if not Popup:IsA("ScreenGui") then return end
-
-    Popup.Enabled = false
+    if _G.HidePopupEnabled then
+        Popup.Enabled = false
+    end
     Popup:GetPropertyChangedSignal("Enabled"):Connect(function()
-        if Popup.Enabled then Popup.Enabled = false end
+        if _G.HidePopupEnabled and Popup.Enabled then
+            Popup.Enabled = false
+        end
     end)
 end
-
 local ExistingPopup = LP.PlayerGui:FindFirstChild("Popup")
 if ExistingPopup then WatchPopup(ExistingPopup) end
-
 LP.PlayerGui.ChildAdded:Connect(function(Child)
-    if Child.Name == "Popup" then WatchPopup(Child) end
+    if Child.Name == "Popup" then
+        WatchPopup(Child)
+    end
 end)
-
-HidePopup()
 
 -- LOOP MANAGER
 
@@ -829,6 +829,8 @@ CurrentQuest.Changed:Connect(function()
     LastQuest = NewQuest
 end)
 
+if LP.Character then ResetCharacter(LP.Character) end
+
 local Codes = {
     "4BVISITS",
     "MOBILEFIXED",
@@ -863,8 +865,6 @@ local function RedeemAllCodes()
         Redeeming = false
     end)
 end
-
-if LP.Character then ResetCharacter(LP.Character) end
 
 -- UI
 
@@ -1035,6 +1035,19 @@ AddElement(Tabs.Settings, "Toggle", {
     Value = false,
     Callback = function(State)
         ToggleHaki(State)
+    end
+})
+
+AddElement(Tabs.Settings, "Toggle", {
+    Title = "Hide Popup",
+    Desc = "ซ่อนหน้าต่าง Popup",
+    Flag = "HidePopup",
+    Value = false,
+    Callback = function(State)
+        _G.HidePopupEnabled = State
+        if State then
+            HidePopup()
+        end
     end
 })
 
