@@ -829,8 +829,6 @@ CurrentQuest.Changed:Connect(function()
     LastQuest = NewQuest
 end)
 
-if LP.Character then ResetCharacter(LP.Character) end
-
 local Codes = {
     "4BVISITS",
     "MOBILEFIXED",
@@ -865,6 +863,8 @@ local function RedeemAllCodes()
         Redeeming = false
     end)
 end
+
+if LP.Character then ResetCharacter(LP.Character) end
 
 -- UI
 
