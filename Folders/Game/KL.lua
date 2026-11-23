@@ -10,6 +10,7 @@ local Chest = RS:WaitForChild("Chest")
 local Remotes = Chest.Remotes.Functions
 local QuestRemote = Remotes.Quest
 local EtcRemote = Remotes.EtcFunction
+local CheckQuest = Remotes:WaitForChild("CheckQuest")
 local ProxyFolder = RS.Chest.Assets.Modules.EntityClient.Proxy
 local SkillRemote = Remotes.SkillAction
 local HakiRemote = Chest.Remotes.Events.Armament
@@ -72,7 +73,10 @@ local WaitingRepeat = false
 local RepeatDecisionMade = false
 local LastRepeatClick = 0
 local QuestEndedAt = 0
-
+local ShopRunning = false
+local TargetSize = UDim2.new(999994, 0, 999994, 0)
+local WorldRunning = false
+local TargetSize = UDim2.new(999994, 0, 999994, 0)
 local Character
 local HRP
 local CharacterGeneration = 0
@@ -259,6 +263,102 @@ local function TeleportToNPC(NPC)
     task.wait(1)
 
     return true
+end
+
+local function AutoAccept(Name)
+    local Deadline = os.clock() + 5
+
+    while os.clock() < Deadline do
+        local GUI = LP.PlayerGui:FindFirstChild(Name)
+        local Dialogue = GUI and GUI:FindFirstChild("Dialogue")
+        local Accept = Dialogue and Dialogue:FindFirstChild("Accept")
+
+        if Dialogue and Accept and Dialogue.Visible and Accept.Visible then
+            Accept.Size = TargetSize
+            local Viewport = workspace.CurrentCamera.ViewportSize
+            VIM:SendMouseButtonEvent(Viewport.X / 2, Viewport.Y - 2, 0, true, game, 0)
+            task.wait(0.05)
+            VIM:SendMouseButtonEvent(Viewport.X / 2, Viewport.Y - 2, 0, false, game, 0)
+            return true
+        end
+
+        task.wait(0.1)
+    end
+end
+
+local function BuyStyle(Name)
+    if ShopRunning then return end
+    ShopRunning = true
+
+    pcall(function()
+        local NPC = NPCFolder:FindFirstChild(Name)
+        if not NPC then return end
+
+        TeleportToNPC(NPC)
+        task.wait(0.5)
+
+        if CheckQuest:InvokeServer(NPC) then
+            AutoAccept(Name)
+        end
+    end)
+
+    ShopRunning = false
+end
+
+for _, Name in ipairs({
+    "WaterStyleShop",
+    "DarkLegShop",
+    "DragonClawShop",
+    "ElectroShop",
+    "CyborgShop"
+}) do
+    _G[Name] = function()
+        BuyStyle(Name)
+    end
+end
+local function WorldNPC(NPC, GUIName)
+    if WorldRunning then return false end
+    WorldRunning = true
+
+    local Success = pcall(function()
+        TeleportToNPC(NPC)
+        task.wait(0.5)
+
+        CheckQuest:InvokeServer(NPC)
+
+        local Deadline = os.clock() + 5
+
+        while os.clock() < Deadline do
+            local GUI = LP.PlayerGui:FindFirstChild(GUIName)
+            local Dialogue = GUI and GUI:FindFirstChild("Dialogue")
+            local Accept = Dialogue and Dialogue:FindFirstChild("Accept")
+
+            if Dialogue and Accept and Dialogue.Visible and Accept.Visible then
+                Accept.Size = TargetSize
+
+                local Viewport = workspace.CurrentCamera.ViewportSize
+                local X, Y = Viewport.X / 2, Viewport.Y - 2
+
+                VIM:SendMouseButtonEvent(X, Y, 0, true, game, 0)
+                task.wait(0.05)
+                VIM:SendMouseButtonEvent(X, Y, 0, false, game, 0)
+                break
+            end
+
+            task.wait(0.1)
+        end
+    end)
+
+    WorldRunning = false
+    return Success
+end
+
+function RunElitePirate()
+    return WorldNPC(RS.NPC:WaitForChild("Elite Pirate"), "Elite Pirate")
+end
+
+function RunTheSquid()
+    return WorldNPC(NPCFolder:WaitForChild("The Squid"), "The Squid")
 end
 
 local function ModeFarm()
@@ -1073,6 +1173,64 @@ AddElement(Tabs.Settings, "Toggle", {
         if State then
             HidePopup()
         end
+    end
+})
+AddElement(Tabs.Buy, "Button", {
+    Title = "Water Style",
+    Callback = function()
+        task.spawn(WaterStyleShop)
+    end
+})
+
+AddElement(Tabs.Buy, "Button", {
+    Title = "Dark Leg",
+    Callback = function()
+        task.spawn(DarkLegShop)
+    end
+})
+
+AddElement(Tabs.Buy, "Button", {
+    Title = "Dragon Claw",
+    Callback = function()
+        task.spawn(DragonClawShop)
+    end
+})
+
+AddElement(Tabs.Buy, "Button", {
+    Title = "Electro",
+    Callback = function()
+        task.spawn(ElectroShop)
+    end
+})
+
+AddElement(Tabs.Buy, "Button", {
+    Title = "Cyborg",
+    Callback = function()
+        task.spawn(CyborgShop)
+    end
+})
+
+AddElement(Tabs.Teleport, "Button", {
+    Title = "Elite Pirate1",
+    Desc = "Interact with Elite Pirate",
+    Callback = function()
+        task.spawn(RunElitePirate)
+    end
+})
+
+AddElement(Tabs.Teleport, "Button", {
+    Title = "Elite Pirate2",
+    Desc = "Interact with Elite Pirate",
+    Callback = function()
+        task.spawn(RunElitePirate)
+    end
+})
+
+AddElement(Tabs.Teleport, "Button", {
+    Title = "The Squid3",
+    Desc = "Interact with The Squid",
+    Callback = function()
+        task.spawn(RunTheSquid)
     end
 })
 
