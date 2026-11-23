@@ -74,7 +74,6 @@ local RepeatDecisionMade = false
 local LastRepeatClick = 0
 local QuestEndedAt = 0
 local ShopRunning = false
-local TargetSize = UDim2.new(999994, 0, 999994, 0)
 local WorldRunning = false
 local TargetSize = UDim2.new(999994, 0, 999994, 0)
 local Character
@@ -254,7 +253,8 @@ local function GetNPCRoot(NPC)
 end
 
 local function TeleportToNPC(NPC)
-    local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+    local Char = LP.Character or LP.CharacterAdded:Wait()
+    local Root = Char:FindFirstChild("HumanoidRootPart")
     local NPCRoot = GetNPCRoot(NPC)
 
     if not Root or not NPCRoot then return false end
@@ -264,6 +264,9 @@ local function TeleportToNPC(NPC)
 
     return true
 end
+
+
+-- FIGHTING STYLE SHOP
 
 local function AutoAccept(Name)
     local Deadline = os.clock() + 5
@@ -275,47 +278,76 @@ local function AutoAccept(Name)
 
         if Dialogue and Accept and Dialogue.Visible and Accept.Visible then
             Accept.Size = TargetSize
+
             local Viewport = workspace.CurrentCamera.ViewportSize
-            VIM:SendMouseButtonEvent(Viewport.X / 2, Viewport.Y - 2, 0, true, game, 0)
+            local X, Y = Viewport.X / 2, Viewport.Y - 2
+
+            VIM:SendMouseButtonEvent(X, Y, 0, true, game, 0)
             task.wait(0.05)
-            VIM:SendMouseButtonEvent(Viewport.X / 2, Viewport.Y - 2, 0, false, game, 0)
+            VIM:SendMouseButtonEvent(X, Y, 0, false, game, 0)
+
             return true
         end
 
         task.wait(0.1)
     end
+
+    return false
 end
 
 local function BuyStyle(Name)
-    if ShopRunning then return end
+    if ShopRunning then return false end
     ShopRunning = true
 
-    pcall(function()
+    local Success, Result = pcall(function()
         local NPC = NPCFolder:FindFirstChild(Name)
-        if not NPC then return end
+        if not NPC then error("NPC Not Found: " .. Name) end
 
-        TeleportToNPC(NPC)
+        if not TeleportToNPC(NPC) then
+            error("Teleport Failed: " .. Name)
+        end
+
         task.wait(0.5)
 
-        if CheckQuest:InvokeServer(NPC) then
-            AutoAccept(Name)
+        CheckQuest:InvokeServer(NPC)
+
+        if not AutoAccept(Name) then
+            error("Accept GUI Not Found: " .. Name)
         end
     end)
 
     ShopRunning = false
+
+    WindUI:Notify({
+        Title = "Fighting Style",
+        Content = Success and (Name .. " Completed") or tostring(Result),
+        Duration = 3
+    })
+
+    return Success
 end
 
-for _, Name in ipairs({
-    "WaterStyleShop",
-    "DarkLegShop",
-    "DragonClawShop",
-    "ElectroShop",
-    "CyborgShop"
-}) do
-    _G[Name] = function()
-        BuyStyle(Name)
-    end
+local function WaterStyleShop()
+    return BuyStyle("WaterStyleShop")
 end
+
+local function DarkLegShop()
+    return BuyStyle("DarkLegShop")
+end
+
+local function DragonClawShop()
+    return BuyStyle("DragonClawShop")
+end
+
+local function ElectroShop()
+    return BuyStyle("ElectroShop")
+end
+
+local function CyborgShop()
+    return BuyStyle("CyborgShop")
+end
+
+
 local function WorldNPC(NPC, GUIName)
     if WorldRunning then return false end
     WorldRunning = true
@@ -1175,6 +1207,7 @@ AddElement(Tabs.Settings, "Toggle", {
         end
     end
 })
+
 AddElement(Tabs.Buy, "Button", {
     Title = "Water Style",
     Callback = function()
@@ -1209,6 +1242,7 @@ AddElement(Tabs.Buy, "Button", {
         task.spawn(CyborgShop)
     end
 })
+
 
 AddElement(Tabs.Teleport, "Button", {
     Title = "Elite Pirate1",
