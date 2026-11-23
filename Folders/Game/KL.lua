@@ -25,9 +25,7 @@ local StatsUI = LP.PlayerGui.MainGui.StarterFrame.StatsFrame
 local StatsRemote = StatsUI.RemoteEvent
 local Points = StatsUI.StatsPage.FunctionBar.PointsFrame.PointText
 local MapName = MarketplaceService:GetProductInfo(game.PlaceId).Name:gsub("[%c%p%s]", "_")
-
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-
 local Window = WindUI:CreateWindow({
     Title = "InfernoX HUB",
     Icon = "rbxassetid://133128937209520",
@@ -38,12 +36,9 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark",
     Resizable = true
 })
-
 local ConfigManager = Window.ConfigManager
 local MyConfig = ConfigManager:CreateConfig(MapName .. "/" .. LP.UserId)
-
 -- SETTINGS
-
 _G.Farm = false
 _G.Haki = false
 _G.AutoStats = false
@@ -57,13 +52,11 @@ _G.SelectedStats = {"Melee"}
 _G.StatsAmount = 10
 _G.SkillAimTarget = nil
 _G.SkillAimMaxDistance = 1000
-_G.AutoSkillDelay = 0.2
+_G.AutoSkillDelay = 0.5
 _G.AutoSkillKeys = {"Z", "X", "C", "V"}
-
-local M1Delay = 0.25
+local M1Delay = 0.1
 local StatsDelay = 0.3
 local StatsIndex = 1
-
 local LockedMob
 local MobPositions = {}
 local LastQuest = ""
@@ -76,43 +69,77 @@ local QuestEndedAt = 0
 local ShopRunning = false
 local WorldRunning = false
 local TargetSize = UDim2.new(999994, 0, 999994, 0)
+local HubHash = "e94b1a2f71e89836e2a57bfca448dd56633345b5d83ddb28ec778731eff1edff"
 local Character
 local HRP
 local CharacterGeneration = 0
 local st = CFrame.identity
 local QuestCandidateCache
-
 local EquipCategories = {
     Melee = SkillData.Styles,
     Sword = SkillData.Swords,
     Fruit = SkillData.Fruits
 }
-
 -- CONFIG
-
 local function AddElement(Tab, ElementType, Data)
     local Callback = Data.Callback
-
     Data.Callback = function(Value)
         if Callback then Callback(Value) end
-
         task.spawn(function()
             task.wait(1)
             MyConfig:Save()
         end)
     end
-
     local Element = Tab[ElementType](Tab, Data)
-
     if Data.Flag then
         MyConfig:Register(Data.Flag, Element)
     end
-
     return Element
 end
-
 local function GetDropdown(Value)
     return type(Value) == "table" and Value[1] or Value
+end
+
+local function GetHubFrame()
+    local CoreGui = game:GetService("CoreGui")
+    local Container = CoreGui:FindFirstChild(HubHash)
+    local UI = Container and Container:FindFirstChild("WindUI")
+    local Window = UI and UI:FindFirstChild("Window")
+    return Window and Window:FindFirstChild("Frame")
+end
+local function ClickAccept()
+    local Position = Vector2.new(350, 300)
+    VIM:SendMouseMoveEvent(Position.X, Position.Y, game)
+    task.wait(0.1)
+    VIM:SendMouseButtonEvent(Position.X, Position.Y, 0, true, game, 0)
+    task.wait(0.1)
+    VIM:SendMouseButtonEvent(Position.X, Position.Y, 0, false, game, 0)
+    return true
+end
+
+local function WaitAndClickAccept(GUIName, Timeout)
+    local Deadline = os.clock() + (Timeout or 15)
+    while os.clock() < Deadline do
+        local GUI = LP.PlayerGui:FindFirstChild(GUIName)
+        local Dialogue = GUI and GUI:FindFirstChild("Dialogue")
+        local Accept = Dialogue and Dialogue:FindFirstChild("Accept")
+        if Dialogue and Accept and Dialogue.Visible and Accept.Visible then
+            local HubFrame = GetHubFrame()
+            local OldVisible = HubFrame and HubFrame.Visible
+            if HubFrame then
+                HubFrame.Visible = false
+            end
+            task.wait(0.2)
+            local Success = ClickAccept()
+            task.wait(1.5)
+            if HubFrame then
+                HubFrame.Visible = OldVisible
+            end
+            return Success
+        end
+        task.wait(0.2)
+    end
+    return false
 end
 
 -- POPUP
@@ -141,53 +168,39 @@ LP.PlayerGui.ChildAdded:Connect(function(Child)
         WatchPopup(Child)
     end
 end)
-
 -- LOOP MANAGER
-
 local Running = {}
-
 local function StartLoop(Name, Condition, Delay, Callback)
     if Running[Name] then return end
-
     Running[Name] = true
     task.spawn(function()
         while Condition() do
             pcall(Callback)
             task.wait(Delay)
         end
-
         Running[Name] = nil
     end)
 end
-
 -- CORE FUNCTIONS
-
 local function GetRoot(Target)
     Target = Target or LP.Character
-
     if not Target then return nil end
     if Target:IsA("BasePart") then return Target end
-
     if Target:IsA("Model") then
         return Target:FindFirstChild("HumanoidRootPart")
             or Target.PrimaryPart
             or Target:FindFirstChildWhichIsA("BasePart", true)
     end
-
     return nil
 end
-
 local function IsAlive(Mob)
     local Humanoid = Mob and Mob:FindFirstChildOfClass("Humanoid")
     return Mob and Mob.Parent and Humanoid and Humanoid.Health > 0
 end
-
 local function GetEquipTool(Type)
     local Folder = EquipCategories[Type]
     if not Folder then return nil end
-
     local Char = LP.Character
-
     if Char then
         for _, Tool in ipairs(Char:GetChildren()) do
             if Tool:IsA("Tool") and Folder:FindFirstChild(Tool.Name .. "_Data") then
@@ -195,210 +208,132 @@ local function GetEquipTool(Type)
             end
         end
     end
-
     for _, Tool in ipairs(LP.Backpack:GetChildren()) do
         if Tool:IsA("Tool") and Folder:FindFirstChild(Tool.Name .. "_Data") then
             return Tool
         end
     end
 end
-
 local function EquipToolNow()
     if not _G.Farm then return false end
-
     local Tool = GetEquipTool(_G.WeaponType)
     local Char = LP.Character
     local Humanoid = Char and Char:FindFirstChildOfClass("Humanoid")
-
     if not Tool or not Humanoid then return false end
     if Tool.Parent == Char then return true end
-
     if Tool.Parent == LP.Backpack then
         return pcall(function()
             Humanoid:EquipTool(Tool)
         end)
     end
-
     return false
 end
-
 local function StopFarm()
     if HRP then
         local Clip = HRP:FindFirstChild("BodyClip")
         if Clip then Clip:Destroy() end
     end
-
     HRP = nil
     _G.SkillAimTarget = nil
 end
-
 local function GetNPCRoot(NPC)
     if not NPC then return nil end
-
     local Current = NPC
-
     while Current and Current ~= NPCFolder do
         if Current:IsA("Model") then
             if Current.PrimaryPart then return Current.PrimaryPart end
-
             local Root = Current:FindFirstChild("HumanoidRootPart", true)
             if Root and Root:IsA("BasePart") then return Root end
         end
-
         if Current:IsA("BasePart") then return Current end
         Current = Current.Parent
     end
-
     return nil
 end
-
 local function TeleportToNPC(NPC)
     local Char = LP.Character or LP.CharacterAdded:Wait()
     local Root = Char:FindFirstChild("HumanoidRootPart")
     local NPCRoot = GetNPCRoot(NPC)
-
     if not Root or not NPCRoot then return false end
-
     Root.CFrame = NPCRoot.CFrame * CFrame.new(0, 0, 3)
     task.wait(1)
-
     return true
 end
-
-
 -- FIGHTING STYLE SHOP
-
 local function AutoAccept(Name)
-    local Deadline = os.clock() + 5
-
-    while os.clock() < Deadline do
-        local GUI = LP.PlayerGui:FindFirstChild(Name)
-        local Dialogue = GUI and GUI:FindFirstChild("Dialogue")
-        local Accept = Dialogue and Dialogue:FindFirstChild("Accept")
-
-        if Dialogue and Accept and Dialogue.Visible and Accept.Visible then
-            Accept.Size = TargetSize
-
-            local Viewport = workspace.CurrentCamera.ViewportSize
-            local X, Y = Viewport.X / 2, Viewport.Y - 2
-
-            VIM:SendMouseButtonEvent(X, Y, 0, true, game, 0)
-            task.wait(0.05)
-            VIM:SendMouseButtonEvent(X, Y, 0, false, game, 0)
-
-            return true
-        end
-
-        task.wait(0.1)
-    end
-
-    return false
+    return WaitAndClickAccept(Name, 15)
 end
-
 local function BuyStyle(Name)
     if ShopRunning then return false end
     ShopRunning = true
-
     local Success, Result = pcall(function()
         local NPC = NPCFolder:FindFirstChild(Name)
         if not NPC then error("NPC Not Found: " .. Name) end
-
         if not TeleportToNPC(NPC) then
             error("Teleport Failed: " .. Name)
         end
-
         task.wait(0.5)
-
         CheckQuest:InvokeServer(NPC)
-
         if not AutoAccept(Name) then
-            error("Accept GUI Not Found: " .. Name)
+            error("Accept GUI Timeout: " .. Name)
         end
     end)
-
     ShopRunning = false
-
     WindUI:Notify({
         Title = "Fighting Style",
         Content = Success and (Name .. " Completed") or tostring(Result),
         Duration = 3
     })
-
     return Success
 end
-
 local function WaterStyleShop()
     return BuyStyle("WaterStyleShop")
 end
-
 local function DarkLegShop()
     return BuyStyle("DarkLegShop")
 end
-
 local function DragonClawShop()
     return BuyStyle("DragonClawShop")
 end
-
 local function ElectroShop()
     return BuyStyle("ElectroShop")
 end
-
 local function CyborgShop()
     return BuyStyle("CyborgShop")
 end
-
-
 local function WorldNPC(NPC, GUIName)
     if WorldRunning then return false end
     WorldRunning = true
-
-    local Success = pcall(function()
-        TeleportToNPC(NPC)
+    local Success, Result = pcall(function()
+        if not TeleportToNPC(NPC) then
+            error("Teleport Failed: " .. GUIName)
+        end
         task.wait(0.5)
-
         CheckQuest:InvokeServer(NPC)
-
-        local Deadline = os.clock() + 5
-
-        while os.clock() < Deadline do
-            local GUI = LP.PlayerGui:FindFirstChild(GUIName)
-            local Dialogue = GUI and GUI:FindFirstChild("Dialogue")
-            local Accept = Dialogue and Dialogue:FindFirstChild("Accept")
-
-            if Dialogue and Accept and Dialogue.Visible and Accept.Visible then
-                Accept.Size = TargetSize
-
-                local Viewport = workspace.CurrentCamera.ViewportSize
-                local X, Y = Viewport.X / 2, Viewport.Y - 2
-
-                VIM:SendMouseButtonEvent(X, Y, 0, true, game, 0)
-                task.wait(0.05)
-                VIM:SendMouseButtonEvent(X, Y, 0, false, game, 0)
-                break
-            end
-
-            task.wait(0.1)
+        if not WaitAndClickAccept(GUIName, 15) then
+            error("Accept GUI Timeout: " .. GUIName)
         end
     end)
-
     WorldRunning = false
+    if not Success then
+        WindUI:Notify({
+            Title = "NPC Interaction",
+            Content = tostring(Result),
+            Duration = 3
+        })
+    end
     return Success
 end
-
 function RunElitePirate()
     return WorldNPC(RS.NPC:WaitForChild("Elite Pirate"), "Elite Pirate")
 end
-
 function RunTheSquid()
     return WorldNPC(NPCFolder:WaitForChild("The Squid"), "The Squid")
 end
-
 local function ModeFarm()
     if not HRP or not HRP.Parent then return end
-
     local Offset = CFrame.identity
     local Rotation = CFrame.identity
-
     if _G.FarmMode == "Behind" then
         Offset = CFrame.new(0, 0, _G.FarmDistance)
     elseif _G.FarmMode == "Above" then
@@ -408,27 +343,20 @@ local function ModeFarm()
         Offset = CFrame.new(0, -_G.FarmDistance, 0)
         Rotation = CFrame.Angles(math.rad(90), 0, 0)
     end
-
     st = Offset * Rotation
-
     local Clip = HRP:FindFirstChild("BodyClip")
-
     if not Clip then
         Clip = Instance.new("BodyVelocity")
         Clip.Name = "BodyClip"
         Clip.Parent = HRP
     end
-
     Clip.MaxForce = Vector3.new(1e9, 1e9, 1e9)
     Clip.P = 1e6
     Clip.Velocity = Vector3.zero
-
     HRP.AssemblyLinearVelocity = Vector3.zero
     HRP.AssemblyAngularVelocity = Vector3.zero
 end
-
 -- QUEST FUNCTIONS
-
 local function IsMainQuest(Data)
     return type(Data) == "table"
         and type(Data.Level) == "number"
@@ -442,34 +370,27 @@ local function IsMainQuest(Data)
         and not Data.Interact
         and not Data.Track
 end
-
 local function GetQuestCandidates(Level)
     if QuestCandidateCache and QuestCandidateCache.Level == Level then
         return QuestCandidateCache.Candidates
     end
-
     local Candidates = {}
-
     for _, NPC in ipairs(NPCFolder:GetDescendants()) do
         local Min = NPC:GetAttribute("LevelMin")
         local Max = NPC:GetAttribute("LevelMax")
-
         if type(Min) == "number" and type(Max) == "number" and Level >= Min then
             local BestQuest
             local BestQuestLevel = -1
-
             for Name, Data in pairs(QuestData) do
                 if IsMainQuest(Data)
                     and Data.Level <= Level
                     and Data.Level >= Min
                     and Data.Level <= Max
                     and Data.Level > BestQuestLevel then
-
                     BestQuest = Name
                     BestQuestLevel = Data.Level
                 end
             end
-
             if BestQuest then
                 table.insert(Candidates, {
                     NPC = NPC,
@@ -481,65 +402,50 @@ local function GetQuestCandidates(Level)
             end
         end
     end
-
     table.sort(Candidates, function(A, B)
         if A.QuestLevel == B.QuestLevel then
             return A.Min > B.Min
         end
-
         return A.QuestLevel > B.QuestLevel
     end)
-
     QuestCandidateCache = {
         Level = Level,
         Candidates = Candidates
     }
-
     return Candidates
 end
-
 NPCFolder.DescendantAdded:Connect(function()
     QuestCandidateCache = nil
 end)
-
 NPCFolder.DescendantRemoving:Connect(function()
     QuestCandidateCache = nil
 end)
-
 local function FindMonster()
     local Data = QuestData[CurrentQuest.Value]
     if not Data then return nil end
-
     if IsAlive(LockedMob) and LockedMob.Name == Data.Mob then
         return LockedMob
     end
-
     LockedMob = nil
     local Targets = {}
-
     for _, Folder in ipairs({MonsterFolder, BossFolder}) do
         for _, Mob in ipairs(Folder:GetChildren()) do
             local Root = Mob:FindFirstChild("HumanoidRootPart")
-
             if Mob.Name == Data.Mob and Root and IsAlive(Mob) then
                 table.insert(Targets, Mob)
             end
         end
     end
-
     table.sort(Targets, function(A, B)
         return A.Humanoid.Health < B.Humanoid.Health
     end)
-
     LockedMob = Targets[1]
-
     if LockedMob then
         local Root = LockedMob:FindFirstChild("HumanoidRootPart")
         if Root then
             MobPositions[Data.Mob] = Root.CFrame
         end
     end
-
     return LockedMob
 end
 local function GetMonsterSpawn()
@@ -550,288 +456,224 @@ local function GetMonsterSpawn()
     local Root = Model:FindFirstChild("HumanoidRootPart")
     return Root and Root.CFrame
 end
-
 local function ChangeQuest(Target, NPC)
     if SwitchingQuest or not Target then return end
-
     SwitchingQuest = true
     WaitingRepeat = false
     RepeatDecisionMade = false
     RepeatQuest = ""
     LockedMob = nil
-
     local Success = pcall(function()
         if CurrentQuest.Value ~= "" then
             EtcRemote:InvokeServer("CancelQuest", {})
             task.wait(0.5)
         end
-
         if CurrentQuest.Value == "" then
             if NPC then TeleportToNPC(NPC) end
             QuestRemote:InvokeServer("take", Target)
         end
     end)
-
     task.wait(1)
     SwitchingQuest = false
-
     return Success
 end
-
 local function UpdateQuest()
     if WaitingRepeat or SwitchingQuest then return end
-
     local Candidates = GetQuestCandidates(Stats.lvl.Value)
     local Candidate = Candidates[1]
-
     if Candidate and CurrentQuest.Value ~= Candidate.Quest then
         ChangeQuest(Candidate.Quest, Candidate.NPC)
     end
 end
-
 local function CheckLevelChange()
     if SwitchingQuest or CurrentQuest.Value == "" then return end
-
     local CurrentData = QuestData[CurrentQuest.Value]
     if not CurrentData then return end
-
     local Candidates = GetQuestCandidates(Stats.lvl.Value)
     local Candidate = Candidates[1]
     local NewData = Candidate and QuestData[Candidate.Quest]
-
     if NewData and NewData.Level > CurrentData.Level then
         ChangeQuest(Candidate.Quest, Candidate.NPC)
     end
 end
-
 local function AutoRepeat()
     if not WaitingRepeat or not RepeatFrame.Visible or RepeatDecisionMade
         or SwitchingQuest or os.clock() - LastRepeatClick < 2 then
         return
     end
-
     local Candidates = GetQuestCandidates(Stats.lvl.Value)
     local Candidate = Candidates[1]
     local Target = Candidate and Candidate.Quest
-
     LastRepeatClick = os.clock()
     RepeatDecisionMade = true
-
     if Target == RepeatQuest and RepeatFrame:FindFirstChild("Yes") then
         firesignal(RepeatFrame.Yes.MouseButton1Click)
     else
         if RepeatFrame:FindFirstChild("No") then
             firesignal(RepeatFrame.No.MouseButton1Click)
         end
-
         task.delay(1.5, function()
             WaitingRepeat = false
             if _G.Farm then UpdateQuest() end
         end)
     end
 end
-
 -- FARM ACTIONS
-
 local function UpdateFarm()
     if not _G.Farm then StopFarm() return end
     if not Character or Character ~= LP.Character then StopFarm() return end
-
     local Root = Character:FindFirstChild("HumanoidRootPart")
     local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-
     if not Root or not Humanoid or Humanoid.Health <= 0 then
         StopFarm()
         return
     end
-
     if HRP ~= Root then
         StopFarm()
         HRP = Root
     end
-
     ModeFarm()
     if CurrentQuest.Value == "" or SwitchingQuest then return end
-
     local Mob = FindMonster()
     local TargetRoot = Mob and Mob:FindFirstChild("HumanoidRootPart")
-
     if IsAlive(Mob) and TargetRoot then
         Root.CFrame = TargetRoot.CFrame * st
     else
         local SpawnCFrame = MobPositions[QuestData[CurrentQuest.Value].Mob]
-
         if SpawnCFrame then
             Root.CFrame = SpawnCFrame * st
         end
     end
 end
-
 local function AutoM1Action()
     if not _G.Farm or not Character or Character ~= LP.Character then return end
-
     local Humanoid = Character:FindFirstChildOfClass("Humanoid")
     if not Humanoid or Humanoid.Health <= 0 then return end
-
     local Mob = FindMonster()
     if not IsAlive(Mob) then return end
-
     local Tool = Character:FindFirstChildOfClass("Tool")
     if not Tool then return end
-
     local SwordName = Stats:FindFirstChild("SwordName")
     local FightingStyle = Stats:FindFirstChild("FightingStyle")
     local Sword = SwordName and tostring(SwordName.Value)
     local Style = FightingStyle and tostring(FightingStyle.Value)
     local SkillName
-
     if Sword and Sword ~= "None" and Tool.Name == Sword then
         SkillName = "SW_" .. Sword .. "_M1"
     else
         if not Style then return end
         SkillName = "FS_" .. Style .. "_M1"
     end
-
     if not IsAlive(Mob) then return end
-
     pcall(function()
         SkillRemote:InvokeServer(SkillName)
     end)
 end
 
--- AUTO SKILL
 
+-- AUTO SKILL
 local function autoskill(Target)
     if not _G.Farm or not _G.SkillAimEnabled or not IsAlive(Target) then
         _G.SkillAimTarget = nil
         return false
     end
-
-    local Root = GetRoot(Target)
+    local Root = Target:FindFirstChild("HumanoidRootPart")
     local PlayerRoot = GetRoot()
-
-    if not Root or not PlayerRoot then
+    if not Root or not PlayerRoot
+        or (PlayerRoot.Position - Root.Position).Magnitude > _G.SkillAimMaxDistance then
         _G.SkillAimTarget = nil
         return false
     end
-
-    local Distance = (PlayerRoot.Position - Root.Position).Magnitude
-
-    if Distance > _G.SkillAimMaxDistance then
-        _G.SkillAimTarget = nil
-        return false
-    end
-
     _G.SkillAimTarget = Root
     return true
 end
 
+task.spawn(function()
+    while task.wait(0.1) do
+        local Mob = _G.Farm and _G.SkillAimEnabled and FindMonster()
+        if Mob then
+            autoskill(Mob)
+        else
+            _G.SkillAimTarget = nil
+        end
+    end
+end)
 local OldNamecall
-
 OldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
     local Args = {...}
-
-    if _G.Farm and _G.SkillAimEnabled and self == SkillRemote
+    if _G.Farm and _G.SkillAimEnabled
+        and self == SkillRemote
         and getnamecallmethod() == "InvokeServer"
         and type(Args[1]) == "string"
-        and Args[1]:match("^FS_")
+        and (Args[1]:match("^FS_") or Args[1]:match("^SW_"))
         and type(Args[2]) == "table" then
-
         local Target = _G.SkillAimTarget
-
         if Target and Target.Parent then
             Args[2] = table.clone(Args[2])
             Args[2].MouseHit = Target.CFrame
             return OldNamecall(self, unpack(Args))
         end
     end
-
     return OldNamecall(self, ...)
 end))
-
 local function AutoSkillAction()
     if not _G.Farm or not _G.AutoSkillEnabled then
         _G.SkillAimTarget = nil
         return
     end
-
     local Mob = FindMonster()
-
-    if not IsAlive(Mob) then
-        _G.SkillAimTarget = nil
-        return
-    end
-
+    if not IsAlive(Mob) then return end
     autoskill(Mob)
-
     for _, Key in ipairs(_G.AutoSkillKeys) do
         if not _G.Farm or not _G.AutoSkillEnabled then break end
-
-        if not IsAlive(Mob) or FindMonster() ~= Mob then
-            _G.SkillAimTarget = nil
-            break
+        if not IsAlive(Mob) or FindMonster() ~= Mob then break end
+        if _G.SkillAimEnabled then
+            autoskill(Mob)
         end
-
-        if _G.SkillAimEnabled then autoskill(Mob) end
-
         local KeyCode = Enum.KeyCode[Key]
-
         if KeyCode then
             VIM:SendKeyEvent(true, KeyCode, false, game)
-            task.wait(1)
+            task.wait(0.05)
             VIM:SendKeyEvent(false, KeyCode, false, game)
         end
-
         task.wait(_G.AutoSkillDelay)
     end
-
-    if not IsAlive(Mob) then _G.SkillAimTarget = nil end
 end
 
--- STATS
 
+-- STATS
 local function AddStats()
     local Selected = _G.SelectedStats
     if type(Selected) ~= "table" or #Selected == 0 then return end
-
     local Available = tonumber(Points.ContentText:match("%d+"))
     if not Available or Available <= 0 then return end
-
     if StatsIndex > #Selected then StatsIndex = 1 end
-
     local StatName = Selected[StatsIndex]
     StatsIndex += 1
-
     if StatName then
         StatsRemote:FireServer(StatName, math.min(_G.StatsAmount, Available))
     end
 end
-
 -- PUBLIC FUNCTIONS
-
 function AutoFarm()
     StartLoop("Farm", function()
         return _G.Farm
     end, 0, UpdateFarm)
 end
-
 function AutoEquip()
     StartLoop("Equip", function()
         return _G.Farm
     end, 1.5, EquipToolNow)
 end
-
 function AutoQuest()
     StartLoop("Quest", function()
         return _G.Farm
     end, 1.5, function()
         AutoRepeat()
-
         if CurrentQuest.Value == "" then
             if WaitingRepeat then
                 if not RepeatFrame.Visible and not RepeatDecisionMade
                     and os.clock() - QuestEndedAt > 2 then
-
                     WaitingRepeat = false
                     UpdateQuest()
                 end
@@ -843,40 +685,32 @@ function AutoQuest()
         end
     end)
 end
-
 function AutoM1()
     StartLoop("M1", function()
         return _G.Farm
     end, M1Delay, AutoM1Action)
 end
-
 function AutoSkill()
     StartLoop("Skill", function()
         return _G.Farm and _G.AutoSkillEnabled
     end, 1, AutoSkillAction)
 end
-
 local function StartAutoStats()
     StartLoop("Stats", function()
         return _G.AutoStats
     end, StatsDelay, AddStats)
 end
-
 -- HAKI
-
 local function ToggleHaki(State)
     _G.Haki = State
-
     if State then
         StartLoop("Haki", function()
             return _G.Haki
         end, 1, function()
             local Char = LP.Character
             local Humanoid = Char and Char:FindFirstChildOfClass("Humanoid")
-
             if Char and Humanoid and Humanoid.Health > 0 then
                 local ArmamentName = LP.Name .. "ArmamentGroup"
-
                 if not CharacterWorkshop:FindFirstChild(ArmamentName) then
                     HakiRemote:FireServer()
                 end
@@ -884,63 +718,47 @@ local function ToggleHaki(State)
         end)
     end
 end
-
 -- CHARACTER
-
 local function WatchCharacterEquip(Char)
     Char.ChildRemoved:Connect(function(Tool)
         if not Tool:IsA("Tool") then return end
-
         task.defer(function()
             if _G.Farm then EquipToolNow() end
         end)
     end)
 end
-
 LP.Backpack.ChildAdded:Connect(function(Tool)
     if not Tool:IsA("Tool") then return end
-
     task.defer(function()
         if _G.Farm then EquipToolNow() end
     end)
 end)
-
 local function ResetCharacter(NewCharacter)
     CharacterGeneration += 1
     local Generation = CharacterGeneration
-
     StopFarm()
     HidePopup()
-
     LockedMob = nil
     Character = NewCharacter
     HRP = nil
-
     WatchCharacterEquip(NewCharacter)
-
     task.spawn(function()
         local Humanoid = NewCharacter:WaitForChild("Humanoid", 15)
         local Root = NewCharacter:WaitForChild("HumanoidRootPart", 15)
-
         if Generation ~= CharacterGeneration then return end
         if not Humanoid or not Root or Humanoid.Health <= 0 then return end
-
         Character = NewCharacter
         HRP = Root
         LockedMob = nil
-
         task.wait(0.5)
         if Generation ~= CharacterGeneration then return end
-
         HidePopup()
-
         if _G.Farm then
             AutoEquip()
             AutoFarm()
             AutoQuest()
             AutoM1()
             AutoSkill()
-
             if CurrentQuest.Value == "" and not WaitingRepeat then
                 UpdateQuest()
             elseif CurrentQuest.Value ~= "" then
@@ -949,9 +767,7 @@ local function ResetCharacter(NewCharacter)
         end
     end)
 end
-
 LP.CharacterAdded:Connect(ResetCharacter)
-
 LP.CharacterRemoving:Connect(function(OldCharacter)
     if Character == OldCharacter then
         CharacterGeneration += 1
@@ -960,14 +776,11 @@ LP.CharacterRemoving:Connect(function(OldCharacter)
         StopFarm()
     end
 end)
-
 Stats.lvl.Changed:Connect(function()
     if _G.Farm then task.defer(CheckLevelChange) end
 end)
-
 CurrentQuest.Changed:Connect(function()
     local NewQuest = CurrentQuest.Value
-
     if NewQuest == "" and LastQuest ~= "" then
         RepeatQuest = LastQuest
         WaitingRepeat = true
@@ -982,12 +795,9 @@ CurrentQuest.Changed:Connect(function()
         LockedMob = nil
         _G.SkillAimTarget = nil
     end
-
     LastQuest = NewQuest
 end)
-
 if LP.Character then ResetCharacter(LP.Character) end
-
 local Codes = {
     "4BVISITS",
     "MOBILEFIXED",
@@ -1002,7 +812,6 @@ local Codes = {
     "FREESTATSRESET",
     "2MFAV"
 }
-
 local RedeemRemote = game:GetService("ReplicatedStorage")
     :WaitForChild("Chest")
     :WaitForChild("Remotes")
@@ -1022,38 +831,33 @@ local function RedeemAllCodes()
         Redeeming = false
     end)
 end
-
 -- UI
-
 Window:Tag({
     Title = "v0.0.1",
     Icon = "github",
     Color = Color3.fromHex("#30ff6a"),
     Radius = 10
 })
-
 Window:Tag({
     Title = "Beta Test",
     Icon = "shield-check",
     Color = Color3.fromHex("#3aa0ff"),
     Radius = 10
 })
-
 Window:Tag({
     Title = "Mobile",
     Icon = "smartphone",
     Color = Color3.fromHex("#ffaa00"),
     Radius = 10
 })
-
 local Tabs = {
     Main = Window:Tab({Title = "Main", Icon = "house"}),
+    sMain = Window:Tab({Title = "SettingsFarm", Icon = "house"}),
     Item = Window:Tab({Title = "Item", Icon = "sword"}),
     Buy = Window:Tab({Title = "Buy", Icon = "shopping-cart"}),
     Teleport = Window:Tab({Title = "Teleport", Icon = "map-pin"}),
     Settings = Window:Tab({Title = "Settings", Icon = "settings"})
 }
-
 AddElement(Tabs.Main, "Toggle", {
     Title = "Auto Farm",
     Desc = "Farm",
@@ -1061,7 +865,6 @@ AddElement(Tabs.Main, "Toggle", {
     Value = false,
     Callback = function(State)
         _G.Farm = State
-
         if State then
             AutoFarm()
             AutoEquip()
@@ -1074,16 +877,14 @@ AddElement(Tabs.Main, "Toggle", {
         end
     end
 })
-
 AddElement(Tabs.Main, "Dropdown", {
     Title = "Farm Method",
     Desc = "เปลี่ยนตำแหน่งฟาร์มแบบ Real-time",
     Values = {"Above", "Behind", "Below"},
-    Value = {"Behind"},
+    Value = {"Above"},
     Flag = "FarmMode_Config",
     Callback = function(Value)
         local Mode = GetDropdown(Value)
-
         _G.FarmMode = ({
             Behind = "Behind",
             Below = "Under",
@@ -1092,7 +893,6 @@ AddElement(Tabs.Main, "Dropdown", {
         })[Mode] or "Above"
     end
 })
-
 AddElement(Tabs.Main, "Slider", {
     Title = "Farm Distance",
     Flag = "FarmDist_Value",
@@ -1101,7 +901,6 @@ AddElement(Tabs.Main, "Slider", {
         _G.FarmDistance = Value
     end
 })
-
 AddElement(Tabs.Main, "Dropdown", {
     Title = "Weapon Type",
     Desc = "เลือกประเภทอาวุธสำหรับ Auto Equip",
@@ -1113,7 +912,6 @@ AddElement(Tabs.Main, "Dropdown", {
         if _G.Farm then AutoEquip() end
     end
 })
-
 AddElement(Tabs.Main, "Toggle", {
     Title = "Auto Stats",
     Desc = "เปิด/ปิดระบบอัปสเตตัสอัตโนมัติ",
@@ -1124,7 +922,6 @@ AddElement(Tabs.Main, "Toggle", {
         if State then StartAutoStats() end
     end
 })
-
 AddElement(Tabs.Main, "Dropdown", {
     Title = "Select Stats",
     Desc = "เลือกสเตตัสที่ต้องการอัป",
@@ -1137,7 +934,6 @@ AddElement(Tabs.Main, "Dropdown", {
         StatsIndex = 1
     end
 })
-
 AddElement(Tabs.Main, "Slider", {
     Title = "Stats Amount",
     Desc = "จำนวนพอยต์ต่อครั้ง",
@@ -1147,7 +943,6 @@ AddElement(Tabs.Main, "Slider", {
         _G.StatsAmount = Value
     end
 })
-
 AddElement(Tabs.Main, "Toggle", {
     Title = "Auto Skill",
     Desc = "กดสกิลอัตโนมัติพร้อมเล็งไปยังมอนที่ฟาร์ม",
@@ -1156,7 +951,6 @@ AddElement(Tabs.Main, "Toggle", {
     Callback = function(State)
         _G.AutoSkillEnabled = State
         _G.SkillAimEnabled = State
-
         if State and _G.Farm then
             AutoSkill()
         else
@@ -1164,11 +958,10 @@ AddElement(Tabs.Main, "Toggle", {
         end
     end
 })
-
 AddElement(Tabs.Main, "Dropdown", {
     Title = "Select Skills",
     Desc = "เลือกปุ่มสกิลที่ต้องการให้กดอัตโนมัติ",
-    Values = {"Z", "X", "C", "V"},
+    Values = {"Z", "X", "C", "V", "E"},
     Value = {"Z", "X", "C", "V"},
     Multi = true,
     Flag = "AutoSkillKeys",
@@ -1176,7 +969,6 @@ AddElement(Tabs.Main, "Dropdown", {
         _G.AutoSkillKeys = type(Options) == "table" and Options or {}
     end
 })
-
 AddElement(Tabs.Main, "Button", {
     Title = "Redeem All Codes",
     Desc = "แลกโค้ดทั้งหมดอัตโนมัติ",
@@ -1184,22 +976,20 @@ AddElement(Tabs.Main, "Button", {
         RedeemAllCodes()
     end
 })
-
 AddElement(Tabs.Settings, "Toggle", {
     Title = "Auto Haki",
     Desc = "Auto enable Armament Haki",
     Flag = "AutoHaki",
-    Value = false,
+    Value = true,
     Callback = function(State)
         ToggleHaki(State)
     end
 })
-
 AddElement(Tabs.Settings, "Toggle", {
     Title = "Hide Popup",
     Desc = "ซ่อนหน้าต่าง Popup",
     Flag = "HidePopup",
-    Value = false,
+    Value = true,
     Callback = function(State)
         _G.HidePopupEnabled = State
         if State then
@@ -1207,43 +997,36 @@ AddElement(Tabs.Settings, "Toggle", {
         end
     end
 })
-
 AddElement(Tabs.Buy, "Button", {
     Title = "Water Style",
     Callback = function()
         task.spawn(WaterStyleShop)
     end
 })
-
 AddElement(Tabs.Buy, "Button", {
     Title = "Dark Leg",
     Callback = function()
         task.spawn(DarkLegShop)
     end
 })
-
 AddElement(Tabs.Buy, "Button", {
     Title = "Dragon Claw",
     Callback = function()
         task.spawn(DragonClawShop)
     end
 })
-
 AddElement(Tabs.Buy, "Button", {
     Title = "Electro",
     Callback = function()
         task.spawn(ElectroShop)
     end
 })
-
 AddElement(Tabs.Buy, "Button", {
     Title = "Cyborg",
     Callback = function()
         task.spawn(CyborgShop)
     end
 })
-
-
 AddElement(Tabs.Teleport, "Button", {
     Title = "Elite Pirate1",
     Desc = "Interact with Elite Pirate",
@@ -1251,7 +1034,6 @@ AddElement(Tabs.Teleport, "Button", {
         task.spawn(RunElitePirate)
     end
 })
-
 AddElement(Tabs.Teleport, "Button", {
     Title = "Elite Pirate2",
     Desc = "Interact with Elite Pirate",
@@ -1259,7 +1041,6 @@ AddElement(Tabs.Teleport, "Button", {
         task.spawn(RunElitePirate)
     end
 })
-
 AddElement(Tabs.Teleport, "Button", {
     Title = "The Squid3",
     Desc = "Interact with The Squid",
@@ -1267,36 +1048,29 @@ AddElement(Tabs.Teleport, "Button", {
         task.spawn(RunTheSquid)
     end
 })
-
 -- SERVER EVENTS STATUS
-
 local StatusParagraph = Tabs.Item:Paragraph({
     Title = "Server Events Status",
     Desc = "Fetching data...",
     Icon = "lucide-clock"
 })
-
 local LastStatusText
-
 task.spawn(function()
     while task.wait(1) do
         pcall(function()
             local SeaText = RS:GetAttribute("SeaMonsterSpawnText") or "N/A"
             local GhostText = RS:GetAttribute("GhostShipSpawnText") or "N/A"
             local IsHydra = RS:GetAttribute("Hydra")
-
             local function CheckStatus(Text)
                 return (Text == "0" or Text == "Spawned" or Text == "UNLEASHED")
                     and "SPAWNED!!🟢" or Text
             end
-
             local NewStatus = string.format(
                 "🌊 %s: %s\n🚢 Ghost Ship: %s",
                 IsHydra and "Hydra" or "Sea Monster",
                 CheckStatus(SeaText),
                 CheckStatus(GhostText)
             )
-
             if NewStatus ~= LastStatusText then
                 LastStatusText = NewStatus
                 StatusParagraph:SetDesc(NewStatus)
@@ -1304,9 +1078,7 @@ task.spawn(function()
         end)
     end
 end)
-
 -- SETTINGS
-
 AddElement(Tabs.Settings, "Input", {
     Title = "Webhook URL",
     Flag = "Webhook_Config",
@@ -1315,7 +1087,6 @@ AddElement(Tabs.Settings, "Input", {
         _G.WebhookURL = Text
     end
 })
-
 AddElement(Tabs.Settings, "Keybind", {
     Title = "Hide Menu",
     Desc = "ปุ่มสำหรับเปิด/ปิดเมนู",
@@ -1325,18 +1096,13 @@ AddElement(Tabs.Settings, "Keybind", {
         _G.HideKey = Key
     end
 })
-
 -- LOAD CONFIG
-
 MyConfig:Load()
-
 local WelcomeFolder = "WindUI"
 local WelcomeFile = WelcomeFolder .. "/InfernoX_Welcome.dat"
-
 if isfolder and not isfolder(WelcomeFolder) then
     makefolder(WelcomeFolder)
 end
-
 if isfile and isfile(WelcomeFile) then
     WindUI:Notify({
         Title = "InfernoX Hub",
@@ -1347,5 +1113,4 @@ if isfile and isfile(WelcomeFile) then
 else
     writefile(WelcomeFile, LP.DisplayName)
 end
-
 Tabs.Main:Select()
