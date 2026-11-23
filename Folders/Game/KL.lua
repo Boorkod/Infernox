@@ -466,7 +466,7 @@ local function GetQuestCandidates(Level)
         local Max = NPC:GetAttribute("LevelMax")
 
         if type(Min) == "number" and type(Max) == "number"
-            and Level >= Min and Level <= Max then
+            and Level >= Min then
 
             local BestQuest
             local BestQuestLevel = -1
@@ -477,6 +477,7 @@ local function GetQuestCandidates(Level)
                     and Data.Level >= Min
                     and Data.Level <= Max
                     and Data.Level > BestQuestLevel then
+
                     BestQuest = Name
                     BestQuestLevel = Data.Level
                 end
@@ -495,10 +496,10 @@ local function GetQuestCandidates(Level)
     end
 
     table.sort(Candidates, function(A, B)
-        if A.QuestLevel == B.QuestLevel then
-            return A.Min > B.Min
+        if A.Min == B.Min then
+            return A.QuestLevel > B.QuestLevel
         end
-        return A.QuestLevel > B.QuestLevel
+        return A.Min > B.Min
     end)
 
     QuestCandidateCache = {
@@ -508,16 +509,6 @@ local function GetQuestCandidates(Level)
 
     return Candidates
 end
-
-NPCFolder.DescendantAdded:Connect(function()
-    QuestCandidateCache = nil
-    FarmLevelLimit = nil
-end)
-
-NPCFolder.DescendantRemoving:Connect(function()
-    QuestCandidateCache = nil
-    FarmLevelLimit = nil
-end)
 
 local function FindMonster()
     local Data = QuestData[CurrentQuest.Value]
