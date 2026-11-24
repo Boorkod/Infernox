@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local MarketplaceService = game:GetService("MarketplaceService")
@@ -519,28 +518,33 @@ local function FindMonster()
     end
 
     LockedMob = nil
-    local Targets = {}
+
+    local MyRoot = GetRoot(Character)
+    if not MyRoot then return nil end
+
+    local BestMob, BestDistance = nil, math.huge
 
     for _, Folder in ipairs({MonsterFolder, BossFolder}) do
         for _, Mob in ipairs(Folder:GetChildren()) do
-            local Root = Mob:FindFirstChild("HumanoidRootPart")
-            if Mob.Name == Data.Mob and Root and IsAlive(Mob) then
-                table.insert(Targets, Mob)
+            if Mob.Name == Data.Mob and IsAlive(Mob) then
+                local Root = Mob:FindFirstChild("HumanoidRootPart")
+
+                if Root then
+                    local Distance = (Root.Position - MyRoot.Position).Magnitude
+
+                    if Distance < BestDistance then
+                        BestMob, BestDistance = Mob, Distance
+                    end
+                end
             end
         end
     end
 
-    table.sort(Targets, function(A, B)
-        return A.Humanoid.Health < B.Humanoid.Health
-    end)
-
-    LockedMob = Targets[1]
+    LockedMob = BestMob
 
     if LockedMob then
         local Root = LockedMob:FindFirstChild("HumanoidRootPart")
-        if Root then
-            MobPositions[Data.Mob] = Root.CFrame
-        end
+        if Root then MobPositions[Data.Mob] = Root.CFrame end
     end
 
     return LockedMob
